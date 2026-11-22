@@ -9,7 +9,7 @@ const PORT = Number(process.env.PORT || 8787);
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 const demoRepository = createSupabaseDemoRepository();
-const bearerToken = req => (req.headers.authorization || "").match(/^Bearer\\s+(.+)$/i)?.[1] || null;
+const bearerToken = req => (req.headers.authorization || "").match(/^Bearer\s+(.+)$/i)?.[1] || null;
 
 function send(res, status, payload) {
   res.writeHead(status, {
