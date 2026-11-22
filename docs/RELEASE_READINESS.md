@@ -29,7 +29,8 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 - [ ] Replace fictional seed prices with a verified provider feed before describing prices as live.
 - [ ] Validate provider payloads, symbol mappings, quote freshness, outages and rate limits.
 - [ ] Obtain a market-data licence that permits the intended public display and commercial use.
-- [ ] Implement robust price validation, P/L, margin, stop-out, swaps, commissions and multi-currency accounting.
+- [ ] Implement robust production-grade P/L, margin, stop-out, swaps, commissions and multi-currency accounting.
+- [ ] Replace the current per-process API burst limiter with a shared, distributed rate limiter before production.
 - [ ] Independently review order execution, risk controls, concurrency and auditability.
 - [ ] Keep live accounts and real order routing disabled until all authorisations and broker/provider contracts are in place.
 
@@ -51,6 +52,6 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 
 - GitHub branch: `development/phase-1-foundation`.
 - Backend health service exists at the current Render URL; a health response alone does not verify database persistence, market data or trading.
-- GitHub Actions run [45076675494](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45076675494) passed 37 automated tests and browser/backend syntax checks for commit `856494ff8c2ecd980415e2e97d22557606ddfd0b`.
+- GitHub Actions run [45076825326](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45076825326) passed 38 automated tests and browser/backend syntax checks for commit `a24775c3eec4aa837b1ac552775c30937334fc91`.
 - Supabase migrations 0006 and 0007 are reported applied by the project owner; the resulting hosted database behavior has not yet been independently verified.
 - Demo execution uses fixed illustrative quotes, not live market data. Migration 0008 hardens database execution against caller-supplied prices; it must be applied before persistent demo orders are used. No live market data, real trading, deposits or withdrawals are enabled.
