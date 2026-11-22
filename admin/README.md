@@ -1,23 +1,19 @@
-# Admin portal preview
+# HikeyFX admin area
 
-Path: `admin/index.html`
+The admin page is a restricted, read-only operations overview. It uses Supabase Auth and the `hikeyfx_admin_overview()` RPC. A normal authenticated member cannot call the RPC unless an active row exists for their user ID in `public.admin_memberships`.
 
-This is a static interface concept for future HikeyFX operations staff. It contains only fictional sample records and figures.
+## Enable an administrator
 
-## Included screens
-- Operations overview metrics.
-- Recent member activity.
-- Verification queue preview.
-- Demo-only risk-monitoring concept.
-- Audit-log preview.
-- Responsive navigation for phone and desktop.
+1. Apply `supabase/migrations/0007_admin_access_foundation.sql` after migrations 0001–0006.
+2. In Supabase Authentication, locate the intended administrator and copy their user UUID.
+3. In the Supabase SQL editor, as the project owner, insert the approved UUID into `public.admin_memberships` with an approved role, for example `owner`, `operations`, `support`, or `risk`.
+4. Never expose a browser action that can insert or update administrator memberships.
 
-## Not implemented
-- Administrator sign-in, MFA, roles or permissions.
-- Live member database or customer records.
-- KYC document upload, review or approval.
-- Actual audit-event collection.
-- Risk calculations, alerts or trading controls.
-- Deposits, withdrawals, live accounts or order execution.
+Example owner-controlled assignment (replace the UUID with the verified Auth user ID):
 
-Do not enter personal information, upload identity documents or use this preview to make account decisions. Before production, implement server-enforced role-based access, MFA, immutable audit records, least-privilege permissions, secure KYC storage and independent security testing. Live trading and client funds remain disabled pending all applicable authorisations and operational readiness.
+```sql
+insert into public.admin_memberships (user_id, role)
+values ('00000000-0000-0000-0000-000000000000', 'owner');
+```
+
+The dashboard exposes aggregate counts, recent member profile summaries and recent audit events only. It does not expose identity documents, credentials, payment destinations or financial controls. KYC decisions, payouts, deposits, live trading and account suspension actions are not implemented.
