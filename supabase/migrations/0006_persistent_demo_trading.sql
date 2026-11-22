@@ -55,9 +55,9 @@ $$;
 create or replace function public.hikeyfx_demo_place_order(
   p_symbol text, p_side public.order_side, p_volume numeric,
   p_entry_price numeric, p_contract_size numeric,
+  p_idempotency_key text,
   p_stop_loss numeric default null, p_take_profit numeric default null,
-  p_leverage integer default 100,
-  p_idempotency_key text
+  p_leverage integer default 100
 )
 returns jsonb
 language plpgsql
@@ -159,8 +159,8 @@ end;
 $$;
 
 revoke all on function public.hikeyfx_demo_snapshot() from public, anon;
-revoke all on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,numeric,numeric,integer,text) from public, anon;
+revoke all on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,text,numeric,numeric,integer) from public, anon;
 revoke all on function public.hikeyfx_demo_close_position(uuid,numeric,text) from public, anon;
 grant execute on function public.hikeyfx_demo_snapshot() to authenticated;
-grant execute on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,numeric,numeric,integer) to authenticated;
+grant execute on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,text,numeric,numeric,integer) to authenticated;
 grant execute on function public.hikeyfx_demo_close_position(uuid,numeric,text) to authenticated;
