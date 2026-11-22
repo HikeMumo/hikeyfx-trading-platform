@@ -82,6 +82,28 @@ async function readJson(req) {
 
 export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository) {
   const memberEngines = new Map();
+  const rateBuckets = new Map();
+  const ratePolicy = (method, path) => {
+    if (method === "GET" && path === "/api/v1/market/quotes") return { name: "quotes", limit: 30 };
+    if (method === "POST" && path === "/api/v1/demo/orders") return { name: "orders", limit: 20 };
+    if (method === "POST" && /^\/api\/v1\/demo\/positions\/[0-9a-f-]+\/close$/i.test(path)) return { name: "closes", limit: 30 };
+    return { name: "member-api", limit: 120 };
+  };
+  const consumeRateLimit = (userId, policy, now = Date.now()) => {
+    const key = userId + ":" + policy.name;
+    let bucket = rateBuckets.get(key);
+    if (!bucket || bucket.resetAt <= now) {
+      bucket = { count: 0, resetAt: now + 60_000 };
+      rateBuckets.set(key, bucket);
+    }
+    if (bucket.count >= policy.limit) return Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+    bucket.count += 1;
+    if (rateBuckets.size > 5000) {
+      for (const [entry, value] of rateBuckets) if (value.resetAt <= now) rateBuckets.delete(entry);
+      while (rateBuckets.size > 5000) rateBuckets.delete(rateBuckets.keys().next().value);
+    }
+    return 0;
+  };
   const getMemberEngine = user => {
     if (!memberEngines.has(user.id)) {
       const instance = typeof engine === "function" ? engine() : engine || new DemoTradingEngine();
@@ -110,6 +132,10 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     const user = await authenticateUser(req);
     if (!user || typeof user.id !== "string" || !user.id) {
       return send(res, 401, { ok: false, error: "A valid HikeyFX member session is required." });
+    }
+    const retryAfterSeconds = consumeRateLimit(user.id, ratePolicy(req.method, url.pathname));
+    if (retryAfterSeconds > 0) {
+      return send(res, 429, { ok: false, error: "Too many requests. Please retry shortly.", retryAfterSeconds });
     }
     const memberEngine = getMemberEngine(user);
     const token = bearerToken(req);
