@@ -96,3 +96,22 @@ test("HTTP API sends baseline hardening headers", async t => {
   assert.equal(response.headers.get("x-frame-options"), "DENY");
   assert.equal(response.headers.get("referrer-policy"), "no-referrer");
 });
+
+
+test("HTTP API supports browser CORS preflight for authenticated API requests", async t => {
+  const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/demo/orders`, {
+    method: "OPTIONS",
+    headers: {
+      origin: "https://hikeyfx.example",
+      "access-control-request-method": "POST",
+      "access-control-request-headers": "authorization,content-type"
+    }
+  });
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get("access-control-allow-origin"), "*");
+  assert.match(response.headers.get("access-control-allow-methods"), /POST/);
+  assert.match(response.headers.get("access-control-allow-headers"), /Authorization/i);
+});
