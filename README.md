@@ -1,27 +1,43 @@
 # HikeyFX Trading Platform
 
-This repository is the separate project for the new HikeyFX trading platform.
+This repository contains the HikeyFX website and the development foundation for a custom trading-platform project.
 
-## Starting point
+## Existing website assets
 
-The site must retain the latest HikeyFX website supplied on 22 November 2026, including its luxury hero video and embedded trading-analysis video. The original website is being separated into:
+Preserve the current public website and its local video paths:
 - `index.html`
 - `assets/luxury-hero.mp4`
 - `assets/trading-analysis.mp4`
 
-The two video files are referenced locally by `index.html`; keep the paths unchanged when uploading.
+The existing homepage is retained as the starting point. Do not replace its design or video assets without an explicit instruction.
 
-## Planned platform integrations
+## Development status
 
-- Twelve Data: market data (API key must be stored server-side, never in browser HTML or committed to Git).
+- [x] Existing homepage and video references retained.
+- [x] Development branch created: `development/phase-1-foundation`.
+- [x] Architecture and regulatory gates documented in `docs/ARCHITECTURE.md`.
+- [x] Initial private-by-default PostgreSQL schema draft added at `supabase/migrations/0001_initial_schema.sql`.
+- [x] Safe environment template added at `.env.example`.
+- [ ] Supabase project connected.
+- [ ] Authentication and member profiles implemented.
+- [ ] Admin authentication and role-based permissions implemented.
+- [ ] Member dashboard and KYC workflow implemented.
+- [ ] Demo market workspace and simulated order engine implemented.
+- [ ] Security, backup, monitoring and recovery tests completed.
+
+## Planned integrations
+
+- Market data provider: server-side adapter only; provider credentials must never be placed in browser code.
 - TradingView Lightweight Charts: chart rendering.
-- Secure authentication/backend: required for real user accounts.
-- Broker execution API: separately required for placing real trades. Market-data access alone does not execute orders.
+- Supabase/PostgreSQL: proposed authentication, database, storage and server functions; not connected yet.
+- Broker execution: separate integration requiring appropriate authorisation, liquidity-provider agreements, risk controls and operational approval.
 
 ## Security
 
-Do not commit API keys, passwords, access tokens, service-role keys, or other secrets. Configure provider credentials as server-side environment variables after a backend has been selected.
+Do not commit API keys, passwords, access tokens, service-role keys or other secrets. Configure credentials through encrypted hosting-provider environment settings. See `.env.example` for variable names only.
 
-## Current status
+## Legal and operational boundary
 
-The repository is initialized. The latest supplied website and its video assets are prepared for upload; live market data, authentication, and broker execution are not yet configured.
+HikeyFX is currently a software-development project, not an incorporated or CMA-authorised brokerage. Live trading, client deposits and withdrawals must remain disabled until the relevant company, regulatory, provider and operational prerequisites are satisfied. Demo functionality must be clearly identified as simulated.
+
+See `docs/ARCHITECTURE.md` for the planned components, environment separation and regulatory gates.
