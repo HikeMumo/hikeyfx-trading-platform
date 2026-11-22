@@ -5,7 +5,7 @@ A local Node.js HTTP API and in-memory demo order engine. This is an engineering
 ## Requirements and run
 
 - Node.js 20 or later.
-- From this directory: `npm test` to run the automated engine tests.
+- From this directory: `npm test` to run the automated engine and HTTP API tests.
 - Run locally with `npm start`.
 - Health check: `http://127.0.0.1:8787/health`.
 
