@@ -9,20 +9,42 @@ function send(res, status, payload) {
   res.writeHead(status, {
     "content-type": "application/json; charset=utf-8",
     "cache-control": "no-store",
-    "x-content-type-options": "nosniff"
+    "x-content-type-options": "nosniff",
+    "referrer-policy": "no-referrer",
+    "x-frame-options": "DENY"
   });
   res.end(JSON.stringify(payload));
 }
 
 async function readJson(req) {
-  let body = "";
-  for await (const chunk of req) {
-    body += chunk;
-    if (body.length > 16_384) throw new Error("Request body too large.");
+  const contentType = req.headers["content-type"] || "";
+  if (!contentType.toLowerCase().startsWith("application/json")) {
+    const error = new Error("Content-Type must be application/json.");
+    error.statusCode = 415;
+    throw error;
   }
-  if (!body) return {};
-  try { return JSON.parse(body); }
+
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += bytes.length;
+    if (size > 16_384) {
+      const error = new Error("Request body too large.");
+      error.statusCode = 413;
+      throw error;
+    }
+    chunks.push(bytes);
+  }
+
+  if (size === 0) return {};
+  let parsed;
+  try { parsed = JSON.parse(Buffer.concat(chunks).toString("utf8")); }
   catch { throw new Error("Request body must be valid JSON."); }
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Request body must be a JSON object.");
+  }
+  return parsed;
 }
 
 export function createApp(engine = new DemoTradingEngine()) {
@@ -48,7 +70,7 @@ export function createApp(engine = new DemoTradingEngine()) {
         const order = await readJson(req);
         return send(res, 201, { ok: true, data: engine.placeOrder(order) });
       } catch (error) {
-        return send(res, 400, { ok: false, error: error.message });
+        return send(res, error.statusCode || 400, { ok: false, error: error.message });
       }
     }
     const closeMatch = url.pathname.match(/^\/api\/v1\/demo\/positions\/([0-9a-f-]+)\/close$/i);
