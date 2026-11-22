@@ -76,7 +76,15 @@ async function readJson(req) {
   return parsed;
 }
 
-export function createApp(engine = new DemoTradingEngine(), marketData = fetchTraderMadeQuotes, authenticateUser = authenticate) {
+export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate) {
+  const memberEngines = new Map();
+  const getMemberEngine = user => {
+    if (!memberEngines.has(user.id)) {
+      const instance = typeof engine === "function" ? engine() : engine || new DemoTradingEngine();
+      memberEngines.set(user.id, instance);
+    }
+    return memberEngines.get(user.id);
+  };
   return createServer(async (req, res) => {
     const url = new URL(req.url, `http://${HOST}:${PORT}`);
     if (req.method === "OPTIONS") {
@@ -96,18 +104,19 @@ export function createApp(engine = new DemoTradingEngine(), marketData = fetchTr
     }
 
     const user = await authenticateUser(req);
-    if (!user) {
+    if (!user || typeof user.id !== "string" || !user.id) {
       return send(res, 401, { ok: false, error: "A valid HikeyFX member session is required." });
     }
+    const memberEngine = getMemberEngine(user);
 
     if (req.method === "GET" && url.pathname === "/api/v1/demo/account") {
-      return send(res, 200, { ok: true, data: engine.getAccount() });
+      return send(res, 200, { ok: true, data: memberEngine.getAccount() });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/demo/positions") {
-      return send(res, 200, { ok: true, data: engine.snapshot().positions });
+      return send(res, 200, { ok: true, data: memberEngine.snapshot().positions });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/demo/history") {
-      return send(res, 200, { ok: true, data: engine.snapshot().history });
+      return send(res, 200, { ok: true, data: memberEngine.snapshot().history });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/market/quotes") {
       try {
@@ -126,7 +135,7 @@ export function createApp(engine = new DemoTradingEngine(), marketData = fetchTr
     if (req.method === "POST" && url.pathname === "/api/v1/demo/orders") {
       try {
         const order = await readJson(req);
-        return send(res, 201, { ok: true, data: engine.placeOrder(order) });
+        return send(res, 201, { ok: true, data: memberEngine.placeOrder(order) });
       } catch (error) {
         return send(res, error.statusCode || 400, { ok: false, error: error.message });
       }
@@ -134,7 +143,7 @@ export function createApp(engine = new DemoTradingEngine(), marketData = fetchTr
     const closeMatch = url.pathname.match(/^\/api\/v1\/demo\/positions\/([0-9a-f-]+)\/close$/i);
     if (req.method === "POST" && closeMatch) {
       try {
-        return send(res, 200, { ok: true, data: engine.closePosition(closeMatch[1]) });
+        return send(res, 200, { ok: true, data: memberEngine.closePosition(closeMatch[1]) });
       } catch (error) {
         return send(res, 404, { ok: false, error: error.message });
       }
