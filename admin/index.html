@@ -10,30 +10,54 @@
 </style></head>
 <body><div class="shell">
 <aside class="side"><div class="brand"><span class="mark">H</span> HikeyFX</div><div class="eyebrow">Administration</div><nav class="nav"><a class="active" href="#overview">Overview</a><a href="#members">Members</a><a href="#verification">Verification</a><a href="#risk">Risk monitor</a><a href="#audit">Audit log</a></nav><div class="side-note">Internal interface concept. No administrator authentication or connected customer records.</div></aside>
-<main class="main" id="overview"><div class="top"><div><h1>Operations overview</h1><div class="sub">Platform administration · Development environment</div></div><span class="preview">PREVIEW · FICTIONAL DATA</span></div>
-<div class="notice"><strong>Preview only:</strong> this page is not connected to HikeyFX accounts or a backend. All names, figures and events below are fictional examples. No controls perform administrative actions.</div>
+<main class="main" id="overview"><div class="top"><div><h1>Operations overview</h1><div class="sub">Platform administration · Development environment</div></div><span class="preview" id="adminStatus">CHECKING ADMIN ACCESS</span></div>
+<div class="notice"><strong>Restricted area:</strong> access requires an active administrator membership. Only read-only operational summaries are displayed here; customer money movement and live trading controls are not available.</div>
 <div class="grid">
-<div class="card"><div class="metric-label">Registered members</div><div class="metric">1,284</div><div class="metric-foot">Illustrative sample figure</div></div>
-<div class="card"><div class="metric-label">Demo accounts</div><div class="metric">936</div><div class="metric-foot">Simulated accounts only</div></div>
-<div class="card"><div class="metric-label">Verification queue</div><div class="metric">18</div><div class="metric-foot">Fictional pending cases</div></div>
-<div class="card"><div class="metric-label">Open demo positions</div><div class="metric">247</div><div class="metric-foot">No live exposure represented</div></div>
+<div class="card"><div class="metric-label">Registered members</div><div class="metric" id="memberCount">—</div><div class="metric-foot">Registered profiles</div></div>
+<div class="card"><div class="metric-label">Demo accounts</div><div class="metric" id="demoCount">—</div><div class="metric-foot">Demo accounts only</div></div>
+<div class="card"><div class="metric-label">Verification queue</div><div class="metric" id="kycCount">—</div><div class="metric-foot">Pending / in review</div></div>
+<div class="card"><div class="metric-label">Open demo positions</div><div class="metric" id="positionCount">—</div><div class="metric-foot">Demo positions only</div></div>
 </div>
-<section class="section split"><div class="card" id="members"><div class="section-head"><h2>Recent member activity</h2><small>Sample records</small></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Account type</th><th>Status</th><th>Joined</th></tr></thead><tbody>
-<tr><td>Member-1048</td><td><span class="pill demo">Demo</span></td><td><span class="pill">Active</span></td><td>Today</td></tr>
-<tr><td>Member-1047</td><td><span class="pill demo">Demo</span></td><td><span class="pill">Active</span></td><td>Yesterday</td></tr>
-<tr><td>Member-1046</td><td><span class="pill demo">Demo</span></td><td><span class="pill pending">Pending</span></td><td>Yesterday</td></tr>
-<tr><td>Member-1045</td><td><span class="pill demo">Demo</span></td><td><span class="pill">Active</span></td><td>2 days ago</td></tr>
-</tbody></table></div></div>
-<div class="card" id="verification"><div class="section-head"><h2>Verification queue</h2><small>Workflow preview</small></div><div class="activity">
-<div class="event"><div><strong>Member-1046</strong><small>Identity review · Sample case</small></div><span class="pill pending">Pending</span></div>
-<div class="event"><div><strong>Member-1039</strong><small>Address review · Sample case</small></div><span class="pill pending">Pending</span></div>
-<div class="event"><div><strong>Member-1032</strong><small>Profile check · Sample case</small></div><span class="pill pending">Pending</span></div>
-</div><p class="muted" style="font-size:11px;margin:12px 0 0">No documents are stored or reviewed in this prototype.</p></div></section>
+<section class="section split"><div class="card" id="members"><div class="section-head"><h2>Recent member activity</h2><small>Latest 10 profiles</small></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Account type</th><th>Status</th><th>Joined</th></tr></thead><tbody id="memberRows"><tr><td colspan="4">Loading member records…</td></tr></tbody></table></div></div>
+<div class="card" id="verification"><div class="section-head"><h2>Verification queue</h2><small>Aggregate status only</small></div><div class="activity" id="verificationSummary"><div class="event"><div><strong>Verification queue</strong><small>Loading aggregate status…</small></div><span class="pill pending">—</span></div></div><p class="muted" style="font-size:11px;margin:12px 0 0">Identity documents are not exposed in this overview.</p></div></section>
 <section class="section split"><div class="card" id="risk"><div class="section-head"><h2>Demo risk monitor</h2><span class="pill">SIMULATED</span></div><div class="metric-label">Illustrative platform load</div><div class="metric">Normal</div><div class="riskbar"><span></span></div><div class="metric-foot">Sample indicator only — not a risk engine, exposure report or trading control.</div><div class="event"><div><strong>Live execution</strong><small>Locked in development</small></div><span class="pill pending">Disabled</span></div><div class="event"><div><strong>Client deposits</strong><small>Not implemented</small></div><span class="pill pending">Disabled</span></div></div>
-<div class="card" id="audit"><div class="section-head"><h2>Audit log preview</h2><small>Fictional events</small></div><div class="activity">
-<div class="event"><div><strong>Demo workspace opened</strong><small>System sample · Today, 10:42</small></div><span class="muted">INFO</span></div>
-<div class="event"><div><strong>Member profile created</strong><small>System sample · Today, 09:18</small></div><span class="muted">INFO</span></div>
-<div class="event"><div><strong>Verification case queued</strong><small>System sample · Yesterday</small></div><span class="muted">INFO</span></div>
-</div></div></section>
-<div class="footer">HikeyFX · Admin portal concept · Not for production use · No real customer data or financial activity</div>
-</main></div></body></html>
+<div class="card" id="audit"><div class="section-head"><h2>Audit log preview</h2><small>Fictional events</small></div><div class="activity" id="auditRows"><div class="event"><div><strong>Audit events</strong><small>Loading…</small></div><span class="muted">—</span></div></div></div></section>
+<div class="footer">HikeyFX · Restricted admin overview · Read-only development operations</div>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../auth/config.js"></script>
+<script>
+(function(){
+const status=document.getElementById("adminStatus");
+const config=window.HIKEYFX_SUPABASE_CONFIG||{};
+const safeDate=value=>{const date=new Date(value);return Number.isNaN(date.getTime())?"—":date.toLocaleString()};
+const node=(tag,text,className)=>{const item=document.createElement(tag);item.textContent=text||"—";if(className)item.className=className;return item};
+function denied(message){status.textContent="ACCESS DENIED";const notice=document.querySelector(".notice");notice.textContent=message;document.getElementById("memberRows").innerHTML="<tr><td colspan='4'>Administrator access is unavailable.</td></tr>";document.getElementById("auditRows").textContent="Restricted.";document.getElementById("verificationSummary").textContent="Restricted."}
+if(!window.supabase||!config.url||!config.publishableKey){denied("Supabase configuration is unavailable.");return}
+const client=window.supabase.createClient(config.url,config.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+client.auth.getSession().then(async result=>{
+ if(result.error||!result.data.session){window.location.replace("../auth/");return}
+ const {data,error}=await client.rpc("hikeyfx_admin_overview");
+ if(error)throw error;
+ status.textContent="ADMIN ACCESS VERIFIED";
+ const values={memberCount:data.members,demoCount:data.demoAccounts,kycCount:data.verificationPending,positionCount:data.openDemoPositions};
+ Object.keys(values).forEach(id=>document.getElementById(id).textContent=Number(values[id]||0).toLocaleString());
+ const rows=document.getElementById("memberRows");rows.replaceChildren();
+ (data.recentMembers||[]).forEach(member=>{
+  const tr=document.createElement("tr");
+  const name=node("td",member.displayName||"HikeyFX member");
+  const mode=node("td",member.accountMode||"No account","pill demo");
+  const state=node("td",member.accountStatus||"—",member.accountStatus==="active"?"pill":"pill pending");
+  const joined=node("td",safeDate(member.joinedAt));
+  [name,mode,state,joined].forEach(cell=>tr.appendChild(cell));rows.appendChild(tr);
+ });
+ if(!rows.children.length)rows.innerHTML="<tr><td colspan='4'>No member profiles found.</td></tr>";
+ const queue=document.getElementById("verificationSummary");queue.replaceChildren();
+ const q=document.createElement("div");q.className="event";const qText=document.createElement("div");qText.append(node("strong","Open verification cases"),node("small","Pending or in-review cases"));q.append(qText,node("span",String(data.verificationPending||0),"pill pending"));queue.append(q);
+ const events=document.getElementById("auditRows");events.replaceChildren();
+ (data.recentAuditEvents||[]).forEach(event=>{const row=document.createElement("div");row.className="event";const detail=document.createElement("div");detail.append(node("strong",event.action),node("small",(event.targetType||"System")+" · "+safeDate(event.createdAt)));row.append(detail,node("span","AUDIT","muted"));events.append(row)});
+ if(!events.children.length)events.textContent="No audit events recorded.";
+ const signout=node("button","Sign out");signout.style.cssText="border:1px solid #3b4b61;background:#17253b;color:#eef4ff;padding:8px 12px;border-radius:8px;cursor:pointer";signout.onclick=async()=>{await client.auth.signOut();window.location.replace("../auth/")};document.querySelector(".top").append(signout);
+}).catch(error=>denied(error.message||"Administrator access could not be verified."));
+})();
+</script></body></html>
