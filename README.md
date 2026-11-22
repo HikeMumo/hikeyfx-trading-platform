@@ -22,7 +22,7 @@ The existing homepage is retained as the starting point. Do not replace its desi
 - [ ] Authentication and member profiles implemented.
 - [ ] Admin authentication and role-based permissions implemented.
 - [ ] Member dashboard and KYC workflow implemented.
-- [ ] Demo market workspace and simulated order engine implemented.
+- [x] Browser-based demo workspace prototype and client-side simulated order flow added (not a production order engine).
 - [ ] Security, backup, monitoring and recovery tests completed.
 
 ## Planned integrations
@@ -39,5 +39,16 @@ Do not commit API keys, passwords, access tokens, service-role keys or other sec
 ## Legal and operational boundary
 
 HikeyFX is currently a software-development project, not an incorporated or CMA-authorised brokerage. Live trading, client deposits and withdrawals must remain disabled until the relevant company, regulatory, provider and operational prerequisites are satisfied. Demo functionality must be clearly identified as simulated.
+
+## Trading workspace prototype
+
+- Entry point: `trading/index.html`.
+- Scope and limitations: `trading/README.md`.
+- Trading milestone: `docs/TRADING_WORKSPACE_MILESTONE.md`.
+- Read-only market-data contract: `docs/MARKET_DATA_INTEGRATION.md`.
+- Backend API and security contract: `docs/BACKEND_API_CONTRACT.md`.
+- Manual QA checklist: `docs/PHASE1_TRADING_QA_CHECKLIST.md`.
+
+The workspace currently uses locally generated fictional chart data and a browser-only demo simulator. It is not connected to real-time prices, a database, authentication or broker execution. Manual browser QA is still outstanding.
 
 See `docs/ARCHITECTURE.md` for the planned components, environment separation and regulatory gates.
