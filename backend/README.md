@@ -27,11 +27,11 @@ The server binds to `127.0.0.1` only. It is not configured for public hosting. A
 - Request bodies are limited to 16 KiB.
 - The JSON body must be an object; malformed and non-object JSON is rejected.
 - Responses include `no-store`, `nosniff`, `no-referrer` and `DENY` frame headers.
-- This is a local demo API, not a substitute for authentication, authorization, CSRF protections or production security controls.
+- Non-health API routes require a verified Supabase member access token. Browser CORS is enabled for API access; CORS is not authentication or authorization.
 
 ## Current behavior
 
-- All balances and orders exist only in server memory and reset when the process restarts.
+- Each authenticated member receives a separate in-memory demo engine. Balances and orders reset when the process restarts; this is not database persistence.
 - Prices are fictional seed quotes, not a market feed.
 - Supported demo symbols: EURUSD, GBPUSD, AUDUSD and XAUUSD.
 - Market buy/sell positions use the ask/bid respectively.
@@ -41,6 +41,6 @@ The server binds to `127.0.0.1` only. It is not configured for public hosting. A
 
 ## Critical limitations
 
-There is no user authentication, database persistence, account isolation, rate limiting, production logging, monitoring, broker connectivity, real-time data, deposits, withdrawals or live order execution. Do not expose this service to the internet or use it with real funds or personal information.
+There is no database persistence, rate limiting, production logging, monitoring, verified live market feed, broker connectivity, deposits, withdrawals or live order execution. Demo account isolation currently exists only in server memory and is lost on restart. Do not expose this service to the internet or use it with real funds or personal information.
 
 Before any hosted use, implement authenticated server-side identity and authorization, persistent transactional storage, per-user account isolation, idempotency, audit trails, robust risk/margin rules, secure deployment controls, independent security testing and the required company/regulatory/provider approvals. Live trading and client money remain disabled.
