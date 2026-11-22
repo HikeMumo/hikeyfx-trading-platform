@@ -79,7 +79,7 @@ async function readJson(req) {
   return parsed;
 }
 
-export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate) {
+export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository) {
   const memberEngines = new Map();
   const getMemberEngine = user => {
     if (!memberEngines.has(user.id)) {
@@ -112,12 +112,12 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     }
     const memberEngine = getMemberEngine(user);
     const token = bearerToken(req);
-    const persistent = demoRepository && token;
+    const persistent = repository && token;
 
     if (req.method === "GET" && url.pathname === "/api/v1/demo/account") {
       if (persistent) {
         try {
-          const snapshot = await demoRepository.snapshot(token);
+          const snapshot = await repository.snapshot(token);
           const usedMargin = snapshot.positions.reduce((sum, p) => sum + Number(p.margin || 0), 0);
           return send(res, 200, { ok: true, data: { currency: "USD", mode: "demo", balance: Number(snapshot.balance), equity: Number(snapshot.balance), unrealisedPnl: 0, usedMargin, freeMargin: Number(snapshot.balance) - usedMargin, leverage: 100, accountId: snapshot.accountId } });
         } catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
@@ -160,7 +160,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
           const quote = memberEngine.getQuote(symbol);
           const side = String(order.side || "").toLowerCase();
           const entryPrice = side === "buy" ? quote.ask : side === "sell" ? quote.bid : NaN;
-          const data = await demoRepository.placeOrder(token, { symbol, side, volume: order.volume, entryPrice, contractSize: quote.contractSize, stopLoss: order.stopLoss, takeProfit: order.takeProfit, leverage: 100 });
+          const data = await repository.placeOrder(token, { symbol, side, volume: order.volume, entryPrice, contractSize: quote.contractSize, stopLoss: order.stopLoss, takeProfit: order.takeProfit, leverage: 100 });
           return send(res, 201, { ok: true, data });
         }
         return send(res, 201, { ok: true, data: memberEngine.placeOrder(order) });
@@ -177,7 +177,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
           if (!position) return send(res, 404, { ok: false, error: "Open demo position not found." });
           const quote = memberEngine.getQuote(position.symbol);
           const exitPrice = position.side === "buy" ? quote.bid : quote.ask;
-          const data = await demoRepository.closePosition(token, closeMatch[1], exitPrice);
+          const data = await repository.closePosition(token, closeMatch[1], exitPrice);
           return send(res, 200, { ok: true, data });
         }
         return send(res, 200, { ok: true, data: memberEngine.closePosition(closeMatch[1]) });
