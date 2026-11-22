@@ -1,15 +1,23 @@
 # HikeyFX demo backend
 
-A local Node.js HTTP API and in-memory demo order engine. This is an engineering prototype, not a broker backend.
+Authenticated Node.js API for the HikeyFX development demo platform.
 
 ## Requirements and run
 
 - Node.js 20 or later.
-- From this directory: `npm test` to run the engine and HTTP API tests.
+- From this directory: `npm test` to run the engine, API and adapter tests.
 - Run locally with `npm start`.
 - Health check: `http://127.0.0.1:8787/health`.
 
-The server binds to `127.0.0.1` only. It is not configured for public hosting. Automated tests are included; see `../docs/CI_TEST_STATUS.md` for whether a current successful run has been verified.
+## Configuration
+
+Set these environment variables on the backend host:
+
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY`
+- `TRADERMADE_API_KEY` (optional until a valid, permitted data subscription is available)
+
+Never put a Supabase secret/service-role key or TraderMade key in browser code or Git.
 
 ## Routes
 
@@ -18,29 +26,25 @@ The server binds to `127.0.0.1` only. It is not configured for public hosting. A
 - `GET /api/v1/demo/positions`
 - `GET /api/v1/demo/history`
 - `GET /api/v1/market/quotes`
-- `POST /api/v1/demo/orders` — JSON: `{"symbol":"EURUSD","side":"buy","volume":0.1,"stopLoss":1.08,"takeProfit":1.09}`
+- `POST /api/v1/demo/orders`
 - `POST /api/v1/demo/positions/{id}/close`
 
-## Request handling
+All non-health routes require a verified Supabase access token. When Supabase configuration and a bearer token are present, demo account reads and order/close operations use the persistent Supabase RPC functions. Tests can inject a repository adapter. The no-token injected-test path retains the in-memory engine.
 
-- Order requests must use `Content-Type: application/json`.
-- Request bodies are limited to 16 KiB.
-- The JSON body must be an object; malformed and non-object JSON is rejected.
-- Responses include `no-store`, `nosniff`, `no-referrer` and `DENY` frame headers.
-- Non-health API routes require a verified Supabase member access token. Browser CORS is enabled for API access; CORS is not authentication or authorization.
+## Database migration
 
-## Current behavior
+Apply `../supabase/migrations/0006_persistent_demo_trading.sql` in the HikeyFX Supabase SQL editor after migrations 0001–0005. It seeds a limited set of demo instruments and adds authenticated, member-scoped snapshot, order and close RPCs. The RPCs derive the user from `auth.uid()`, enforce demo-account ownership, lock the account balance for margin checks, append trade events and use idempotency keys for order submissions.
 
-- Each authenticated member receives a separate in-memory demo engine. Balances and orders reset when the process restarts; this is not database persistence.
-- Prices are fictional seed quotes, not a market feed.
-- Supported demo symbols: EURUSD, GBPUSD, AUDUSD and XAUUSD.
-- Market buy/sell positions use the ask/bid respectively.
-- Basic volume, margin, stop-loss and take-profit validation is performed.
-- The engine can process stop-loss/take-profit when its quote-update method receives a new price. No external quote stream is connected.
-- Profit calculations are simplified demo calculations, not production-grade multi-currency accounting.
+The migration has not been applied automatically by GitHub. Do not enable the frontend persistent flow until migration 0006 has been applied successfully.
 
-## Critical limitations
+## Demo trading behavior and limitations
 
-There is no database persistence, rate limiting, production logging, monitoring, verified live market feed, broker connectivity, deposits, withdrawals or live order execution. Demo account isolation currently exists only in server memory and is lost on restart. Do not expose this service to the internet or use it with real funds or personal information.
+- Each authenticated member has a distinct database demo account.
+- Demo positions, balance changes and history persist in Supabase.
+- The UI accepts unit quantities and converts them to lots (100,000 units per lot).
+- Supported execution symbols in the current demo engine are EURUSD, GBPUSD, AUDUSD and XAUUSD.
+- Execution prices still come from hard-coded demonstration quotes. They are not live, delayed or broker-provided market prices.
+- Unrealised P/L, stop-out, swaps, commissions, multi-currency conversion, server-side streaming quote updates and automatic stop-loss/take-profit execution are not implemented.
+- This is not a broker backend. No live accounts, real orders, deposits, withdrawals or client-money movement are enabled.
 
-Before any hosted use, implement authenticated server-side identity and authorization, persistent transactional storage, per-user account isolation, idempotency, audit trails, robust risk/margin rules, secure deployment controls, independent security testing and the required company/regulatory/provider approvals. Live trading and client money remain disabled.
+Before any public trading or money movement, complete production-grade risk and accounting design, rate limiting, monitoring, incident response, independent security review, licensed market-data and execution agreements, and all applicable company and regulatory approvals. Do not use real funds.
