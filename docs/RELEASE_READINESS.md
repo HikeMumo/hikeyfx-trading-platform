@@ -5,8 +5,8 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 ## Database and identity gates
 
 - [ ] Apply Supabase migrations 0001–0005 (already reported complete by the project owner).
-- [ ] Apply `supabase/migrations/0006_persistent_demo_trading.sql`.
-- [ ] Apply `supabase/migrations/0007_admin_access_foundation.sql`.
+- [x] Apply `supabase/migrations/0006_persistent_demo_trading.sql` (owner-confirmed).
+- [x] Apply `supabase/migrations/0007_admin_access_foundation.sql` (owner-confirmed).
 - [ ] Configure Supabase Auth Site URL and redirect URLs to the final HTTPS frontend origin.
 - [ ] Verify email confirmation, sign-in, sign-out, session refresh and account bootstrap.
 - [ ] Verify two different test members cannot see or modify each other's demo account, positions or history.
@@ -51,5 +51,5 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 - GitHub branch: `development/phase-1-foundation`.
 - Backend health service exists at the current Render URL; a health response alone does not verify database persistence, market data or trading.
 - GitHub Actions run [45075273243](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45075273243) passed 32 automated tests and browser/backend syntax checks for its commit.
-- Supabase migrations 0006 and 0007 are committed but require manual application in the Supabase SQL editor.
+- Supabase migrations 0006 and 0007 are reported applied by the project owner; the resulting hosted database behavior has not yet been independently verified.
 - Demo execution still uses fictional backend seed quotes. No live market data, real trading, deposits or withdrawals are enabled.
