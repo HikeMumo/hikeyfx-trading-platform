@@ -3,5 +3,5 @@
 // NEVER put a Supabase secret/service_role key in this file.
 window.HIKEYFX_SUPABASE_CONFIG = {
   url: "https://sbsdjncpozgbqzutzxkw.supabase.co",
-  publishableKey: "YOUR_SUPABASE_PUBLISHABLE_KEY"
+  publishableKey: "sb_publishable_yc7MIAuDjXwgayKkPoZ50w_qJgyA5RE"
 };
