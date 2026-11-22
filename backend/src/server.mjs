@@ -14,7 +14,11 @@ function send(res, status, payload) {
     "cache-control": "no-store",
     "x-content-type-options": "nosniff",
     "referrer-policy": "no-referrer",
-    "x-frame-options": "DENY"
+    "x-frame-options": "DENY",
+    "access-control-allow-origin": "*",
+    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-headers": "Authorization, Content-Type",
+    "access-control-max-age": "600"
   });
   res.end(JSON.stringify(payload));
 }
@@ -75,6 +79,18 @@ async function readJson(req) {
 export function createApp(engine = new DemoTradingEngine(), marketData = fetchTraderMadeQuotes, authenticateUser = authenticate) {
   return createServer(async (req, res) => {
     const url = new URL(req.url, `http://${HOST}:${PORT}`);
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, {
+        "access-control-allow-origin": "*",
+        "access-control-allow-methods": "GET, POST, OPTIONS",
+        "access-control-allow-headers": "Authorization, Content-Type",
+        "access-control-max-age": "600",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer",
+        "x-frame-options": "DENY"
+      });
+      return res.end();
+    }
     if (req.method === "GET" && url.pathname === "/health") {
       return send(res, 200, { ok: true, service: "hikeyfx-demo-api", mode: "demo-only" });
     }
