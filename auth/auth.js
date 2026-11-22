@@ -6,6 +6,8 @@
   const loginTab = document.getElementById("loginTab");
   const signupTab = document.getElementById("signupTab");
   const nameField = document.getElementById("nameField");
+  const passwordInput = document.getElementById("password");
+  const passwordToggle = document.getElementById("passwordToggle");
   const heading = document.getElementById("heading");
   const intro = document.getElementById("intro");
   let mode = "login";
@@ -19,7 +21,7 @@
     signupTab.classList.toggle("active", signup);
     nameField.hidden = !signup;
     document.getElementById("displayName").required = signup;
-    document.getElementById("password").autocomplete = signup ? "new-password" : "current-password";
+    passwordInput.autocomplete = signup ? "new-password" : "current-password";
     heading.textContent = signup ? "Create your account" : "Welcome back";
     intro.textContent = signup
       ? "Register for a HikeyFX development account."
@@ -39,7 +41,7 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
 
-  loginTab.addEventListener("click", () => setMode("login"));
+  passwordToggle.addEventListener("click", () => {\n    const reveal = passwordInput.type === "password";\n    passwordInput.type = reveal ? "text" : "password";\n    passwordToggle.setAttribute("aria-label", reveal ? "Hide password" : "Show password");\n    passwordToggle.setAttribute("aria-pressed", String(reveal));\n  });\n\n  loginTab.addEventListener("click", () => setMode("login"));
   signupTab.addEventListener("click", () => setMode("signup"));
 
   form.addEventListener("submit", async event => {
