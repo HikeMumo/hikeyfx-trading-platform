@@ -63,3 +63,53 @@ test("rejects malformed quote updates", () => {
   const engine = new DemoTradingEngine();
   assert.throws(() => engine.updateQuote("EURUSD", 1.1, 1.0), /ask greater/);
 });
+
+test("rejects an order when required margin exceeds free margin", () => {
+  const engine = new DemoTradingEngine({ initialBalance: 50, leverage: 1 });
+  assert.throws(
+    () => engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.01 }),
+    /Insufficient demo free margin/
+  );
+  assert.equal(engine.snapshot().positions.length, 0);
+});
+
+test("calculates realised profit for a sell position", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "sell", volume: 0.1 });
+  engine.updateQuote("EURUSD", 1.08390, 1.08402);
+  const closed = engine.closePosition(position.id);
+  assert.equal(closed.realisedPnl, 9.8);
+  assert.equal(engine.getAccount().balance, 10009.8);
+});
+
+test("automatically closes a buy when take-profit is reached", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.1, takeProfit: 1.08600 });
+  const closed = engine.updateQuote("EURUSD", 1.08600, 1.08612);
+  assert.equal(closed.length, 1);
+  assert.equal(closed[0].id, position.id);
+  assert.equal(closed[0].closeReason, "take_profit");
+});
+
+test("automatically closes a sell when stop-loss is reached", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "sell", volume: 0.1, stopLoss: 1.08600 });
+  const closed = engine.updateQuote("EURUSD", 1.08600, 1.08612);
+  assert.equal(closed.length, 1);
+  assert.equal(closed[0].id, position.id);
+  assert.equal(closed[0].closeReason, "stop_loss");
+});
+
+test("rejects zero, negative, non-finite and crossed quote updates", () => {
+  const engine = new DemoTradingEngine();
+  assert.throws(() => engine.updateQuote("EURUSD", 0, 1), /positive prices/);
+  assert.throws(() => engine.updateQuote("EURUSD", -1, 1), /positive prices/);
+  assert.throws(() => engine.updateQuote("EURUSD", Number.NaN, 1.1), /positive prices/);
+  assert.throws(() => engine.updateQuote("EURUSD", 1.1, 1.1), /ask greater/);
+});
+
+test("rejects invalid leverage and initial balances", () => {
+  assert.throws(() => new DemoTradingEngine({ initialBalance: 0 }), /Initial balance/);
+  assert.throws(() => new DemoTradingEngine({ initialBalance: 100, leverage: 0 }), /Leverage/);
+  assert.throws(() => new DemoTradingEngine({ initialBalance: 100, leverage: 501 }), /Leverage/);
+});
