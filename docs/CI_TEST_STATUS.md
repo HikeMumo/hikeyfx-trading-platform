@@ -6,11 +6,10 @@ The workflow runs browser-script syntax checks and the Node.js 20 backend suite 
 
 ## Latest verified run
 
-- Successful run: [GitHub Actions run 45076825326](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45076825326)
-- Tested commit: `a24775c3eec4aa837b1ac552775c30937334fc91`
+- Successful run: [GitHub Actions run 45076939612](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45076939612)
+- Tested commit: `512761a1c93a0cbfe5697a26ee272b3804d296b1`
 - Result: **38 tests passed, 0 failed**.
-- Verified: backend engine/API behavior, authenticated member routes, persistent repository routing, Supabase outage and retryable status handling, protected demo-quote migration contracts, per-member quote burst limiting, browser JavaScript syntax, and SQL migration contract checks.
-- Earlier successful quote-hardening checks: [run 45076675494](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45076675494).
+- Verified: backend engine/API behavior, authenticated member routes, persistent repository routing, Supabase outage and retryable status handling, protected demo-quote migration contracts, per-member quote burst limiting, close-reason validation, browser JavaScript syntax, and SQL migration contract checks.
 - Each newer source commit must be checked independently; a successful older run does not prove later changes passed.
 
 ## Scope and limitations
