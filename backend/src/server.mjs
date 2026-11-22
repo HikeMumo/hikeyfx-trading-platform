@@ -2,11 +2,14 @@ import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 import { DemoTradingEngine } from "./engine.mjs";
 import { fetchTraderMadeQuotes } from "./market-data.mjs";
+import { createSupabaseDemoRepository } from "./supabase.mjs";
 
 const HOST = "0.0.0.0";
 const PORT = Number(process.env.PORT || 8787);
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
+const demoRepository = createSupabaseDemoRepository();
+const bearerToken = req => (req.headers.authorization || "").match(/^Bearer\\s+(.+)$/i)?.[1] || null;
 
 function send(res, status, payload) {
   res.writeHead(status, {
@@ -108,14 +111,31 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
       return send(res, 401, { ok: false, error: "A valid HikeyFX member session is required." });
     }
     const memberEngine = getMemberEngine(user);
+    const token = bearerToken(req);
+    const persistent = demoRepository && token;
 
     if (req.method === "GET" && url.pathname === "/api/v1/demo/account") {
+      if (persistent) {
+        try {
+          const snapshot = await demoRepository.snapshot(token);
+          const usedMargin = snapshot.positions.reduce((sum, p) => sum + Number(p.margin || 0), 0);
+          return send(res, 200, { ok: true, data: { currency: "USD", mode: "demo", balance: Number(snapshot.balance), equity: Number(snapshot.balance), unrealisedPnl: 0, usedMargin, freeMargin: Number(snapshot.balance) - usedMargin, leverage: 100, accountId: snapshot.accountId } });
+        } catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
+      }
       return send(res, 200, { ok: true, data: memberEngine.getAccount() });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/demo/positions") {
+      if (persistent) {
+        try { return send(res, 200, { ok: true, data: (await demoRepository.snapshot(token)).positions }); }
+        catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
+      }
       return send(res, 200, { ok: true, data: memberEngine.snapshot().positions });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/demo/history") {
+      if (persistent) {
+        try { return send(res, 200, { ok: true, data: (await demoRepository.snapshot(token)).history }); }
+        catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
+      }
       return send(res, 200, { ok: true, data: memberEngine.snapshot().history });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/market/quotes") {
@@ -135,6 +155,14 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     if (req.method === "POST" && url.pathname === "/api/v1/demo/orders") {
       try {
         const order = await readJson(req);
+        if (persistent) {
+          const symbol = String(order.symbol || "").replace("/", "").toUpperCase();
+          const quote = memberEngine.getQuote(symbol);
+          const side = String(order.side || "").toLowerCase();
+          const entryPrice = side === "buy" ? quote.ask : side === "sell" ? quote.bid : NaN;
+          const data = await demoRepository.placeOrder(token, { symbol, side, volume: order.volume, entryPrice, contractSize: quote.contractSize, stopLoss: order.stopLoss, takeProfit: order.takeProfit, leverage: 100 });
+          return send(res, 201, { ok: true, data });
+        }
         return send(res, 201, { ok: true, data: memberEngine.placeOrder(order) });
       } catch (error) {
         return send(res, error.statusCode || 400, { ok: false, error: error.message });
@@ -143,6 +171,15 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     const closeMatch = url.pathname.match(/^\/api\/v1\/demo\/positions\/([0-9a-f-]+)\/close$/i);
     if (req.method === "POST" && closeMatch) {
       try {
+        if (persistent) {
+          const snapshot = await demoRepository.snapshot(token);
+          const position = snapshot.positions.find(item => item.id === closeMatch[1]);
+          if (!position) return send(res, 404, { ok: false, error: "Open demo position not found." });
+          const quote = memberEngine.getQuote(position.symbol);
+          const exitPrice = position.side === "buy" ? quote.bid : quote.ask;
+          const data = await demoRepository.closePosition(token, closeMatch[1], exitPrice);
+          return send(res, 200, { ok: true, data });
+        }
         return send(res, 200, { ok: true, data: memberEngine.closePosition(closeMatch[1]) });
       } catch (error) {
         return send(res, 404, { ok: false, error: error.message });
