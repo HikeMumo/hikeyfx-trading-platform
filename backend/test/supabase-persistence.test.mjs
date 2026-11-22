@@ -35,7 +35,7 @@ test("Supabase repository forwards only the member JWT and publishable key to RP
       contractSize: 100000, idempotencyKey: "test-order-key-001"
     });
     assert.equal(result.accountId, "account-1");
-    assert.ok(requests[0].url.endsWith("/rpc/hikeyfx_demo_place_order"));
+    assert.ok(requests[0].url.endsWith("/rpc/hikeyfx_demo_place_order_v2"));
     assert.equal(requests[0].options.headers.apikey, "sb_publishable_test");
     assert.equal(requests[0].options.headers.authorization, "Bearer member-jwt");
     const body = JSON.parse(requests[0].options.body);
@@ -52,10 +52,12 @@ test("Supabase repository forwards only the member JWT and publishable key to RP
 test("demo execution migration ignores caller-supplied entry, contract and exit prices", async () => {
   const sql = await readFile(new URL("../../supabase/migrations/0008_demo_execution_quote_hardening.sql", import.meta.url), "utf8");
   assert.match(sql, /create table public\.demo_execution_quotes/);
+  assert.match(sql, /revoke all on function public\.hikeyfx_demo_place_order\(/);
+  assert.match(sql, /revoke all on function public\.hikeyfx_demo_close_position\(/);
   assert.match(sql, /revoke all on table public\.demo_execution_quotes from public, anon, authenticated/);
   assert.match(sql, /join public\.demo_execution_quotes q on q\.symbol=i\.symbol/);
-  const place = sql.slice(sql.indexOf("create or replace function public.hikeyfx_demo_place_order"), sql.indexOf("create or replace function public.hikeyfx_demo_close_position"));
-  const close = sql.slice(sql.indexOf("create or replace function public.hikeyfx_demo_close_position"));
+  const place = sql.slice(sql.indexOf("create or replace function public.hikeyfx_demo_place_order_v2"), sql.indexOf("create or replace function public.hikeyfx_demo_close_position_v2"));
+  const close = sql.slice(sql.indexOf("create or replace function public.hikeyfx_demo_close_position_v2"));
   assert.match(place, /v_entry_price := case when p_side='buy' then v_ask else v_bid end/);
   assert.match(place, /v_contract_size numeric/);
   assert.doesNotMatch(place, /v_entry_price\s*:=\s*p_entry_price/i);
@@ -64,6 +66,8 @@ test("demo execution migration ignores caller-supplied entry, contract and exit 
   assert.doesNotMatch(close, /v_exit_price\s*:=\s*p_exit_price/i);
   assert.match(close, /Invalid demo close reason/);
   assert.match(sql, /security definer/);
+  assert.match(sql, /grant execute on function public\.hikeyfx_demo_place_order_v2/);
+  assert.match(sql, /grant execute on function public\.hikeyfx_demo_close_position_v2/);
   assert.match(sql, /set search_path = ''/);
 });
 
