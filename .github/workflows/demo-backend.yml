@@ -1,4 +1,4 @@
-name: HikeyFX demo backend checks
+name: HikeyFX platform checks
 
 on:
   workflow_dispatch:
