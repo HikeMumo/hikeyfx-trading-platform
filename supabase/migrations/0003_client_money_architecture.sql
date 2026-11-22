@@ -117,8 +117,7 @@ begin
     end if;
     new.posted_at := coalesce(new.posted_at, now());
   end if;
-  return new;
-end;
+  return new;end;
 $$;
 
 create trigger ledger_journal_posting_guard
@@ -237,8 +236,7 @@ create table public.withdrawal_requests (
   reviewed_at timestamptz,
   paid_at timestamptz,
   updated_at timestamptz not null default now(),
-  unique (user_id, idempotency_key),
-  unique (provider_code, provider_reference),
+  unique (user_id, idempotency_key),  unique (provider_code, provider_reference),
   foreign key (client_money_account_id, user_id)
     references public.client_money_accounts(id, user_id) on delete restrict
 );
