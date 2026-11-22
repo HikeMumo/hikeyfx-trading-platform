@@ -63,7 +63,7 @@ el("tabHistory").addEventListener("click",function(){el("tabHistory").classList.
 function activateNav(id){["navCharts","navTrade","navHistory","navAccount"].forEach(function(key){el(key).classList.toggle("active",key===id)})}
 el("navCharts").addEventListener("click",function(){activateNav("navCharts");el("chart").scrollIntoView({behavior:"smooth",block:"center"})});
 el("navTrade").addEventListener("click",function(){activateNav("navTrade");el("placeOrder").scrollIntoView({behavior:"smooth",block:"center"})});
-el("navHistory").addEventListener("click",function(){activateNav("navHistory");el("tabHistory").click();el("positionsTable").scrollIntoView({behavior:"smooth",block:"center"})});
+el("navHistory").addEventListener("click",function(){activateNav("navHistory");el("tabHistory").click();el("historyTable").scrollIntoView({behavior:"smooth",block:"center"})});
 el("navAccount").addEventListener("click",function(){window.location.assign("../portal/")});
 window.addEventListener("resize",drawChart);renderList();selectAsset();updateBalance();checkApi();
 if(!authClient){notify("Secure member sign-in is unavailable.");el("placeOrder").disabled=true}else{authClient.auth.getSession().then(function(result){if(result.error||!result.data.session){window.location.replace("../auth/");return}accessToken=result.data.session.access_token;return authClient.rpc("bootstrap_member").then(function(rpcResult){if(rpcResult.error)throw rpcResult.error;return syncTradingState()}).then(function(){el("placeOrder").disabled=false})}).catch(function(error){notify("Account connection failed: "+error.message);el("placeOrder").disabled=true})}
