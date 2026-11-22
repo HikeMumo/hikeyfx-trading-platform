@@ -174,7 +174,7 @@ returns trigger
 language plpgsql
 security invoker
 set search_path = ''
-as $
+as $$
 begin
   if old.status <> 'draft' then
     raise exception 'Posted ledger journals are immutable';
@@ -182,7 +182,7 @@ begin
   if tg_op = 'DELETE' then return old; end if;
   return new;
 end;
-$;
+$$;
 
 create trigger ledger_journals_immutable_after_post
 before update or delete on public.ledger_journals
