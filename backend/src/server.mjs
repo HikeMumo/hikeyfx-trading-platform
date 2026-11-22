@@ -3,7 +3,7 @@ import { pathToFileURL } from "node:url";
 import { DemoTradingEngine } from "./engine.mjs";
 import { fetchTraderMadeQuotes } from "./market-data.mjs";
 
-const HOST = "127.0.0.1";
+const HOST = "0.0.0.0";
 const PORT = Number(process.env.PORT || 8787);
 
 function send(res, status, payload) {
@@ -101,7 +101,7 @@ const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process
 if (isDirectRun) {
   const server = createApp();
   server.listen(PORT, HOST, () => {
-    console.log(`HikeyFX demo API listening at http://${HOST}:${PORT}`);
-    console.log("Demo-only, in-memory data. Do not expose to the public internet.");
+    console.log(`HikeyFX demo API listening on port ${PORT}`);
+    console.log("Development demo API. Authentication and persistence are not yet production-ready.");
   });
 }
