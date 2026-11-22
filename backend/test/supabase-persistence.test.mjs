@@ -9,10 +9,10 @@ test("persistent demo migration defines member-scoped authenticated RPCs", async
   }
   assert.equal((sql.match(/security definer/gi) || []).length, 3);
   assert.equal((sql.match(/set search_path = ''/gi) || []).length, 3);
-  assert.match(sql, /auth\\.uid\\(\\)/);
+  assert.ok(sql.includes("auth.uid()"));
   assert.match(sql, /pg_advisory_xact_lock/);
   assert.match(sql, /demo_idempotency_keys/);
-  assert.match(sql, /grant execute on function public\\.hikeyfx_demo_place_order/);
+  assert.ok(sql.includes("grant execute on function public.hikeyfx_demo_place_order"));
   assert.match(sql, /from public, anon/);
 });
 
@@ -35,7 +35,7 @@ test("Supabase repository forwards only the member JWT and publishable key to RP
       contractSize: 100000, idempotencyKey: "test-order-key-001"
     });
     assert.equal(result.accountId, "account-1");
-    assert.match(requests[0].url, /rpc\\/hikeyfx_demo_place_order$/);
+    assert.ok(requests[0].url.endsWith("/rpc/hikeyfx_demo_place_order"));
     assert.equal(requests[0].options.headers.apikey, "sb_publishable_test");
     assert.equal(requests[0].options.headers.authorization, "Bearer member-jwt");
     const body = JSON.parse(requests[0].options.body);
