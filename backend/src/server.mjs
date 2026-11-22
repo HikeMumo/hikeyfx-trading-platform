@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { DemoTradingEngine } from "./engine.mjs";
 import { fetchTraderMadeQuotes } from "./market-data.mjs";
@@ -160,7 +161,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
           const quote = memberEngine.getQuote(symbol);
           const side = String(order.side || "").toLowerCase();
           const entryPrice = side === "buy" ? quote.ask : side === "sell" ? quote.bid : NaN;
-          const data = await repository.placeOrder(token, { symbol, side, volume: order.volume, entryPrice, contractSize: quote.contractSize, stopLoss: order.stopLoss, takeProfit: order.takeProfit, leverage: 100 });
+          const data = await repository.placeOrder(token, { symbol, side, volume: order.volume, entryPrice, contractSize: quote.contractSize, stopLoss: order.stopLoss, takeProfit: order.takeProfit, leverage: 100, idempotencyKey: String(order.idempotencyKey || randomUUID()) });
           return send(res, 201, { ok: true, data });
         }
         return send(res, 201, { ok: true, data: memberEngine.placeOrder(order) });
