@@ -62,6 +62,7 @@ test("demo execution migration ignores caller-supplied entry, contract and exit 
   assert.doesNotMatch(place, /v_contract_size\s*:=\s*p_contract_size/i);
   assert.match(close, /v_exit_price := case when v_position\.side='buy' then v_bid else v_ask end/);
   assert.doesNotMatch(close, /v_exit_price\s*:=\s*p_exit_price/i);
+  assert.match(close, /Invalid demo close reason/);
   assert.match(sql, /security definer/);
   assert.match(sql, /set search_path = ''/);
 });
