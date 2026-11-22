@@ -101,6 +101,27 @@ test("all member API routes reject unauthenticated requests", async t => {
   }
 });
 
+test("market quote endpoint applies a per-member burst limit", async t => {
+  let calls = 0;
+  const marketData = async () => {
+    calls += 1;
+    return { quotes: [], source: "test", receivedAt: new Date().toISOString(), status: "fresh" };
+  };
+  const server = createApp(null, marketData, async () => ({ id: "quote-rate-member" }), null);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}/api/v1/market/quotes`;
+  for (let i = 0; i < 30; i += 1) {
+    const response = await fetch(base);
+    assert.equal(response.status, 200);
+  }
+  const limited = await fetch(base);
+  assert.equal(limited.status, 429);
+  const payload = await limited.json();
+  assert.equal(payload.retryAfterSeconds > 0, true);
+  assert.equal(calls, 30);
+});
+
 test("HTTP API returns 404 for unknown routes", async t => {
   const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
