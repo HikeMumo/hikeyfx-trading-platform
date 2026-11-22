@@ -45,6 +45,15 @@ HikeyFX is currently a software-development project, not an incorporated or CMA-
 - Member portal preview: `portal/index.html` (static UI only; no login or personal data collection).
 - Admin portal preview: `admin/index.html` (fictional sample data only; no authentication or real admin actions).
 
+## Server-side demo backend prototype
+
+- API and engine: `backend/src/`.
+- Setup, routes and limitations: `backend/README.md`.
+- Automated unit tests: `backend/test/engine.test.mjs` (`npm test` from `backend/` with Node.js 20+).
+- Milestone and remaining gates: `docs/DEMO_ENGINE_MILESTONE.md`.
+
+The backend is local-only, in-memory and uses fictional seed prices. It is not connected to the website, authentication, a database or a real market feed. It must not be exposed publicly or used with real funds.
+
 ## Trading workspace prototype
 
 - Entry point: `trading/index.html`.
