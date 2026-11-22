@@ -7,6 +7,9 @@ on:
       - development/phase-1-foundation
     paths:
       - "backend/**"
+      - "auth/**"
+      - "portal/**"
+      - "trading/**"
       - ".github/workflows/demo-backend.yml"
   pull_request:
     branches:
@@ -30,6 +33,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Check browser JavaScript syntax
+        run: |
+          node --check auth/config.js
+          node --check auth/auth.js
+          node --check portal/member.js
       - name: Run automated tests
         working-directory: backend
         run: npm test
