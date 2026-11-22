@@ -2,24 +2,18 @@
 
 Workflow: `.github/workflows/demo-backend.yml`
 
-The workflow runs the Node.js 20 demo backend test suite on pushes and pull requests that change backend files, and supports manual dispatch from the GitHub Actions tab.
+The workflow runs browser-script syntax checks and the Node.js 20 backend suite when backend, authentication, portal, trading, admin, Supabase migration or workflow files change.
 
-## Current verification status
+## Latest verified run
 
-- Workflow definition is committed to `development/phase-1-foundation`.
-- Engine and HTTP API test files have been expanded to cover 19 cases in total.
-- The latest backend test changes were committed, which should satisfy the workflow's push path filter.
-- This environment cannot access GitHub Actions run history or execute a clean clone because direct GitHub network access is unavailable here.
-- No successful CI run has been verified in this session. Do not describe the tests as passing until the Actions run is inspected.
+- Successful run: [GitHub Actions run 45074995760](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45074995760)
+- Commit: `fd4622da377765ece22021da38030eccd0d4b9ea`
+- Verified: backend engine/API tests, trading-page JavaScript syntax, API configuration syntax, and admin-page JavaScript syntax.
+- Persistent demo SQL and adapter tests passed in run [45074847518](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45074847518).
+- Each newer commit must be checked independently; a successful older run does not prove later changes passed.
 
-## How to verify
+## Scope and limitations
 
-1. Open the repository's **Actions** tab.
-2. Select **HikeyFX demo backend checks**.
-3. Open the run for the latest `development/phase-1-foundation` commit.
-4. Confirm the **Run automated tests** step is green and the summary reports all tests passing.
-5. If it fails, inspect the failing test output before making further changes.
+Automated tests do not apply Supabase migrations, verify the hosted Supabase schema, test the Render service, validate TraderMade credentials or confirm any real market-data entitlement. End-to-end hosted testing is still required after migrations are applied and the frontend is deployed.
 
-## Acceptance
-
-A successful run must execute `npm test` in `backend/` under Node.js 20 and pass both the engine unit tests and HTTP API integration tests. Passing tests are necessary but not sufficient for production readiness.
+Passing tests are necessary but not sufficient for production readiness.
