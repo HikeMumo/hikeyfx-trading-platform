@@ -2,7 +2,7 @@
   const config = window.HIKEYFX_SUPABASE_CONFIG || {};
   const fail = message => {
     document.documentElement.style.visibility = "visible";
-    document.body.innerHTML = '<main style="max-width:560px;margin:12vh auto;padding:24px;color:#edf5ef;font:15px system-ui;background:#111a15;border:1px solid #26372c;border-radius:14px"><h2>HikeyFX member area</h2><p>' + message.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) + '</p><a style="color:#b5efc5" href="../auth/">Return to sign in</a></main>';
+    document.body.innerHTML = '<main style="max-width:560px;margin:12vh auto;padding:24px;color:#26231e;font:15px system-ui;background:#fffdf7;border:1px solid #ded6c5;border-radius:14px;box-shadow:0 12px 36px rgba(40,32,20,.08)"><h2>HikeyFX member area</h2><p>' + message.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) + '</p><a style="color:#26734d" href="../auth/">Return to sign in</a></main>';
   };
   if (!window.supabase || !config.url || !config.publishableKey) {
     fail("Supabase connection settings are missing. Please return to member sign-in.");
