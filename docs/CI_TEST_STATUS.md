@@ -6,11 +6,12 @@ The workflow runs browser-script syntax checks and the Node.js 20 backend suite 
 
 ## Latest verified run
 
-- Successful run: [GitHub Actions run 45074995760](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45074995760)
-- Commit: `fd4622da377765ece22021da38030eccd0d4b9ea`
-- Verified: backend engine/API tests, trading-page JavaScript syntax, API configuration syntax, and admin-page JavaScript syntax.
-- Persistent demo SQL and adapter tests passed in run [45074847518](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45074847518).
-- Each newer commit must be checked independently; a successful older run does not prove later changes passed.
+- Successful run: [GitHub Actions run 45076241569](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45076241569)
+- Tested commit: `d4928c79c208b4786538de89e8f7c619d078d7fa`
+- Result: **34 tests passed, 0 failed**.
+- Verified: backend engine/API behavior, persistent repository routing, member API authentication, frontend JavaScript syntax, API configuration syntax, and SQL migration contract checks.
+- Earlier successful persistent routing checks: [run 45076102007](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45076102007).
+- Each newer source commit must be checked independently; a successful older run does not prove later changes passed.
 
 ## Scope and limitations
 
