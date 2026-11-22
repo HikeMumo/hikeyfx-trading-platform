@@ -23,7 +23,11 @@ on conflict(symbol) do update set
 alter table public.demo_execution_quotes enable row level security;
 revoke all on table public.demo_execution_quotes from public, anon, authenticated;
 
-create or replace function public.hikeyfx_demo_place_order(
+-- Disable the older RPCs that accepted caller-controlled execution prices.
+revoke all on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,text,numeric,numeric,integer) from public, anon, authenticated;
+revoke all on function public.hikeyfx_demo_close_position(uuid,numeric,text) from public, anon, authenticated;
+
+create or replace function public.hikeyfx_demo_place_order_v2(
   p_symbol text, p_side public.order_side, p_volume numeric,
   p_entry_price numeric, p_contract_size numeric,
   p_idempotency_key text,
@@ -139,7 +143,7 @@ begin
 end;
 $$;
 
-create or replace function public.hikeyfx_demo_close_position(
+create or replace function public.hikeyfx_demo_close_position_v2(
   p_position_id uuid, p_exit_price numeric, p_reason text default 'manual'
 )
 returns jsonb
@@ -208,10 +212,10 @@ begin
 end;
 $$;
 
-revoke all on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,text,numeric,numeric,integer) from public, anon;
-revoke all on function public.hikeyfx_demo_close_position(uuid,numeric,text) from public, anon;
-grant execute on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,text,numeric,numeric,integer) to authenticated;
-grant execute on function public.hikeyfx_demo_close_position(uuid,numeric,text) to authenticated;
+revoke all on function public.hikeyfx_demo_place_order_v2(text,public.order_side,numeric,numeric,numeric,text,numeric,numeric,integer) from public, anon;
+revoke all on function public.hikeyfx_demo_close_position_v2(uuid,numeric,text) from public, anon;
+grant execute on function public.hikeyfx_demo_place_order_v2(text,public.order_side,numeric,numeric,numeric,text,numeric,numeric,integer) to authenticated;
+grant execute on function public.hikeyfx_demo_close_position_v2(uuid,numeric,text) to authenticated;
 
 comment on table public.demo_execution_quotes is
   'Protected fixed illustrative demo quotes. No authenticated client may read or change execution prices.';
