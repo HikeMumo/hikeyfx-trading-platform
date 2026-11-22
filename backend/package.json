@@ -1,0 +1,14 @@
+{
+  "name": "hikeyfx-demo-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-only educational demo trading API prototype for HikeyFX",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
