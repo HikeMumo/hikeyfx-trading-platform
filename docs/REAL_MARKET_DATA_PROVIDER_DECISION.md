@@ -7,9 +7,13 @@ The member's account may be labelled **Demo Account**. Market prices and candles
 
 ## Provider shortlist reviewed on 22 November 2026
 
-### TraderMade — preferred candidate for broker-style display discussions
-TraderMade advertises real-time FX, commodities, US stocks and indices over REST, WebSocket and FIX, and specifically markets data/display rights for trading platforms and brokers. Its commercial pricing and exact instrument coverage/licensing must be confirmed in writing before integration.
-Reference: https://marketdata.tradermade.com/
+### TraderMade — selected for private development/testing only
+The user has created a TraderMade account. Its REST API documents a live rates endpoint and a time-series endpoint. The free access guide describes limited access, including live mid-price data during the trial and end-of-day daily history; minute/hour historical endpoints are not available on the free tier. Verify the exact active entitlement in the account dashboard.
+The free tier is for personal/private development and testing only. It is not permission to display or redistribute prices to HikeyFX public users or operate a commercial broker platform. Before public display, obtain a written commercial data licence covering HikeyFX's intended use, symbols, territories, display and redistribution rights, and fees.
+References:
+- https://marketdata.tradermade.com/docs/restful-api
+- https://marketdata.tradermade.com/docs/restful-api/free-tier.pdf
+- https://tradermade.com/pricing
 
 ### Twelve Data — useful API candidate, but not a default public-display licence
 Twelve Data documents real-time forex streaming and broad market-data APIs. Its published terms state that external redistribution/display requires the relevant rights/add-on or a separate written agreement; individual plans are for personal/internal use, not commercial display to third parties. Its Forex API v2 documentation also says redistribution requires a separate licensing agreement.
@@ -46,9 +50,9 @@ No subscription or data rights are assumed by this document.
 A genuine market-data feed does not make a trade real. Until HikeyFX has the required Kenyan authorisation, agreements, safeguards, risk controls, operational readiness and legal review, order entry remains a demo-account workflow. No customer funds are accepted and no external order is routed. Do not represent a demo fill as a broker/exchange execution.
 
 ## Immediate implementation sequence
-1. Select a provider and obtain written display/licensing terms.
+1. Use TraderMade only for private development/testing under the free entitlement; verify the exact active plan in the dashboard.
 2. Store the provider credential in backend environment secrets.
-3. Implement provider adapter and authenticated read-only quote/candle endpoints.
+3. Implement the server-side quote adapter for private testing; obtain a separate written commercial display licence before exposing market data publicly.
 4. Remove all seeded quotes and generated chart candles from the trading UI; show unavailable when the provider is not connected.
 5. Connect the persistent demo engine to validated provider quotes only after the feed is working and freshness tests pass.
 6. Complete database transaction, authentication, idempotency and security tests before deployment.
