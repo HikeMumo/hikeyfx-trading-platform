@@ -9,7 +9,7 @@ A local Node.js HTTP API and in-memory demo order engine. This is an engineering
 - Run locally with `npm start`.
 - Health check: `http://127.0.0.1:8787/health`.
 
-The server binds to `127.0.0.1` only. It is not configured for public hosting.
+The server binds to `127.0.0.1` only. It is not configured for public hosting. Automated engine and HTTP API tests are included, but they have not yet been executed in this environment.
 
 ## Routes
 
