@@ -6,7 +6,7 @@
 
 create type public.ledger_account_class as enum ('asset', 'liability', 'equity', 'income', 'expense');
 create type public.ledger_entry_side as enum ('debit', 'credit');
-create type public.ledger_journal_status as enum ('draft', 'posted', 'reversed');
+create type public.ledger_journal_status as enum ('draft', 'posted');
 create type public.deposit_status as enum ('created', 'pending', 'confirmed', 'failed', 'cancelled', 'reversed');
 create type public.withdrawal_status as enum ('requested', 'under_review', 'approved', 'processing', 'paid', 'rejected', 'cancelled', 'failed');
 create type public.payment_event_status as enum ('received', 'processing', 'processed', 'ignored', 'failed');
@@ -21,6 +21,8 @@ create table public.client_money_accounts (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (id, user_id),
+  unique (id, currency),
+  unique (id, user_id, currency),
   unique (user_id, currency)
 );
 
@@ -34,9 +36,8 @@ create table public.ledger_accounts (
   is_control_account boolean not null default false,
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
-  constraint ledger_client_account_currency_scope check (
-    client_money_account_id is null or currency is not null
-  )
+  foreign key (client_money_account_id, currency)
+    references public.client_money_accounts(id, currency) on delete restrict
 );
 
 create table public.ledger_journals (
@@ -50,10 +51,9 @@ create table public.ledger_journals (
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
   posted_at timestamptz,
-  reversed_by_journal_id uuid references public.ledger_journals(id) on delete restrict,
   constraint posted_journal_timestamp_consistent check (
     (status = 'draft' and posted_at is null)
-    or (status in ('posted', 'reversed') and posted_at is not null)
+    or (status = 'posted' and posted_at is not null)
   )
 );
 
@@ -86,7 +86,18 @@ declare
   credit_total numeric(24, 2);
   wrong_currency_count bigint;
 begin
-  if new.status in ('posted', 'reversed') and old.status = 'draft' then
+  if tg_op = 'INSERT' then
+    if new.status <> 'draft' then
+      raise exception 'Ledger journals must be created as drafts';
+    end if;
+    return new;
+  end if;
+
+  if old.status <> 'draft' then
+    raise exception 'Posted ledger journals are immutable; create a separate reversal journal';
+  end if;
+
+  if new.status = 'posted' then
     select count(*),
            coalesce(sum(case when e.side = 'debit' then e.amount else 0 end), 0),
            coalesce(sum(case when e.side = 'credit' then e.amount else 0 end), 0),
@@ -111,7 +122,7 @@ end;
 $$;
 
 create trigger ledger_journal_posting_guard
-before update of status on public.ledger_journals
+before insert or update of status on public.ledger_journals
 for each row execute function public.validate_ledger_journal_posting();
 
 create function public.reject_posted_ledger_mutation()
@@ -123,22 +134,39 @@ as $$
 declare
   target_journal_id uuid;
   journal_state public.ledger_journal_status;
+  account_currency char(3);
+  journal_currency char(3);
 begin
-  if tg_table_name = 'ledger_journals' then
-    if old.status <> 'draft' then
-      raise exception 'Posted ledger journals are immutable; use a reversal journal';
+  if tg_op in ('UPDATE', 'DELETE') then
+    target_journal_id := old.journal_id;
+    select j.status into journal_state
+      from public.ledger_journals j
+     where j.id = target_journal_id;
+    if journal_state is distinct from 'draft' then
+      raise exception 'Entries for posted or missing journals cannot be changed';
     end if;
-    return case when tg_op = 'DELETE' then old else new end;
   end if;
 
-  target_journal_id := case when tg_op = 'DELETE' then old.journal_id else new.journal_id end;
-  select j.status into journal_state
-    from public.ledger_journals j
-   where j.id = target_journal_id;
-  if journal_state is distinct from 'draft' then
-    raise exception 'Entries for posted or missing journals cannot be changed';
+  if tg_op in ('INSERT', 'UPDATE') then
+    select j.status, j.currency into journal_state, journal_currency
+      from public.ledger_journals j
+     where j.id = new.journal_id;
+    if journal_state is distinct from 'draft' then
+      raise exception 'Entries can only be added to draft journals';
+    end if;
+
+    select a.currency into account_currency
+      from public.ledger_accounts a
+     where a.id = new.ledger_account_id;
+    if account_currency is distinct from new.currency or journal_currency is distinct from new.currency then
+      raise exception 'Ledger entry, ledger account, and journal currencies must match';
+    end if;
   end if;
-  return case when tg_op = 'DELETE' then old else new end;
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+  return new;
 end;
 $$;
 
@@ -168,8 +196,8 @@ create table public.deposit_intents (
   updated_at timestamptz not null default now(),
   unique (user_id, idempotency_key),
   unique (provider_code, provider_reference),
-  foreign key (client_money_account_id, user_id)
-    references public.client_money_accounts(id, user_id) on delete restrict
+  foreign key (client_money_account_id, user_id, currency)
+    references public.client_money_accounts(id, user_id, currency) on delete restrict
 );
 
 create index deposit_intents_user_created_idx on public.deposit_intents(user_id, created_at desc);
