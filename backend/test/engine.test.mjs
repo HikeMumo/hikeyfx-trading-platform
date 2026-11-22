@@ -73,13 +73,15 @@ test("rejects an order when required margin exceeds free margin", () => {
   assert.equal(engine.snapshot().positions.length, 0);
 });
 
-test("calculates realised profit for a sell position", () => {
+test("calculates realised profit for a sell position after the spread", () => {
   const engine = new DemoTradingEngine();
   const position = engine.placeOrder({ symbol: "EURUSD", side: "sell", volume: 0.1 });
   engine.updateQuote("EURUSD", 1.08390, 1.08402);
   const closed = engine.closePosition(position.id);
-  assert.equal(closed.realisedPnl, 9.8);
-  assert.equal(engine.getAccount().balance, 10009.8);
+  // A sell enters at bid and closes at ask; the 0.00088 move earns $8.80
+  // after accounting for the bid/ask spread.
+  assert.equal(closed.realisedPnl, 8.8);
+  assert.equal(engine.getAccount().balance, 10008.8);
 });
 
 test("automatically closes a buy when take-profit is reached", () => {
