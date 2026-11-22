@@ -37,7 +37,8 @@ export function createSupabaseDemoRepository({ fetchImpl = fetch } = {}) {
       p_contract_size: order.contractSize,
       p_stop_loss: order.stopLoss ?? null,
       p_take_profit: order.takeProfit ?? null,
-      p_leverage: order.leverage ?? 100
+      p_leverage: order.leverage ?? 100,
+      p_idempotency_key: order.idempotencyKey
     }),
     closePosition: (token, id, exitPrice, reason = "manual") => rpc(token, "hikeyfx_demo_close_position", {
       p_position_id: id,
