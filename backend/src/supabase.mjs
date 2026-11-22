@@ -4,17 +4,24 @@ const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 export function createSupabaseDemoRepository({ fetchImpl = fetch } = {}) {
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return null;
   async function rpc(accessToken, name, args = {}) {
-    const response = await fetchImpl(new URL(`/rest/v1/rpc/${name}`, SUPABASE_URL), {
-      method: "POST",
-      headers: {
-        apikey: SUPABASE_PUBLISHABLE_KEY,
-        authorization: `Bearer ${accessToken}`,
-        "content-type": "application/json",
-        accept: "application/json"
-      },
-      body: JSON.stringify(args),
-      signal: AbortSignal.timeout(10000)
-    });
+    let response;
+    try {
+      response = await fetchImpl(new URL(`/rest/v1/rpc/${name}`, SUPABASE_URL), {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          authorization: `Bearer ${accessToken}`,
+          "content-type": "application/json",
+          accept: "application/json"
+        },
+        body: JSON.stringify(args),
+        signal: AbortSignal.timeout(10000)
+      });
+    } catch {
+      const error = new Error("Persistent demo service is temporarily unavailable.");
+      error.statusCode = 503;
+      throw error;
+    }
     if (!response.ok) {
       let message = "Persistent demo service is temporarily unavailable.";
       try {
@@ -22,7 +29,7 @@ export function createSupabaseDemoRepository({ fetchImpl = fetch } = {}) {
         if (typeof payload.message === "string" && /invalid|insufficient|not found|enabled|stop loss|take profit/i.test(payload.message)) message = payload.message;
       } catch {}
       const error = new Error(message);
-      error.statusCode = response.status === 401 ? 401 : response.status === 403 ? 403 : 400;
+      error.statusCode = response.status === 401 ? 401 : response.status === 403 ? 403 : response.status === 429 ? 429 : response.status >= 500 ? 503 : 400;
       throw error;
     }
     return response.json();
