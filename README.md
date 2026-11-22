@@ -21,7 +21,7 @@ The existing homepage is retained as the starting point. Do not replace its desi
 - [ ] Supabase project connected.
 - [ ] Authentication and member profiles implemented.
 - [ ] Admin authentication and role-based permissions implemented.
-- [ ] Member dashboard and KYC workflow implemented.
+- [x] Static member-portal interface preview added (authentication, database and KYC processing are not connected).
 - [x] Browser-based demo workspace prototype and client-side simulated order flow added (not a production order engine).
 - [ ] Security, backup, monitoring and recovery tests completed.
 
@@ -39,6 +39,10 @@ Do not commit API keys, passwords, access tokens, service-role keys or other sec
 ## Legal and operational boundary
 
 HikeyFX is currently a software-development project, not an incorporated or CMA-authorised brokerage. Live trading, client deposits and withdrawals must remain disabled until the relevant company, regulatory, provider and operational prerequisites are satisfied. Demo functionality must be clearly identified as simulated.
+
+## Interface prototypes
+
+- Member portal preview: `portal/index.html` (static UI only; no login or personal data collection).
 
 ## Trading workspace prototype
 
