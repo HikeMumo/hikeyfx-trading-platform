@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 import { DemoTradingEngine } from "./engine.mjs";
+import { fetchTraderMadeQuotes } from "./market-data.mjs";
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.PORT || 8787);
@@ -47,7 +48,7 @@ async function readJson(req) {
   return parsed;
 }
 
-export function createApp(engine = new DemoTradingEngine()) {
+export function createApp(engine = new DemoTradingEngine(), marketData = fetchTraderMadeQuotes) {
   return createServer(async (req, res) => {
     const url = new URL(req.url, `http://${HOST}:${PORT}`);
     if (req.method === "GET" && url.pathname === "/health") {
@@ -63,7 +64,18 @@ export function createApp(engine = new DemoTradingEngine()) {
       return send(res, 200, { ok: true, data: engine.snapshot().history });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/market/quotes") {
-      return send(res, 200, { ok: true, data: engine.snapshot().quotes, source: "fictional-seed-prices" });
+      try {
+        const rawSymbols = url.searchParams.get("symbols");
+        const result = await marketData(rawSymbols ? { symbols: rawSymbols.split(",") } : {});
+        return send(res, 200, { ok: true, data: result.quotes, source: result.source, receivedAt: result.receivedAt, status: result.status });
+      } catch (error) {
+        const notConfigured = error.code === "MARKET_DATA_NOT_CONFIGURED";
+        return send(res, notConfigured ? 503 : 502, {
+          ok: false,
+          status: notConfigured ? "unavailable" : "provider-error",
+          error: notConfigured ? "Market data is not configured." : "Genuine market data is temporarily unavailable."
+        });
+      }
     }
     if (req.method === "POST" && url.pathname === "/api/v1/demo/orders") {
       try {
