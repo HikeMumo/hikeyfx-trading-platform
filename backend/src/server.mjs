@@ -130,14 +130,14 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     }
     if (req.method === "GET" && url.pathname === "/api/v1/demo/positions") {
       if (persistent) {
-        try { return send(res, 200, { ok: true, data: (await demoRepository.snapshot(token)).positions }); }
+        try { return send(res, 200, { ok: true, data: (await repository.snapshot(token)).positions }); }
         catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
       }
       return send(res, 200, { ok: true, data: memberEngine.snapshot().positions });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/demo/history") {
       if (persistent) {
-        try { return send(res, 200, { ok: true, data: (await demoRepository.snapshot(token)).history }); }
+        try { return send(res, 200, { ok: true, data: (await repository.snapshot(token)).history }); }
         catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
       }
       return send(res, 200, { ok: true, data: memberEngine.snapshot().history });
@@ -176,7 +176,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     if (req.method === "POST" && closeMatch) {
       try {
         if (persistent) {
-          const snapshot = await demoRepository.snapshot(token);
+          const snapshot = await repository.snapshot(token);
           const position = snapshot.positions.find(item => item.id === closeMatch[1]);
           if (!position) return send(res, 404, { ok: false, error: "Open demo position not found." });
           const quote = memberEngine.getQuote(position.symbol);
