@@ -21,7 +21,7 @@ Never put a Supabase secret/service-role key or TraderMade key in browser code o
 
 ## Routes
 
-- `GET /health`
+- `GET /health` (returns process status and safe booleans indicating Supabase persistence and market-data configuration; it does not probe the database or validate provider credentials)
 - `GET /api/v1/demo/account`
 - `GET /api/v1/demo/positions`
 - `GET /api/v1/demo/history`
@@ -31,11 +31,11 @@ Never put a Supabase secret/service-role key or TraderMade key in browser code o
 
 All non-health routes require a verified Supabase access token. When Supabase configuration and a bearer token are present, demo account reads and order/close operations use the persistent Supabase RPC functions. Tests can inject a repository adapter. The no-token injected-test path retains the in-memory engine.
 
-## Database migration
+## Database migrations
 
-Apply `../supabase/migrations/0006_persistent_demo_trading.sql` in the HikeyFX Supabase SQL editor after migrations 0001–0005. It seeds a limited set of demo instruments and adds authenticated, member-scoped snapshot, order and close RPCs. The RPCs derive the user from `auth.uid()`, enforce demo-account ownership, lock the account balance for margin checks, append trade events and use idempotency keys for order submissions.
+Apply `../supabase/migrations/0006_persistent_demo_trading.sql` after migrations 0001–0005. Apply `../supabase/migrations/0007_admin_access_foundation.sql` afterward to add the manually controlled admin membership foundation. It seeds a limited set of demo instruments and adds authenticated, member-scoped snapshot, order and close RPCs. The RPCs derive the user from `auth.uid()`, enforce demo-account ownership, lock the account balance for margin checks, append trade events and use idempotency keys for order submissions.
 
-The migration has not been applied automatically by GitHub. Do not enable the frontend persistent flow until migration 0006 has been applied successfully.
+GitHub stores the migration source but does not execute it. The project owner has confirmed migrations 0006 and 0007 were applied in Supabase; verify the hosted RPCs with authenticated end-to-end tests before relying on persistence.
 
 ## Demo trading behavior and limitations
 
