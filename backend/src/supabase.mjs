@@ -29,14 +29,14 @@ export function createSupabaseDemoRepository({ fetchImpl = fetch } = {}) {
         if (typeof payload.message === "string" && /invalid|insufficient|not found|enabled|stop loss|take profit/i.test(payload.message)) message = payload.message;
       } catch {}
       const error = new Error(message);
-      error.statusCode = response.status === 401 ? 401 : response.status === 403 ? 403 : response.status === 429 ? 429 : response.status >= 500 ? 503 : 400;
+      error.statusCode = response.status === 401 ? 401 : response.status === 403 ? 403 : response.status === 429 ? 429 : response.status === 404 || response.status >= 500 ? 503 : 400;
       throw error;
     }
     return response.json();
   }
   return {
     snapshot: token => rpc(token, "hikeyfx_demo_snapshot"),
-    placeOrder: (token, order) => rpc(token, "hikeyfx_demo_place_order", {
+    placeOrder: (token, order) => rpc(token, "hikeyfx_demo_place_order_v2", {
       p_symbol: order.symbol,
       p_side: order.side,
       p_volume: order.volume,
@@ -47,7 +47,7 @@ export function createSupabaseDemoRepository({ fetchImpl = fetch } = {}) {
       p_leverage: order.leverage ?? 100,
       p_idempotency_key: order.idempotencyKey
     }),
-    closePosition: (token, id, exitPrice, reason = "manual") => rpc(token, "hikeyfx_demo_close_position", {
+    closePosition: (token, id, exitPrice, reason = "manual") => rpc(token, "hikeyfx_demo_close_position_v2", {
       p_position_id: id,
       p_exit_price: exitPrice,
       p_reason: reason
