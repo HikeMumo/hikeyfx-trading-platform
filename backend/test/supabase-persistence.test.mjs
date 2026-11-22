@@ -49,6 +49,38 @@ test("Supabase repository forwards only the member JWT and publishable key to RP
 });
 
 
+test("demo execution migration ignores caller-supplied entry, contract and exit prices", async () => {
+  const sql = await readFile(new URL("../../supabase/migrations/0008_demo_execution_quote_hardening.sql", import.meta.url), "utf8");
+  assert.match(sql, /create table public\.demo_execution_quotes/);
+  assert.match(sql, /revoke all on table public\.demo_execution_quotes from public, anon, authenticated/);
+  assert.match(sql, /join public\.demo_execution_quotes q on q\.symbol=i\.symbol/);
+  const place = sql.slice(sql.indexOf("create or replace function public.hikeyfx_demo_place_order"), sql.indexOf("create or replace function public.hikeyfx_demo_close_position"));
+  const close = sql.slice(sql.indexOf("create or replace function public.hikeyfx_demo_close_position"));
+  assert.match(place, /v_entry_price := case when p_side='buy' then v_ask else v_bid end/);
+  assert.match(place, /v_contract_size numeric/);
+  assert.doesNotMatch(place, /v_entry_price\s*:=\s*p_entry_price/i);
+  assert.doesNotMatch(place, /v_contract_size\s*:=\s*p_contract_size/i);
+  assert.match(close, /v_exit_price := case when v_position\.side='buy' then v_bid else v_ask end/);
+  assert.doesNotMatch(close, /v_exit_price\s*:=\s*p_exit_price/i);
+  assert.match(sql, /security definer/);
+  assert.match(sql, /set search_path = ''/);
+});
+
+test("Supabase repository converts network failures to retryable service-unavailable errors", async () => {
+  const oldUrl = process.env.SUPABASE_URL;
+  const oldKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  process.env.SUPABASE_URL = "https://example.supabase.co";
+  process.env.SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
+  try {
+    const { createSupabaseDemoRepository } = await import("../src/supabase.mjs?network-failure-test");
+    const repository = createSupabaseDemoRepository({ fetchImpl: async () => { throw new Error("socket closed"); } });
+    await assert.rejects(repository.snapshot("member-jwt"), error => error.statusCode === 503);
+  } finally {
+    if (oldUrl === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldUrl;
+    if (oldKey === undefined) delete process.env.SUPABASE_PUBLISHABLE_KEY; else process.env.SUPABASE_PUBLISHABLE_KEY = oldKey;
+  }
+});
+
 test("admin migration restricts operational overview to active admin memberships", async () => {
   const sql = await readFile(new URL("../../supabase/migrations/0007_admin_access_foundation.sql", import.meta.url), "utf8");
   assert.ok(sql.includes("create table public.admin_memberships"));
