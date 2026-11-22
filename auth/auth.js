@@ -58,7 +58,7 @@
           email, password,
           options: {
             data: { display_name: displayName },
-            emailRedirectTo: new URL("../portal/", window.location.href).href
+            emailRedirectTo: new URL("../trading/", window.location.href).href
           }
         });
         if (error) throw error;
@@ -78,7 +78,7 @@
       }
       const { error: bootstrapError } = await client.rpc("bootstrap_member");
       if (bootstrapError) throw bootstrapError;
-      window.location.assign("../portal/");
+      window.location.assign("../trading/");
     } catch (error) {
       setStatus(error && error.message ? error.message : "Unable to complete account access. Please try again.");
     } finally {
