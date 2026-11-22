@@ -170,9 +170,24 @@ begin
 end;
 $$;
 
+create function public.reject_posted_journal_mutation()
+returns trigger
+language plpgsql
+security invoker
+set search_path = ''
+as $
+begin
+  if old.status <> 'draft' then
+    raise exception 'Posted ledger journals are immutable';
+  end if;
+  if tg_op = 'DELETE' then return old; end if;
+  return new;
+end;
+$;
+
 create trigger ledger_journals_immutable_after_post
 before update or delete on public.ledger_journals
-for each row execute function public.reject_posted_ledger_mutation();
+for each row execute function public.reject_posted_journal_mutation();
 
 create trigger ledger_entries_draft_only
 before insert or update or delete on public.ledger_entries
