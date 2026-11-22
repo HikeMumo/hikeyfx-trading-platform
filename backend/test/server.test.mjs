@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { createApp } from "../src/server.mjs";
 
 test("HTTP API exposes demo account and accepts validated demo orders", async t => {
-  const server = createApp();
+  const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const address = server.address();
@@ -46,7 +46,7 @@ test("HTTP API exposes demo account and accepts validated demo orders", async t 
 });
 
 test("HTTP API returns 404 for unknown routes", async t => {
-  const server = createApp();
+  const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const response = await fetch(`http://127.0.0.1:${server.address().port}/not-a-route`);
@@ -54,7 +54,7 @@ test("HTTP API returns 404 for unknown routes", async t => {
 });
 
 test("HTTP API rejects malformed, non-object and non-JSON request bodies", async t => {
-  const server = createApp();
+  const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -75,7 +75,7 @@ test("HTTP API rejects malformed, non-object and non-JSON request bodies", async
 });
 
 test("HTTP API rejects request bodies larger than 16 KiB", async t => {
-  const server = createApp();
+  const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/demo/orders`, {
@@ -88,7 +88,7 @@ test("HTTP API rejects request bodies larger than 16 KiB", async t => {
 });
 
 test("HTTP API sends baseline hardening headers", async t => {
-  const server = createApp();
+  const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const response = await fetch(`http://127.0.0.1:${server.address().port}/health`);
