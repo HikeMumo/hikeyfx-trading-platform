@@ -1,6 +1,7 @@
 name: HikeyFX demo backend checks
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - development/phase-1-foundation
