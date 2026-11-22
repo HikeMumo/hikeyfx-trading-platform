@@ -9,7 +9,7 @@ This folder contains the isolated Phase 1 trading workspace prototype.
 - Local sample instrument list covering forex, indices and commodities.
 - Locally generated illustrative candlesticks.
 - Selectable chart timeframes (the timeframe changes the interface state; it does not fetch historical market candles).
-- Moving-average overlay and an illustrative RSI label toggle.
+- Moving-average overlay and a calculated RSI (14) panel based only on the generated sample candles.
 - Demo-only market order ticket, simulated positions, close action and order history.
 - Demo balance and order state exist only in the current page session and reset on refresh.
 
