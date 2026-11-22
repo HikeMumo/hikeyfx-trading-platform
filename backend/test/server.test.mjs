@@ -115,3 +115,26 @@ test("HTTP API supports browser CORS preflight for authenticated API requests", 
   assert.match(response.headers.get("access-control-allow-methods"), /POST/);
   assert.match(response.headers.get("access-control-allow-headers"), /Authorization/i);
 });
+
+
+test("HTTP API keeps demo accounts and positions isolated by authenticated member", async t => {
+  const server = createApp(null, undefined, async req => ({ id: req.headers["x-test-user"] }));
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const forUser = user => ({ headers: { "x-test-user": user } });
+  const userAOrder = await fetch(base + "/api/v1/demo/orders", {
+    method: "POST",
+    headers: { "x-test-user": "member-a", "content-type": "application/json" },
+    body: JSON.stringify({ symbol: "EURUSD", side: "buy", volume: 0.1 })
+  });
+  assert.equal(userAOrder.status, 201);
+  const userAPositions = await fetch(base + "/api/v1/demo/positions", forUser("member-a"));
+  assert.equal((await userAPositions.json()).data.length, 1);
+  const userBPositions = await fetch(base + "/api/v1/demo/positions", forUser("member-b"));
+  assert.equal((await userBPositions.json()).data.length, 0);
+  const userBAccount = await fetch(base + "/api/v1/demo/account", forUser("member-b"));
+  const account = await userBAccount.json();
+  assert.equal(account.data.balance, 10000);
+  assert.equal(account.data.usedMargin, 0);
+});
