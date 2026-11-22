@@ -5,6 +5,8 @@ import { fetchTraderMadeQuotes } from "./market-data.mjs";
 
 const HOST = "0.0.0.0";
 const PORT = Number(process.env.PORT || 8787);
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 
 function send(res, status, payload) {
   res.writeHead(status, {
@@ -15,6 +17,28 @@ function send(res, status, payload) {
     "x-frame-options": "DENY"
   });
   res.end(JSON.stringify(payload));
+}
+
+async function authenticate(req) {
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) return null;
+  const header = req.headers.authorization || "";
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  if (!match) return null;
+
+  try {
+    const response = await fetch(new URL("/auth/v1/user", SUPABASE_URL), {
+      headers: {
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        authorization: `Bearer ${match[1]}`
+      },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!response.ok) return null;
+    const user = await response.json();
+    return user && typeof user.id === "string" ? user : null;
+  } catch {
+    return null;
+  }
 }
 
 async function readJson(req) {
@@ -54,6 +78,12 @@ export function createApp(engine = new DemoTradingEngine(), marketData = fetchTr
     if (req.method === "GET" && url.pathname === "/health") {
       return send(res, 200, { ok: true, service: "hikeyfx-demo-api", mode: "demo-only" });
     }
+
+    const user = await authenticate(req);
+    if (!user) {
+      return send(res, 401, { ok: false, error: "A valid HikeyFX member session is required." });
+    }
+
     if (req.method === "GET" && url.pathname === "/api/v1/demo/account") {
       return send(res, 200, { ok: true, data: engine.getAccount() });
     }
@@ -102,6 +132,6 @@ if (isDirectRun) {
   const server = createApp();
   server.listen(PORT, HOST, () => {
     console.log(`HikeyFX demo API listening on port ${PORT}`);
-    console.log("Development demo API. Authentication and persistence are not yet production-ready.");
+    console.log("Development demo API. Demo trading remains in-memory and non-production.");
   });
 }
