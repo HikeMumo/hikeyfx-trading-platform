@@ -7,7 +7,7 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 - [ ] Apply Supabase migrations 0001–0005 (already reported complete by the project owner).
 - [x] Apply `supabase/migrations/0006_persistent_demo_trading.sql` (owner-confirmed).
 - [x] Apply `supabase/migrations/0007_admin_access_foundation.sql` (owner-confirmed).
-- [ ] Apply `supabase/migrations/0008_demo_execution_quote_hardening.sql` (newly committed; required before persistent demo orders are used).
+- [ ] Apply `supabase/migrations/0008_demo_execution_quote_hardening.sql` (newly committed; required before updated backend deployment or persistent demo orders).
 - [ ] Configure Supabase Auth Site URL and redirect URLs to the final HTTPS frontend origin.
 - [ ] Verify email confirmation, sign-in, sign-out, session refresh and account bootstrap.
 - [ ] Verify two different test members cannot see or modify each other's demo account, positions or history.
