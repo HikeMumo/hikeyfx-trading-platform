@@ -43,6 +43,7 @@ HikeyFX is currently a software-development project, not an incorporated or CMA-
 ## Interface prototypes
 
 - Member portal preview: `portal/index.html` (static UI only; no login or personal data collection).
+- Admin portal preview: `admin/index.html` (fictional sample data only; no authentication or real admin actions).
 
 ## Trading workspace prototype
 
