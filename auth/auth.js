@@ -41,7 +41,16 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
 
-  passwordToggle.addEventListener("click", () => {\n    const reveal = passwordInput.type === "password";\n    passwordInput.type = reveal ? "text" : "password";\n    passwordToggle.setAttribute("aria-label", reveal ? "Hide password" : "Show password");\n    passwordToggle.setAttribute("aria-pressed", String(reveal));\n  });\n\n  if (new URLSearchParams(window.location.search).get("mode") === "signup") setMode("signup");\n\n  loginTab.addEventListener("click", () => setMode("login"));
+  passwordToggle.addEventListener("click", () => {
+    const reveal = passwordInput.type === "password";
+    passwordInput.type = reveal ? "text" : "password";
+    passwordToggle.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
+    passwordToggle.setAttribute("aria-pressed", String(reveal));
+  });
+
+  if (new URLSearchParams(window.location.search).get("mode") === "signup") setMode("signup");
+
+  loginTab.addEventListener("click", () => setMode("login"));
   signupTab.addEventListener("click", () => setMode("signup"));
 
   form.addEventListener("submit", async event => {
