@@ -44,6 +44,7 @@ GitHub stores the migration source but does not execute it. The project owner ha
 - The UI accepts unit quantities and converts them to lots (100,000 units per lot).
 - Supported execution symbols in the current demo engine are EURUSD, GBPUSD, AUDUSD and XAUUSD.
 - Execution prices still come from hard-coded demonstration quotes. They are not live, delayed or broker-provided market prices.
+- A basic per-member, per-process burst limiter protects quote, order and close routes. It is not a distributed limiter and must be replaced with shared rate limiting before production.
 - Unrealised P/L, stop-out, swaps, commissions, multi-currency conversion, server-side streaming quote updates and automatic stop-loss/take-profit execution are not implemented.
 - This is not a broker backend. No live accounts, real orders, deposits, withdrawals or client-money movement are enabled.
 
