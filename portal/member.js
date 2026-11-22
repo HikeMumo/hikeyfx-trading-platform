@@ -67,7 +67,7 @@
     });
     if (header) header.appendChild(signOut);
     const notice = document.querySelector(".notice");
-    if (notice) notice.innerHTML = "<b>Development status:</b> Your sign-in and profile/account records are connected. Demo balance, positions, KYC workflows, payments and live trading are not connected to this page. Do not submit payment details or identity documents here.";
+    if (notice) notice.innerHTML = "<b>Development status:</b> Your sign-in, profile, demo account and demo balance are connected when the database setup is complete. Positions, KYC workflows, payments and live trading are not connected to this page. Do not submit payment details or identity documents here.";
     document.documentElement.style.visibility = "visible";
   }).catch(error => fail(error && error.message ? error.message : "Unable to verify your session."));
 })();
