@@ -28,12 +28,17 @@
     const profile = profileResult.data || {};
     const accounts = accountResult.data || [];
     const demo = accounts.find(a => a.mode === "demo");
+    let demoBalance = null;
+    if (demo) {
+      const balanceResult = await client.from("demo_account_balances").select("cash_balance").eq("account_id", demo.id).maybeSingle();
+      if (!balanceResult.error && balanceResult.data) demoBalance = balanceResult.data.cash_balance;
+    }
     const welcome = document.querySelector(".welcome h1");
     const intro = document.querySelector(".welcome p");
     if (welcome) welcome.textContent = "Welcome, " + (profile.display_name || user.email || "HikeyFX member");
     if (intro) intro.textContent = "Signed in as " + (user.email || "authenticated member");
     const metrics = document.querySelectorAll(".metric strong");
-    if (metrics[0]) metrics[0].textContent = "Not connected";
+    if (metrics[0]) metrics[0].textContent = demoBalance === null ? "Balance pending" : new Intl.NumberFormat("en-US", { style: "currency", currency: demo.currency || "USD" }).format(Number(demoBalance));
     if (metrics[1]) metrics[1].textContent = "—";
     if (metrics[2]) metrics[2].textContent = "Not started";
     if (metrics[3]) metrics[3].textContent = "Demo only";
