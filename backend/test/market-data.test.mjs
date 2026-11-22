@@ -42,7 +42,11 @@ test("TraderMade adapter rejects unsupported symbols before provider request", a
 });
 
 test("market quote route reports unavailable when provider is not configured", async t => {
-  const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
+  const server = createApp(undefined, async () => {
+    const error = new Error("Market data provider is not configured.");
+    error.code = "MARKET_DATA_NOT_CONFIGURED";
+    throw error;
+  }, async () => ({ id: "test-user" }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/market/quotes`);
