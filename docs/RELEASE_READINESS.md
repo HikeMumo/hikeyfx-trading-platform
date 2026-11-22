@@ -52,6 +52,6 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 
 - GitHub branch: `development/phase-1-foundation`.
 - Backend health service exists at the current Render URL; a health response alone does not verify database persistence, market data or trading.
-- GitHub Actions run [45076939612](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45076939612) passed 38 automated tests and browser/backend syntax checks for commit `512761a1c93a0cbfe5697a26ee272b3804d296b1`.
+- GitHub Actions run [45077090171](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45077090171) passed 38 automated tests and browser/backend syntax checks for commit `a84a465f1622d4fb268e97e84af80d275d136105`.
 - Supabase migrations 0006 and 0007 are reported applied by the project owner; the resulting hosted database behavior has not yet been independently verified.
 - Demo execution uses fixed illustrative quotes, not live market data. Migration 0008 hardens database execution against caller-supplied prices; it must be applied before persistent demo orders are used. No live market data, real trading, deposits or withdrawals are enabled.
