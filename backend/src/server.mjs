@@ -104,7 +104,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
       return res.end();
     }
     if (req.method === "GET" && url.pathname === "/health") {
-      return send(res, 200, { ok: true, service: "hikeyfx-demo-api", mode: "demo-only" });
+      return send(res, 200, { ok: true, status: "alive", service: "hikeyfx-demo-api", mode: "demo-only", checks: { supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY), persistentDemoConfigured: Boolean(demoRepository), marketDataConfigured: Boolean(process.env.TRADERMADE_API_KEY) } });
     }
 
     const user = await authenticateUser(req);
@@ -198,6 +198,6 @@ if (isDirectRun) {
   const server = createApp();
   server.listen(PORT, HOST, () => {
     console.log(`HikeyFX demo API listening on port ${PORT}`);
-    console.log("Development demo API. Demo trading remains in-memory and non-production.");
+    console.log(demoRepository ? "Persistent Supabase demo repository enabled; demo-only and non-production." : "Supabase persistence is not configured; in-memory demo mode only.");
   });
 }
