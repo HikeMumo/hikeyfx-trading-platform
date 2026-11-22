@@ -120,7 +120,10 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
         try {
           const snapshot = await repository.snapshot(token);
           const usedMargin = snapshot.positions.reduce((sum, p) => sum + Number(p.margin || 0), 0);
-          return send(res, 200, { ok: true, data: { currency: "USD", mode: "demo", balance: Number(snapshot.balance), equity: Number(snapshot.balance), unrealisedPnl: 0, usedMargin, freeMargin: Number(snapshot.balance) - usedMargin, leverage: 100, accountId: snapshot.accountId } });
+          const unrealisedPnl = snapshot.positions.reduce((sum, p) => sum + memberEngine.getUnrealisedPnl(p), 0);
+          const balance = Number(snapshot.balance);
+          const equity = Math.round((balance + unrealisedPnl + Number.EPSILON) * 100) / 100;
+          return send(res, 200, { ok: true, data: { currency: "USD", mode: "demo", balance, equity, unrealisedPnl, usedMargin, freeMargin: equity - usedMargin, leverage: 100, accountId: snapshot.accountId } });
         } catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
       }
       return send(res, 200, { ok: true, data: memberEngine.getAccount() });
@@ -183,7 +186,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
         }
         return send(res, 200, { ok: true, data: memberEngine.closePosition(closeMatch[1]) });
       } catch (error) {
-        return send(res, 404, { ok: false, error: error.message });
+        return send(res, error.statusCode || 404, { ok: false, error: error.message });
       }
     }
     return send(res, 404, { ok: false, error: "Route not found." });
