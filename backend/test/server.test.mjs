@@ -52,3 +52,47 @@ test("HTTP API returns 404 for unknown routes", async t => {
   const response = await fetch(`http://127.0.0.1:${server.address().port}/not-a-route`);
   assert.equal(response.status, 404);
 });
+
+test("HTTP API rejects malformed, non-object and non-JSON request bodies", async t => {
+  const server = createApp();
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const cases = [
+    { body: "{", contentType: "application/json", expected: 400 },
+    { body: "[]", contentType: "application/json", expected: 400 },
+    { body: "{}", contentType: "text/plain", expected: 415 }
+  ];
+  for (const item of cases) {
+    const response = await fetch(base + "/api/v1/demo/orders", {
+      method: "POST",
+      headers: { "content-type": item.contentType },
+      body: item.body
+    });
+    assert.equal(response.status, item.expected);
+    assert.equal((await response.json()).ok, false);
+  }
+});
+
+test("HTTP API rejects request bodies larger than 16 KiB", async t => {
+  const server = createApp();
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/demo/orders`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ padding: "x".repeat(17_000) })
+  });
+  assert.equal(response.status, 413);
+  assert.equal((await response.json()).ok, false);
+});
+
+test("HTTP API sends baseline hardening headers", async t => {
+  const server = createApp();
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/health`);
+  assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(response.headers.get("x-frame-options"), "DENY");
+  assert.equal(response.headers.get("referrer-policy"), "no-referrer");
+});
