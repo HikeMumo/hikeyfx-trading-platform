@@ -81,6 +81,23 @@ test("Supabase repository converts network failures to retryable service-unavail
   }
 });
 
+test("Supabase RPC preserves retryable upstream status codes", async () => {
+  const oldUrl = process.env.SUPABASE_URL;
+  const oldKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  process.env.SUPABASE_URL = "https://example.supabase.co";
+  process.env.SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
+  try {
+    const { createSupabaseDemoRepository } = await import("../src/supabase.mjs?status-test");
+    const unavailable = createSupabaseDemoRepository({ fetchImpl: async () => new Response("{}", { status: 503 }) });
+    const rateLimited = createSupabaseDemoRepository({ fetchImpl: async () => new Response("{}", { status: 429 }) });
+    await assert.rejects(unavailable.snapshot("member-jwt"), error => error.statusCode === 503);
+    await assert.rejects(rateLimited.snapshot("member-jwt"), error => error.statusCode === 429);
+  } finally {
+    if (oldUrl === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldUrl;
+    if (oldKey === undefined) delete process.env.SUPABASE_PUBLISHABLE_KEY; else process.env.SUPABASE_PUBLISHABLE_KEY = oldKey;
+  }
+});
+
 test("admin migration restricts operational overview to active admin memberships", async () => {
   const sql = await readFile(new URL("../../supabase/migrations/0007_admin_access_foundation.sql", import.meta.url), "utf8");
   assert.ok(sql.includes("create table public.admin_memberships"));
