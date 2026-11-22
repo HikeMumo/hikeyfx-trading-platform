@@ -131,5 +131,7 @@ create policy "Users can read their own KYC status"
 
 -- No client-side insert/update/delete policies for orders, KYC cases or audit events.
 -- Trusted server functions must validate every write and append audit events.
--- Financial ledger tables and live accounts will be added only after legal and
--- operational requirements are confirmed. No real deposits or withdrawals here.
+-- A separate migration adds development-only client-money and double-entry ledger
+-- schema scaffolding. It does not enable real deposits, withdrawals, or live accounts.
+-- Transaction functions and live-money operations remain blocked pending legal and
+-- operational requirements, provider agreements, and independent security review.
