@@ -138,3 +138,24 @@ test("HTTP API keeps demo accounts and positions isolated by authenticated membe
   assert.equal(account.data.balance, 10000);
   assert.equal(account.data.usedMargin, 0);
 });
+
+
+test("authenticated API uses persistent repository when a bearer token is present", async t => {
+  const calls = [];
+  const repository = {
+    snapshot: async token => { calls.push(["snapshot", token]); return { accountId: "account-a", balance: 10000, positions: [], history: [] }; },
+    placeOrder: async (token, order) => { calls.push(["place", token, order]); return { id: "position-a", status: "open", ...order }; },
+    closePosition: async (token, id, price) => { calls.push(["close", token, id, price]); return { id, status: "closed" }; }
+  };
+  const server = createApp(null, undefined, async () => ({ id: "member-a" }), repository);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const headers = { authorization: "Bearer test-access-token", "content-type": "application/json" };
+  const account = await fetch(base + "/api/v1/demo/account", { headers });
+  assert.equal((await account.json()).data.accountId, "account-a");
+  const placed = await fetch(base + "/api/v1/demo/orders", { method: "POST", headers, body: JSON.stringify({ symbol: "EUR/USD", side: "buy", volume: 0.1 }) });
+  assert.equal(placed.status, 201);
+  assert.equal((await placed.json()).data.id, "position-a");
+  assert.equal(calls.some(call => call[0] === "place" && call[1] === "test-access-token" && call[2].symbol === "EURUSD"), true);
+});
