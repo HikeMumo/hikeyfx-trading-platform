@@ -49,7 +49,8 @@ HikeyFX is currently a software-development project, not an incorporated or CMA-
 
 - API and engine: `backend/src/`.
 - Setup, routes and limitations: `backend/README.md`.
-- Automated unit tests: `backend/test/engine.test.mjs` (`npm test` from `backend/` with Node.js 20+).
+- Automated unit tests: `backend/test/engine.test.mjs` and `backend/test/server.test.mjs` (`npm test` from `backend/` with Node.js 20+).
+- CI workflow: `.github/workflows/demo-backend.yml`; current run status: `docs/CI_TEST_STATUS.md`.
 - Milestone and remaining gates: `docs/DEMO_ENGINE_MILESTONE.md`.
 - Draft database persistence design: `docs/DEMO_PERSISTENCE_SCHEMA.md` and `supabase/migrations/0002_demo_trading_persistence.sql` (not executed).
 
