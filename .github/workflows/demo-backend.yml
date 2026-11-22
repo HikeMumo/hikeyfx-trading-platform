@@ -10,6 +10,7 @@ on:
       - "auth/**"
       - "portal/**"
       - "trading/**"
+      - "supabase/**"
       - ".github/workflows/demo-backend.yml"
   pull_request:
     branches:
@@ -41,6 +42,8 @@ jobs:
           node --check auth/config.js
           node --check auth/auth.js
           node --check portal/member.js
+          node --check backend/src/server.mjs
+          node --check backend/src/supabase.mjs
       - name: Run automated tests
         working-directory: backend
         run: npm test
