@@ -11,6 +11,7 @@ create table public.admin_memberships (
 );
 
 alter table public.admin_memberships enable row level security;
+revoke all on table public.admin_memberships from public, anon, authenticated;
 
 create or replace function public.hikeyfx_admin_overview()
 returns jsonb
