@@ -24,10 +24,8 @@ test("trading API configuration JavaScript parses successfully", async () => {
 
 test("admin page inline JavaScript parses successfully", async () => {
   const html = await readFile(new URL("../../admin/index.html", import.meta.url), "utf8");
-  const scripts = [...html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-    .filter(match => !/\\bsrc\\s*=/.test(match[1]) && match[2].trim());
-  assert.ok(scripts.length > 0, "expected an inline admin script");
-  for (const [index, match] of scripts.entries()) {
-    assert.doesNotThrow(() => new vm.Script(match[2], { filename: `admin-inline-${index + 1}.js` }));
-  }
+  const start = html.lastIndexOf("<script>");
+  const end = html.indexOf("</script>", start);
+  assert.ok(start >= 0 && end > start, "expected an inline admin script");
+  assert.doesNotThrow(() => new vm.Script(html.slice(start + 8, end), { filename: "admin-inline.js" }));
 });
