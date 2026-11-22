@@ -159,6 +159,9 @@ declare
   v_new_balance numeric(20,2);
 begin
   if v_uid is null then raise exception 'Authentication required'; end if;
+  if coalesce(p_reason,'manual') not in ('manual','stop_loss','take_profit','system') then
+    raise exception 'Invalid demo close reason';
+  end if;
   v_account_id := public.bootstrap_member();
   select * into v_position
     from public.demo_positions
