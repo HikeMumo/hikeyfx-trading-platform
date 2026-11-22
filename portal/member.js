@@ -29,7 +29,30 @@
     const accounts = accountResult.data || [];
     const demo = accounts.find(a => a.mode === "demo");
     let demoBalance = null;
-    if (demo) {
+    let openPositions = 0;
+    let recentHistory = [];
+    if (demo && window.HIKEYFX_API_BASE_URL) {
+      const headers = { authorization: "Bearer " + data.session.access_token };
+      const apiBase = String(window.HIKEYFX_API_BASE_URL).replace(/\/$/, "");
+      const [accountResponse, positionsResponse, historyResponse] = await Promise.all([
+        fetch(apiBase + "/api/v1/demo/account", { headers, cache: "no-store" }),
+        fetch(apiBase + "/api/v1/demo/positions", { headers, cache: "no-store" }),
+        fetch(apiBase + "/api/v1/demo/history", { headers, cache: "no-store" })
+      ]);
+      if (accountResponse.ok) {
+        const result = await accountResponse.json();
+        if (result.ok && result.data) demoBalance = Number(result.data.balance);
+      }
+      if (positionsResponse.ok) {
+        const result = await positionsResponse.json();
+        if (result.ok && Array.isArray(result.data)) openPositions = result.data.length;
+      }
+      if (historyResponse.ok) {
+        const result = await historyResponse.json();
+        if (result.ok && Array.isArray(result.data)) recentHistory = result.data.slice(0, 5);
+      }
+    }
+    if (demoBalance === null && demo) {
       const balanceResult = await client.from("demo_account_balances").select("cash_balance").eq("account_id", demo.id).maybeSingle();
       if (!balanceResult.error && balanceResult.data) demoBalance = balanceResult.data.cash_balance;
     }
@@ -39,7 +62,7 @@
     if (intro) intro.textContent = "Signed in as " + (user.email || "authenticated member");
     const metrics = document.querySelectorAll(".metric strong");
     if (metrics[0]) metrics[0].textContent = demoBalance === null ? "Balance pending" : new Intl.NumberFormat("en-US", { style: "currency", currency: demo.currency || "USD" }).format(Number(demoBalance));
-    if (metrics[1]) metrics[1].textContent = "—";
+    if (metrics[1]) metrics[1].textContent = String(openPositions);
     if (metrics[2]) metrics[2].textContent = "Not started";
     if (metrics[3]) metrics[3].textContent = "Demo only";
     const accountRow = document.querySelector(".main-grid .account");
@@ -53,7 +76,19 @@
       if (detail) detail.textContent = "No demo account was returned for this member.";
     }
     const activityBody = document.querySelector(".table tbody");
-    if (activityBody) activityBody.innerHTML = "<tr><td colspan='2'>No live activity feed is connected yet.</td></tr>";
+    if (activityBody) {
+      activityBody.replaceChildren();
+      recentHistory.forEach(item => {
+        const tr = document.createElement("tr");
+        const activity = document.createElement("td");
+        activity.textContent = (item.symbol || "Demo trade") + " · " + (item.side || "").toUpperCase();
+        const status = document.createElement("td");
+        const pnl = Number(item.realisedPnl || 0);
+        status.textContent = (pnl >= 0 ? "+" : "−") + new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Math.abs(pnl));
+        tr.append(activity, status); activityBody.appendChild(tr);
+      });
+      if (!activityBody.children.length) activityBody.innerHTML = "<tr><td colspan='2'>No completed demo trades yet.</td></tr>";
+    }
     const header = document.querySelector(".top");
     const signOut = document.createElement("button");
     signOut.type = "button";
@@ -67,7 +102,7 @@
     });
     if (header) header.appendChild(signOut);
     const notice = document.querySelector(".notice");
-    if (notice) notice.innerHTML = "<b>Development status:</b> Your sign-in, profile, demo account and demo balance are connected when the database setup is complete. Positions, KYC workflows, payments and live trading are not connected to this page. Do not submit payment details or identity documents here.";
+    if (notice) notice.innerHTML = "<b>Development status:</b> Member sign-in, profile, demo account and demo trading summaries are connected. Identity verification, deposits, withdrawals and live trading are not enabled. Do not submit payment details or identity documents here.";
     document.documentElement.style.visibility = "visible";
   }).catch(error => fail(error && error.message ? error.message : "Unable to verify your session."));
 })();
