@@ -23,8 +23,9 @@ test("closes a position and moves realised PnL into balance", () => {
   engine.updateQuote("EURUSD", 1.08600, 1.08612);
   const closed = engine.closePosition(position.id);
   assert.equal(closed.status, "closed");
-  assert.equal(closed.realisedPnl, 8.8);
-  assert.equal(engine.getAccount().balance, 10008.8);
+  // Buy opens at ask (1.08502) and closes at bid (1.08600): 9.8 USD.
+  assert.equal(closed.realisedPnl, 9.8);
+  assert.equal(engine.getAccount().balance, 10009.8);
   assert.equal(engine.snapshot().positions.length, 0);
 });
 
