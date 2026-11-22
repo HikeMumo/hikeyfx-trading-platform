@@ -9,6 +9,7 @@ on:
       - "backend/**"
       - "auth/**"
       - "portal/**"
+      - "admin/**"
       - "trading/**"
       - "supabase/**"
       - ".github/workflows/demo-backend.yml"
