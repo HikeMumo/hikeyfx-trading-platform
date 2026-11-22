@@ -1,4 +1,5 @@
 name: HikeyFX platform checks
+# Validates backend APIs, browser scripts, Supabase RPC adapters and migration contracts.
 
 on:
   workflow_dispatch:
