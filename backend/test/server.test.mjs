@@ -45,6 +45,47 @@ test("HTTP API exposes demo account and accepts validated demo orders", async t 
   assert.equal((await historyResponse.json()).data.length, 1);
 });
 
+test("persistent positions, history and close use the injected member repository", async t => {
+  const positionId = "123e4567-e89b-12d3-a456-426614174000";
+  const calls = [];
+  const repository = {
+    snapshot: async token => {
+      calls.push(["snapshot", token]);
+      return {
+        accountId: "account-a", balance: 10000,
+        positions: [{ id: positionId, symbol: "EURUSD", side: "buy", margin: 108.5 }],
+        history: [{ id: "closed-a", symbol: "EURUSD", realisedPnl: 12.5 }]
+      };
+    },
+    placeOrder: async () => ({ id: "unused" }),
+    closePosition: async (token, id, price) => {
+      calls.push(["close", token, id, price]);
+      return { id, status: "closed" };
+    }
+  };
+  const server = createApp(null, undefined, async () => ({ id: "member-a" }), repository);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const headers = { authorization: "Bearer member-a-token" };
+
+  const positions = await fetch(base + "/api/v1/demo/positions", { headers });
+  assert.equal(positions.status, 200);
+  assert.equal((await positions.json()).data[0].id, positionId);
+
+  const history = await fetch(base + "/api/v1/demo/history", { headers });
+  assert.equal(history.status, 200);
+  assert.equal((await history.json()).data[0].id, "closed-a");
+
+  const closed = await fetch(base + `/api/v1/demo/positions/${positionId}/close`, {
+    method: "POST", headers
+  });
+  assert.equal(closed.status, 200);
+  assert.equal((await closed.json()).data.status, "closed");
+  assert.equal(calls.filter(call => call[0] === "snapshot").length, 3);
+  assert.equal(calls.some(call => call[0] === "close" && call[1] === "member-a-token" && call[2] === positionId), true);
+});
+
 test("HTTP API returns 404 for unknown routes", async t => {
   const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
