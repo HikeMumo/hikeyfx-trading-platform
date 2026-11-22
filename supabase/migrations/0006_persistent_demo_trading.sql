@@ -116,7 +116,7 @@ begin
   values(v_account_id,p_idempotency_key,v_result);
   return v_result;
 end;
-$;
+$$;
 
 create or replace function public.hikeyfx_demo_close_position(
   p_position_id uuid, p_exit_price numeric, p_reason text default 'manual'
