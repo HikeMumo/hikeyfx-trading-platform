@@ -14,6 +14,7 @@ HikeyFX is currently a software-development project. The company has not yet bee
 - Record administrative and security-sensitive actions in an audit trail.
 - Deny access by default; enforce ownership checks on the server and with database row-level security.
 - Keep demo trading isolated from any future live environment.
+- Design future payment workflows now, but keep real-money processing disabled until all legal and operational gates are met.
 
 ## Planned application areas
 
@@ -25,6 +26,7 @@ HikeyFX is currently a software-development project. The company has not yet bee
 6. Backend API: validates identity, permissions, business rules and provider responses.
 7. Market data: server-side provider adapters and normalized quotes.
 8. Future execution adapter: disabled until the legal, liquidity, risk and operational prerequisites have been approved.
+9. Future payments and client-money service: deposit intents, withdrawal requests, double-entry ledger, provider-event verification and reconciliation; live processing remains disabled.
 
 ## Environments
 
@@ -36,7 +38,7 @@ Never commit secrets. Use the hosting provider's encrypted environment-variable 
 
 ## Regulatory and product gates
 
-Before offering brokerage services, obtain Kenyan legal and regulatory advice and written clarification from the CMA on the applicable licence, capital, platform recognition/admission requirements and the permitted product scope. Do not assume a proprietary platform or every proposed asset class automatically qualifies under one licence.
+Before offering brokerage services, obtain Kenyan legal and regulatory advice and written clarification from the CMA on the applicable licence, capital, platform recognition/admission requirements, client-money safeguarding and reconciliation obligations, and the permitted product scope. Do not assume a proprietary platform or every proposed asset class automatically qualifies under one licence.
 
 ## Initial implementation sequence
 
@@ -47,5 +49,6 @@ Before offering brokerage services, obtain Kenyan legal and regulatory advice an
 5. Member dashboard and support workflows.
 6. KYC document workflow and review audit trail.
 7. Demo market workspace and simulated orders.
-8. Security, monitoring, backup and recovery tests.
-9. Licensing and provider-readiness review before any live functionality.
+8. Payment/client-money schema foundation and reviewed ledger transaction design (no live money).
+9. Security, monitoring, backup and recovery tests.
+10. Licensing and provider-readiness review before any live functionality.
