@@ -56,7 +56,8 @@ create or replace function public.hikeyfx_demo_place_order(
   p_symbol text, p_side public.order_side, p_volume numeric,
   p_entry_price numeric, p_contract_size numeric,
   p_stop_loss numeric default null, p_take_profit numeric default null,
-  p_leverage integer default 100
+  p_leverage integer default 100,
+  p_idempotency_key text
 )
 returns jsonb
 language plpgsql
@@ -71,8 +72,11 @@ declare
   v_used numeric(20,2);
   v_margin numeric(20,2);
   v_position public.demo_positions%rowtype;
+  v_cached jsonb;
+  v_result jsonb;
 begin
   if v_uid is null then raise exception 'Authentication required'; end if;
+  if p_idempotency_key is null or length(p_idempotency_key) < 8 or length(p_idempotency_key) > 128 then raise exception 'A valid idempotency key is required'; end if;
   if p_side not in ('buy','sell') or p_volume < 0.01 or p_volume > 10
      or p_volume * 100 <> trunc(p_volume * 100)
      or p_entry_price <= 0 or p_contract_size <= 0
@@ -88,6 +92,9 @@ begin
     raise exception 'Take profit is on the wrong side of entry';
   end if;
   v_account_id := public.bootstrap_member();
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_account_id::text || p_idempotency_key, 0));
+  select k.response_body into v_cached from public.demo_idempotency_keys k where k.account_id=v_account_id and k.idempotency_key=p_idempotency_key;
+  if v_cached is not null then return v_cached; end if;
   select i.id into v_instrument_id from public.instruments i
    where i.symbol=upper(p_symbol) and i.is_enabled=true;
   if v_instrument_id is null then raise exception 'Instrument is not enabled for demo trading'; end if;
@@ -102,11 +109,14 @@ begin
   returning * into v_position;
   insert into public.demo_trade_events(account_id,position_id,event_type,event_data)
   values(v_account_id,v_position.id,'opened',jsonb_build_object('symbol',upper(p_symbol),'side',p_side,'volume',p_volume,'entryPrice',p_entry_price));
-  return jsonb_build_object('id',v_position.id,'symbol',upper(p_symbol),'side',p_side,
+  v_result := jsonb_build_object('id',v_position.id,'symbol',upper(p_symbol),'side',p_side,
     'volume',p_volume,'entryPrice',p_entry_price,'stopLoss',p_stop_loss,
     'takeProfit',p_take_profit,'margin',v_margin,'openedAt',v_position.opened_at,'status','open');
+  insert into public.demo_idempotency_keys(account_id,idempotency_key,response_body)
+  values(v_account_id,p_idempotency_key,v_result);
+  return v_result;
 end;
-$$;
+$;
 
 create or replace function public.hikeyfx_demo_close_position(
   p_position_id uuid, p_exit_price numeric, p_reason text default 'manual'
@@ -149,7 +159,7 @@ end;
 $$;
 
 revoke all on function public.hikeyfx_demo_snapshot() from public, anon;
-revoke all on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,numeric,numeric,integer) from public, anon;
+revoke all on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,numeric,numeric,integer,text) from public, anon;
 revoke all on function public.hikeyfx_demo_close_position(uuid,numeric,text) from public, anon;
 grant execute on function public.hikeyfx_demo_snapshot() to authenticated;
 grant execute on function public.hikeyfx_demo_place_order(text,public.order_side,numeric,numeric,numeric,numeric,numeric,integer) to authenticated;
