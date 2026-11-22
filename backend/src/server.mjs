@@ -72,14 +72,14 @@ async function readJson(req) {
   return parsed;
 }
 
-export function createApp(engine = new DemoTradingEngine(), marketData = fetchTraderMadeQuotes) {
+export function createApp(engine = new DemoTradingEngine(), marketData = fetchTraderMadeQuotes, authenticateUser = authenticate) {
   return createServer(async (req, res) => {
     const url = new URL(req.url, `http://${HOST}:${PORT}`);
     if (req.method === "GET" && url.pathname === "/health") {
       return send(res, 200, { ok: true, service: "hikeyfx-demo-api", mode: "demo-only" });
     }
 
-    const user = await authenticate(req);
+    const user = await authenticateUser(req);
     if (!user) {
       return send(res, 401, { ok: false, error: "A valid HikeyFX member session is required." });
     }
