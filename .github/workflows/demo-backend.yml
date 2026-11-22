@@ -16,6 +16,9 @@ on:
       - development/phase-1-foundation
     paths:
       - "backend/**"
+      - "auth/**"
+      - "portal/**"
+      - "trading/**"
       - ".github/workflows/demo-backend.yml"
 
 permissions:
