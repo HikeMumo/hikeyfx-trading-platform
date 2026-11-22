@@ -20,6 +20,7 @@ on:
       - "auth/**"
       - "portal/**"
       - "trading/**"
+      - "supabase/**"
       - ".github/workflows/demo-backend.yml"
 
 permissions:
