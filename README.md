@@ -51,6 +51,7 @@ HikeyFX is currently a software-development project, not an incorporated or CMA-
 - Setup, routes and limitations: `backend/README.md`.
 - Automated unit tests: `backend/test/engine.test.mjs` (`npm test` from `backend/` with Node.js 20+).
 - Milestone and remaining gates: `docs/DEMO_ENGINE_MILESTONE.md`.
+- Draft database persistence design: `docs/DEMO_PERSISTENCE_SCHEMA.md` and `supabase/migrations/0002_demo_trading_persistence.sql` (not executed).
 
 The backend is local-only, in-memory and uses fictional seed prices. It is not connected to the website, authentication, a database or a real market feed. It must not be exposed publicly or used with real funds.
 
