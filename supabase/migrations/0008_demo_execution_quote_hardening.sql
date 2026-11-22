@@ -84,6 +84,14 @@ begin
   v_entry_price := case when p_side='buy' then v_ask else v_bid end;
 
   if p_stop_loss is not null and
+     (p_stop_loss <= 0 or p_stop_loss::text in ('NaN','Infinity','-Infinity')) then
+    raise exception 'Invalid stop loss';
+  end if;
+  if p_take_profit is not null and
+     (p_take_profit <= 0 or p_take_profit::text in ('NaN','Infinity','-Infinity')) then
+    raise exception 'Invalid take profit';
+  end if;
+  if p_stop_loss is not null and
      ((p_side='buy' and p_stop_loss >= v_entry_price) or
       (p_side='sell' and p_stop_loss <= v_entry_price)) then
     raise exception 'Stop loss is on the wrong side of entry';
