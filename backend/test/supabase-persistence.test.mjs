@@ -47,3 +47,14 @@ test("Supabase repository forwards only the member JWT and publishable key to RP
     if (oldKey === undefined) delete process.env.SUPABASE_PUBLISHABLE_KEY; else process.env.SUPABASE_PUBLISHABLE_KEY = oldKey;
   }
 });
+
+
+test("admin migration restricts operational overview to active admin memberships", async () => {
+  const sql = await readFile(new URL("../../supabase/migrations/0007_admin_access_foundation.sql", import.meta.url), "utf8");
+  assert.ok(sql.includes("create table public.admin_memberships"));
+  assert.ok(sql.includes("alter table public.admin_memberships enable row level security"));
+  assert.ok(sql.includes("m.user_id=v_uid and m.is_active=true"));
+  assert.ok(sql.includes("Administrator access required"));
+  assert.ok(sql.includes("grant execute on function public.hikeyfx_admin_overview() to authenticated"));
+  assert.ok(sql.includes("revoke all on function public.hikeyfx_admin_overview() from public, anon"));
+});
