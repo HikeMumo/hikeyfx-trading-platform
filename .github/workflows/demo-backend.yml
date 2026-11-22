@@ -1,0 +1,34 @@
+name: HikeyFX demo backend checks
+
+on:
+  push:
+    branches:
+      - development/phase-1-foundation
+    paths:
+      - "backend/**"
+      - ".github/workflows/demo-backend.yml"
+  pull_request:
+    branches:
+      - development/phase-1-foundation
+    paths:
+      - "backend/**"
+      - ".github/workflows/demo-backend.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node.js demo engine and API tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run automated tests
+        working-directory: backend
+        run: npm test
