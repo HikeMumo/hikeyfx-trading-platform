@@ -124,3 +124,12 @@ test("chart drawings can be selected, resized by endpoint dragging and deleted",
   assert.ok(html.includes('drawings[selectedDrawingIndex].x2=e.clientX-r.left'));
   assert.ok(html.includes('function(e){if(drawingEdit){drawingEdit=false'));
 });
+
+test("chart drawings expose a rotation handle and persist rotated geometry", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('function drawingRotationHandle'));
+  assert.ok(html.includes('ctx.rotate(d.angle)'));
+  assert.ok(html.includes('drawingEditMode==="rotate"'));
+  assert.ok(html.includes('edit.angle=drawingEditStartAngle'));
+  assert.ok(html.includes('JSON.stringify(drawings)'));
+});
