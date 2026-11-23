@@ -26,7 +26,7 @@ function calculate(rows){
  const atr14=smma(tr,14);
  const gain=[],loss=[];for(let i=0;i<n;i++){if(i===0){gain.push(null);loss.push(null);continue}const d=c[i]-c[i-1];gain.push(Math.max(0,d));loss.push(Math.max(0,-d))}
  const avgGain=smmaValid(gain,14),avgLoss=smmaValid(loss,14);
- const rsi=c.map((_,i)=>avgGain[i]===null?null:avgLoss[i]===0?100:100-100/(1+avgGain[i]/avgLoss[i]));
+ const rsi=c.map((_,i)=>avgGain[i]===null?null:avgLoss[i]===0?(avgGain[i]===0?50:100):100-100/(1+avgGain[i]/avgLoss[i]));
  const upper=[],lower=[],middle=[];for(let i=0;i<n;i++){if(i<19){upper.push(null);lower.push(null);middle.push(null)}else{const a=c.slice(i-19,i+1),m=mean(a),s=std(a);middle.push(m);upper.push(m+2*s);lower.push(m-2*s)}}
  const high14=[],low14=[];for(let i=0;i<n;i++){high14.push(i<13?null:Math.max(...h.slice(i-13,i+1)));low14.push(i<13?null:Math.min(...l.slice(i-13,i+1)))}
  const typical=rows.map((_,i)=>(h[i]+l[i]+c[i])/3);
