@@ -189,3 +189,16 @@ test("Supabase repository forwards partial close requests to the authenticated R
     if (oldKey === undefined) delete process.env.SUPABASE_PUBLISHABLE_KEY; else process.env.SUPABASE_PUBLISHABLE_KEY = oldKey;
   }
 });
+
+test("journal snapshot migration returns only the member's append-only trade events", async () => {
+  const sql = await readFile(new URL("../../supabase/migrations/0013_demo_journal_snapshot.sql", import.meta.url), "utf8");
+  assert.match(sql, /create or replace function public\.hikeyfx_demo_snapshot/);
+  assert.match(sql, /security definer/);
+  assert.match(sql, /v_account_id := public\.bootstrap_member\(\)/);
+  assert.match(sql, /from public\.demo_trade_events e/);
+  assert.match(sql, /where e\.account_id=v_account_id/);
+  assert.match(sql, /'eventType',e\.event_type/);
+  assert.match(sql, /'journal',v_journal/);
+  assert.match(sql, /revoke all on function public\.hikeyfx_demo_snapshot\(\) from public, anon/);
+  assert.match(sql, /grant execute on function public\.hikeyfx_demo_snapshot\(\) to authenticated/);
+});
