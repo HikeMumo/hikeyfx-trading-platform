@@ -55,6 +55,24 @@ test("chart indicator toggles share one calculated series with the 30-indicator 
   assert.ok(!html.includes('avg/=7'), "legacy seven-period moving average must not conflict with the 20-period library calculation");
 });
 
+test("live quote refresh requests supported forex, metal and index instruments", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes("symbols=EURUSD,GBPUSD,AUDUSD,USDJPY,USDCHF,SPX500,NAS100,UK100,XAUUSD"));
+  for (const [code, label] of [["SPX500","US 500"],["NAS100","US Tech 100"],["UK100","UK 100"],["XAUUSD","Gold"]]) {
+    assert.ok(html.includes(code + ':"' + label + '"'), code + " should map to its visible instrument");
+  }
+});
+
+test("RSI toggle stays synchronized with the full indicator library and all multi-line components render", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('["rsiToggle","Relative Strength Index","RSI 14"]'));
+  assert.ok(html.includes('rsi=activeIndicators.has("Relative Strength Index")'));
+  assert.ok(html.includes('var components=Array.isArray(raw)?'));
+  assert.ok(html.includes('components.forEach(function(item,componentIndex)'));
+  assert.ok(html.includes('drawIndicatorLine(series["Bollinger Bands"].middle'));
+  assert.ok(html.includes('drawIndicatorLine(series.Envelopes.middle'));
+});
+
 test("quotes view provides searchable categories and persistent favourites", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   for (const category of ["All","Favorites","Forex","Indices","Commodities"]) {
