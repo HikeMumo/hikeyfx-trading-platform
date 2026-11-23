@@ -163,11 +163,17 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
       return send(res, 200, { ok: true, data: memberEngine.getAccount() });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/demo/positions") {
-      if (persistent) {
-        try { return send(res, 200, { ok: true, data: (await repository.snapshot(token)).positions }); }
-        catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
-      }
-      return send(res, 200, { ok: true, data: memberEngine.snapshot().positions });
+      try {
+        const openPositions = persistent ? (await repository.snapshot(token)).positions : memberEngine.snapshot().positions;
+        const marked = openPositions.map(position => {
+          const quote = memberEngine.getQuote(position.symbol);
+          const side = String(position.side).toLowerCase();
+          const currentPrice = side === "buy" ? quote.bid : quote.ask;
+          const unrealisedPnl = memberEngine.getUnrealisedPnl({ ...position, side });
+          return { ...position, currentPrice, unrealisedPnl, quoteUpdatedAt: quote.updatedAt || null };
+        });
+        return send(res, 200, { ok: true, data: marked });
+      } catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
     }
     if (req.method === "GET" && url.pathname === "/api/v1/demo/history") {
       if (persistent) {
@@ -187,7 +193,17 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
       try {
         const rawSymbols = url.searchParams.get("symbols");
         const result = await marketData(rawSymbols ? { symbols: rawSymbols.split(",") } : {});
-        return send(res, 200, { ok: true, data: result.quotes, source: result.source, receivedAt: result.receivedAt, status: result.status });
+        const updatedSymbols = [];
+        for (const quote of result.quotes || []) {
+          if (quote.status !== "fresh" || !Number.isFinite(Number(quote.bid)) || !Number.isFinite(Number(quote.ask))) continue;
+          try {
+            memberEngine.updateQuote(quote.symbol, Number(quote.bid), Number(quote.ask));
+            updatedSymbols.push(quote.symbol);
+          } catch (error) {
+            if (!/Unsupported instrument/.test(error.message)) throw error;
+          }
+        }
+        return send(res, 200, { ok: true, data: result.quotes, source: result.source, receivedAt: result.receivedAt, status: result.status, executionQuotesUpdated: updatedSymbols });
       } catch (error) {
         const notConfigured = error.code === "MARKET_DATA_NOT_CONFIGURED";
         return send(res, notConfigured ? 503 : 502, {
