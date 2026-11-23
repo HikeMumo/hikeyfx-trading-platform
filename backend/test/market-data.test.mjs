@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { fetchTraderMadeQuotes, fetchTraderMadeCandles } from "../src/market-data.mjs";
+import { fetchTraderMadeQuotes, fetchTraderMadeCandles, parseHistoricalTimestamp } from "../src/market-data.mjs";
 import { createApp } from "../src/server.mjs";
+
+test("timezone-free historical timestamps are explicitly normalized to UTC", () => {
+  assert.equal(parseHistoricalTimestamp("2026-11-22 11:30:00"), Date.parse("2026-11-22T11:30:00.000Z"));
+  assert.equal(parseHistoricalTimestamp("2026-11-22T11:30:00+03:00"), Date.parse("2026-11-22T08:30:00.000Z"));
+});
 
 test("TraderMade adapter maps genuine timestamped quote fields", async () => {
   const now = Date.parse("2026-11-22T12:00:00.000Z");
