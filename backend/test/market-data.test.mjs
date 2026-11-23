@@ -77,6 +77,7 @@ test("TraderMade historical adapter requests real OHLC time-series data", async 
   assert.equal(requestedUrl.searchParams.has("api_key"),true);
   assert.equal(result.candles.length,2);
   assert.equal(result.candles[1].close,1.0815);
+  assert.equal(result.candles[0].time,"2026-11-22T11:30:00.000Z","timezone-free provider timestamps must be interpreted consistently as UTC");
 });
 
 test("TraderMade historical adapter aggregates unsupported minute periods without fabricating bars", async () => {
