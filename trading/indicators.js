@@ -22,7 +22,7 @@ function calculate(rows){
  if(!Array.isArray(rows)||rows.length<2)return {};
  const c=rows.map(x=>Number(x.close)),h=rows.map(x=>Number(x.high)),l=rows.map(x=>Number(x.low)),o=rows.map(x=>Number(x.open)),v=rows.map(x=>Number(x.volume||0)),n=c.length,hasVolume=rows.some(x=>Number.isFinite(Number(x.volume))&&Number(x.volume)>0);
  if(rows.some((x,i)=>![c[i],h[i],l[i],o[i]].every(Number.isFinite)))return {};
- const sma20=sma(c,20),ema12=ema(c,12),ema13=ema(c,13),ema26=ema(c,26),ema20=ema(c,20),sma5=sma(c,5),sma34=sma(c,34);
+ const sma20=sma(c,20),sma14=sma(c,14),ema12=ema(c,12),ema13=ema(c,13),ema26=ema(c,26),ema20=ema(c,20),sma5=sma(c,5),sma34=sma(c,34);
  const tr=rows.map((x,i)=>i===0?h[i]-l[i]:Math.max(h[i]-l[i],Math.abs(h[i]-c[i-1]),Math.abs(l[i]-c[i-1])));
  const atr14=smma(tr,14);
  const gain=[],loss=[];for(let i=0;i<n;i++){if(i===0){gain.push(null);loss.push(null);continue}const d=c[i]-c[i-1];gain.push(Math.max(0,d));loss.push(Math.max(0,-d))}
@@ -57,7 +57,7 @@ function calculate(rows){
  const spanB=rows.map((_,i)=>i<51?null:(Math.max(...h.slice(i-51,i+1))+Math.min(...l.slice(i-51,i+1)))/2);
  const projectedA=shiftSeries(spanA,26),projectedB=shiftSeries(spanB,26),chikou=Array(n).fill(null);for(let i=26;i<n;i++)chikou[i-26]=c[i];
  const ichi=rows.map((_,i)=>({tenkan:tenkan[i],kijun:kijun[i],senkouA:projectedA[i],senkouB:projectedB[i],chikou:chikou[i]}));
- const envelopes=ema20.map(x=>x===null?null:{upper:x*1.01,lower:x*.99});
+ const envelopes=sma14.map(x=>x===null?null:{upper:x*1.001,lower:x*.999});
  function shiftSeries(values,shift){const out=Array(values.length).fill(null);values.forEach(function(value,i){if(i+shift<out.length)out[i+shift]=value});return out}
  const jaw=shiftSeries(smma(median,13),8),teeth=shiftSeries(smma(median,8),5),lips=shiftSeries(smma(median,5),3);
  const alligator=rows.map((_,i)=>({jaw:jaw[i],teeth:teeth[i],lips:lips[i]}));
@@ -81,7 +81,7 @@ function calculate(rows){
  };
  const series={
  "Moving Average":sma20,"Exponential Moving Average":ema20,"Smoothed Moving Average":smma20,"Linear Weighted Moving Average":wma20,
- "Bollinger Bands":{upper:upper,middle:middle,lower:lower},"Envelopes":{upper:envelopes.map(x=>x&&x.upper),middle:ema20,lower:envelopes.map(x=>x&&x.lower)},
+ "Bollinger Bands":{upper:upper,middle:middle,lower:lower},"Envelopes":{upper:envelopes.map(x=>x&&x.upper),middle:sma14,lower:envelopes.map(x=>x&&x.lower)},
  "Ichimoku Kinko Hyo":{tenkan:ichi.map(x=>x.tenkan),kijun:ichi.map(x=>x.kijun),senkouA:ichi.map(x=>x.senkouA),senkouB:ichi.map(x=>x.senkouB),chikou:ichi.map(x=>x.chikou)},
  "Parabolic SAR":sar,"Standard Deviation":std20,"Average Directional Movement Index":adx,"Average True Range":atr14,
  "Bears Power":c.map((x,i)=>ema13[i]===null?null:l[i]-ema13[i]),"Bulls Power":c.map((x,i)=>ema13[i]===null?null:h[i]-ema13[i]),
