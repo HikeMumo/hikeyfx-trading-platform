@@ -4,6 +4,8 @@ export const INSTRUMENTS = Object.freeze({
   EURUSD: { symbol: "EURUSD", bid: 1.08490, ask: 1.08502, contractSize: 100000, digits: 5 },
   GBPUSD: { symbol: "GBPUSD", bid: 1.27110, ask: 1.27125, contractSize: 100000, digits: 5 },
   AUDUSD: { symbol: "AUDUSD", bid: 0.65410, ask: 0.65422, contractSize: 100000, digits: 5 },
+  USDJPY: { symbol: "USDJPY", bid: 149.610, ask: 149.630, contractSize: 100000, digits: 3 },
+  USDCHF: { symbol: "USDCHF", bid: 0.88404, ask: 0.88416, contractSize: 100000, digits: 5 },
   XAUUSD: { symbol: "XAUUSD", bid: 2340.10, ask: 2340.35, contractSize: 100, digits: 2 }
 });
 
