@@ -86,6 +86,11 @@ const TIMEFRAME_CONFIG = {
 "1D":["daily",1,365],"1W":["daily",1,365],"1M":["daily",1,365]
 };
 const isoDate = date => date.toISOString().slice(0,16).replace("T","-");
+function parseHistoricalTimestamp(value) {
+ const raw=String(value??"").trim();
+ const timezoneLess=/^\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}(?::\\d{2}(?:\\.\\d+)?)?$/.test(raw);
+ return Date.parse(timezoneLess?raw.replace(" ","T")+"Z":raw);
+}
 function bucketStart(date,timeframe) {
  const d=new Date(date);
  if(timeframe==="1W"){const day=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-day);d.setUTCHours(0,0,0,0);return d.toISOString()}
@@ -114,7 +119,7 @@ export async function fetchTraderMadeCandles({symbol,timeframe="15m",apiKey=proc
  if(!response.ok){const error=new Error("Historical candles are unavailable for this account or request.");error.code=response.status===401||response.status===403?"MARKET_DATA_HISTORY_FORBIDDEN":"MARKET_DATA_UPSTREAM_ERROR";throw error}
  let payload;try{payload=await response.json()}catch{const error=new Error("Historical provider returned invalid data.");error.code="MARKET_DATA_INVALID_RESPONSE";throw error}
  if(!Array.isArray(payload.quotes)){const error=new Error("Historical provider returned no candle collection.");error.code="MARKET_DATA_EMPTY";throw error}
- const rows=payload.quotes.flatMap(item=>{const open=Number(item.open),high=Number(item.high),low=Number(item.low),close=Number(item.close),time=Date.parse(item.date||item.datetime||"");if(![open,high,low,close,time].every(Number.isFinite)||Math.min(open,high,low,close)<=0||high<Math.max(open,close,low)||low>Math.min(open,close,high))return[];return[{time:new Date(time).toISOString(),open,high,low,close}]}).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time));
+ const rows=payload.quotes.flatMap(item=>{const open=Number(item.open),high=Number(item.high),low=Number(item.low),close=Number(item.close),time=parseHistoricalTimestamp(item.date||item.datetime||"");if(![open,high,low,close,time].every(Number.isFinite)||Math.min(open,high,low,close)<=0||high<Math.max(open,close,low)||low>Math.min(open,close,high))return[];return[{time:new Date(time).toISOString(),open,high,low,close}]}).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time));
  const candles=aggregateCandles(rows,tf).slice(-240);
  if(!candles.length){const error=new Error("No historical candles were returned for this instrument and timeframe.");error.code="MARKET_DATA_EMPTY";throw error}
  return{source:"TraderMade historical",symbol:code,timeframe:tf,receivedAt:new Date(now).toISOString(),candles};
