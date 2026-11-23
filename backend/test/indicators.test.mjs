@@ -31,11 +31,14 @@ test("indicator library calculates values from historical OHLCV candles", async 
   assert.ok(Number.isFinite(values["Average True Range"]));
   assert.ok(Number.isFinite(values["Relative Vigor Index"].main));
   assert.ok(Number.isFinite(values["Stochastic Oscillator"].signal));
+  assert.ok(Number.isFinite(values["Ichimoku Kinko Hyo"].senkouB));
+  assert.ok(Number.isFinite(values["Moving Average of Oscillator"]));
   assert.ok(Number.isFinite(values["Money Flow Index"]));
   assert.ok(values["Bollinger Bands"].upper > values["Bollinger Bands"].lower);
   assert.equal(values.series["Moving Average"].length, candles.length);
   assert.equal(values.series.MACD.main.length, candles.length);
   assert.equal(values.series.Alligator.jaw.length, candles.length);
+  assert.equal(values.series["Ichimoku Kinko Hyo"].senkouB.length, candles.length);
 });
 
 test("volume indicators remain unavailable when historical provider supplies no volume", async () => {
