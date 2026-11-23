@@ -19,6 +19,12 @@ export class DemoTradingEngine {
     this.quotes = structuredClone(INSTRUMENTS);
     this.positions = [];
     this.history = [];
+    this.journal = [];
+  }
+
+  recordEvent(eventType, eventData) {
+    this.journal.unshift({ id: randomUUID(), eventType, eventData, createdAt: new Date().toISOString() });
+    if (this.journal.length > 500) this.journal.length = 500;
   }
 
   getQuote(symbol) {
@@ -77,6 +83,7 @@ export class DemoTradingEngine {
       openedAt: new Date().toISOString(), status: "open"
     };
     this.positions.push(position);
+    this.recordEvent("opened", { positionId: position.id, symbol, side, volume, entryPrice });
     return { ...position, unrealisedPnl: this.getUnrealisedPnl(position) };
   }
 
@@ -99,6 +106,7 @@ export class DemoTradingEngine {
     position.stopLoss = stopLoss;
     position.takeProfit = takeProfit;
     position.modifiedAt = new Date().toISOString();
+    this.recordEvent("adjustment", { positionId: position.id, symbol: position.symbol, stopLoss, takeProfit });
     return { ...position, unrealisedPnl: this.getUnrealisedPnl(position) };
   }
 
@@ -124,6 +132,7 @@ export class DemoTradingEngine {
       status: "partial_closed", margin: 0
     };
     this.history.unshift(partial);
+    this.recordEvent("partial_close", { positionId: position.id, symbol: position.symbol, side: position.side, closedVolume: volume, remainingVolume: position.volume, exitPrice, realisedPnl: pnl });
     return { positionId: position.id, closedVolume: volume, remainingVolume: position.volume, exitPrice, realisedPnl: pnl, balance: this.balance };
   }
 
@@ -141,6 +150,7 @@ export class DemoTradingEngine {
       closedAt: new Date().toISOString(), status: "closed"
     };
     this.history.unshift(closed);
+    this.recordEvent(reason === "stop_loss" || reason === "take_profit" ? reason : "closed", { positionId: position.id, symbol: position.symbol, side: position.side, volume: position.volume, exitPrice, realisedPnl: pnl, reason });
     return closed;
   }
 
@@ -170,6 +180,7 @@ export class DemoTradingEngine {
       account: this.getAccount(),
       positions: this.positions.map(p => ({ ...p, unrealisedPnl: this.getUnrealisedPnl(p) })),
       history: this.history.map(p => ({ ...p })),
+      journal: this.journal.map(event => ({ ...event, eventData: { ...event.eventData } })),
       quotes: Object.values(this.quotes).map(q => ({ ...q }))
     };
   }
