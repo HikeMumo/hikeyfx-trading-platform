@@ -33,6 +33,19 @@ test("indicator library calculates values from historical OHLCV candles", async 
   assert.equal(values.series.Alligator.jaw.length, candles.length);
 });
 
+test("volume indicators remain unavailable when historical provider supplies no volume", async () => {
+  const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
+  const context = { window: {} };
+  vm.runInNewContext(source, context, { filename: "trading/indicators.js" });
+  const candles = Array.from({ length: 40 }, (_, i) => ({
+    open: 1 + i * 0.001, high: 1.002 + i * 0.001, low: 0.999 + i * 0.001, close: 1.001 + i * 0.001
+  }));
+  const values = context.window.HikeyFXIndicators.calculate(candles);
+  for (const name of ["Force Index","Money Flow Index","Accumulation/Distribution","On Balance Volume","Volumes"]) {
+    assert.equal(values[name], null, name + " must not be fabricated without volume data");
+  }
+});
+
 test("indicator library refuses insufficient and malformed candle series", async () => {
   const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
   const context = { window: {} };
