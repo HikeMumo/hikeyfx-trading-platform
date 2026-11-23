@@ -27,6 +27,11 @@ test("indicator library calculates values from historical OHLCV candles", async 
     assert.notEqual(values[name], null, name + " should have a calculated value");
   }
   assert.ok(Number.isFinite(values["Relative Strength Index"]));
+  assert.ok(Number.isFinite(values["Average Directional Movement Index"]));
+  assert.ok(Number.isFinite(values["Average True Range"]));
+  assert.ok(Number.isFinite(values["Relative Vigor Index"].main));
+  assert.ok(Number.isFinite(values["Stochastic Oscillator"].signal));
+  assert.ok(Number.isFinite(values["Money Flow Index"]));
   assert.ok(values["Bollinger Bands"].upper > values["Bollinger Bands"].lower);
   assert.equal(values.series["Moving Average"].length, candles.length);
   assert.equal(values.series.MACD.main.length, candles.length);
