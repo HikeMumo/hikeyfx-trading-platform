@@ -53,3 +53,18 @@ test("quotes view provides searchable categories and persistent favourites", asy
   assert.ok(html.includes('localStorage.setItem("hikeyfx-favourites"'));
   assert.ok(html.includes('function toggleFavourite'));
 });
+
+test("instrument information opens a populated accessible detail dialog", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const id of ["instrumentInfoDialog","closeInstrumentInfo","detailSymbol","detailDescription","detailClass","detailBid","detailAsk","detailSpread","detailSource","detailTimestamp"]) {
+    assert.ok(html.includes('id="' + id + '"'), id + " should exist");
+  }
+  assert.ok(html.includes('function openInstrumentInfo'));
+  assert.ok(html.includes('aria-modal="true"'));
+});
+
+test("trading page contains no duplicate element IDs", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  const ids = [...html.matchAll(/\\bid="([^"]+)"/g)].map(match => match[1]);
+  assert.equal(new Set(ids).size, ids.length, "element IDs must be unique");
+});
