@@ -236,3 +236,27 @@ test("authenticated API uses persistent repository when a bearer token is presen
   assert.equal((await placed.json()).data.id, "position-a");
   assert.equal(calls.some(call => call[0] === "place" && call[1] === "test-access-token" && call[2].symbol === "EURUSD"), true);
 });
+
+
+test("historical chart candle route requires a member session and returns provider candles", async t => {
+  const history=async ({symbol,timeframe})=>({symbol,timeframe,source:"test-history",receivedAt:"2026-11-22T12:00:00.000Z",candles:[{time:"2026-11-22T11:45:00.000Z",open:1.08,high:1.09,low:1.07,close:1.085}]});
+  const server=createApp(null,undefined,async()=>({id:"chart-member"}),null,history);
+  await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
+  t.after(()=>new Promise(resolve=>server.close(resolve)));
+  const base="http://127.0.0.1:"+server.address().port+"/api/v1/market/candles?symbol=EURUSD&timeframe=15m";
+  const response=await fetch(base);
+  assert.equal(response.status,200);
+  const body=await response.json();
+  assert.equal(body.source,"test-history");
+  assert.equal(body.data[0].close,1.085);
+});
+
+test("historical chart candle route reports plan-restricted provider access", async t => {
+  const history=async()=>{const error=new Error("restricted");error.code="MARKET_DATA_HISTORY_FORBIDDEN";throw error};
+  const server=createApp(null,undefined,async()=>({id:"chart-member"}),null,history);
+  await new Promise(resolve=>server.listen(0,"127.0.0.1",resolve));
+  t.after(()=>new Promise(resolve=>server.close(resolve)));
+  const response=await fetch("http://127.0.0.1:"+server.address().port+"/api/v1/market/candles?symbol=EURUSD&timeframe=1m");
+  assert.equal(response.status,403);
+  assert.equal((await response.json()).status,"plan-restricted");
+});
