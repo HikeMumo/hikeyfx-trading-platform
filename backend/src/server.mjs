@@ -87,6 +87,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     if (method === "GET" && path === "/api/v1/market/quotes") return { name: "quotes", limit: 30 };
     if (method === "GET" && path === "/api/v1/market/candles") return { name: "candles", limit: 30 };
     if (method === "POST" && path === "/api/v1/demo/orders") return { name: "orders", limit: 20 };
+    if (method === "POST" && /^\/api\/v1\/demo\/positions\/[0-9a-f-]+\/modify$/i.test(path)) return { name: "modifications", limit: 30 };
     if (method === "POST" && /^\/api\/v1\/demo\/positions\/[0-9a-f-]+\/close$/i.test(path)) return { name: "closes", limit: 30 };
     return { name: "member-api", limit: 120 };
   };
@@ -211,6 +212,27 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
           return send(res, 201, { ok: true, data });
         }
         return send(res, 201, { ok: true, data: memberEngine.placeOrder(order) });
+      } catch (error) {
+        return send(res, error.statusCode || 400, { ok: false, error: error.message });
+      }
+    }
+    const modifyMatch = url.pathname.match(/^\\/api\\/v1\\/demo\\/positions\\/([0-9a-f-]+)\\/modify$/i);
+    if (req.method === "POST" && modifyMatch) {
+      try {
+        const body = await readJson(req);
+        const levels = {
+          stopLoss: body.stopLoss === null || body.stopLoss === undefined || body.stopLoss === "" ? null : Number(body.stopLoss),
+          takeProfit: body.takeProfit === null || body.takeProfit === undefined || body.takeProfit === "" ? null : Number(body.takeProfit)
+        };
+        if (persistent) {
+          const snapshot = await repository.snapshot(token);
+          if (!snapshot.positions.some(item => item.id === modifyMatch[1])) {
+            return send(res, 404, { ok: false, error: "Open demo position not found." });
+          }
+          const data = await repository.modifyPosition(token, modifyMatch[1], levels);
+          return send(res, 200, { ok: true, data });
+        }
+        return send(res, 200, { ok: true, data: memberEngine.modifyPosition(modifyMatch[1], levels) });
       } catch (error) {
         return send(res, error.statusCode || 400, { ok: false, error: error.message });
       }
