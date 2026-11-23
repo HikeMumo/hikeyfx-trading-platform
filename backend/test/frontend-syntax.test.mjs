@@ -32,12 +32,12 @@ test("admin page inline JavaScript parses successfully", async () => {
 
 test("chart exposes working controls for its analytical drawing objects", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
-  const ids = ["trendTool","horizontalTool","verticalTool","rectangleTool","ellipseTool","rayTool","arrowTool","channelTool","fibonacciTool","triangleTool","gannFanTool","fibArcTool","fibTimeTool","crossTool","diamondTool","measureTool"];
+  const ids = ["trendTool","horizontalTool","verticalTool","rectangleTool","ellipseTool","rayTool","arrowTool","channelTool","fibonacciTool","triangleTool","gannFanTool","fibArcTool","fibTimeTool","crossTool","diamondTool","measureTool","horizontalRayTool","verticalRayTool","fibFanTool","fibExtensionTool","pitchforkTool","gannGridTool","textTool"];
   for (const id of ids) {
     assert.match(html, new RegExp('id="' + id + '"'), id + " control should exist");
     assert.match(html, new RegExp('el\\("' + id + '"\\)\\.addEventListener\\("click"'), id + " control should have a click action");
   }
-  for (const type of ["horizontal","vertical","rectangle","ellipse","triangle","fibonacci","channel","gannfan","fibarc","fibtime","cross","diamond","measure"]) {
+  for (const type of ["horizontal","vertical","rectangle","ellipse","triangle","fibonacci","channel","gannfan","fibarc","fibtime","cross","diamond","measure","horizontalray","verticalray","fibfan","fibextension","pitchfork","gannGrid","text"]) {
     assert.ok(html.includes('d.type==="' + type + '"'), type + " drawing should have a renderer");
   }
   assert.ok(!html.includes("function makeCandles"), "synthetic chart candle generator must not remain");
@@ -140,4 +140,12 @@ test("chart drawings can be removed with a long press on a selected handle", asy
   assert.ok(html.includes('},1800)'));
   assert.ok(html.includes('drawings.splice(hit,1)'));
   assert.ok(html.includes('clearTimeout(drawingHoldTimer)'));
+});
+
+test("chart analytical object library includes 23 drawing tools", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  const toolIds = ["trendTool","horizontalTool","verticalTool","rectangleTool","ellipseTool","rayTool","arrowTool","channelTool","fibonacciTool","triangleTool","gannFanTool","fibArcTool","fibTimeTool","crossTool","diamondTool","measureTool","horizontalRayTool","verticalRayTool","fibFanTool","fibExtensionTool","pitchforkTool","gannGridTool","textTool"];
+  assert.equal(toolIds.length, 23);
+  for (const id of toolIds) assert.ok(html.includes('id="' + id + '"'), id + " should exist");
+  assert.ok(html.includes('window.prompt("Chart text","Text")'));
 });
