@@ -167,3 +167,15 @@ test("account journal can be filtered by event name and event details", async ()
   assert.ok(html.includes('filtered=journal.filter'));
   assert.ok(html.includes('el("journalSearch").addEventListener("input",renderJournal)'));
 });
+
+test("quote status is based on the selected instrument's own provider source", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('selected.quoteSource==="TraderMade"'));
+  assert.ok(html.includes('selected.ch+" · Fallback reference quote"'));
+  assert.ok(html.includes('asset.quoteSource="TraderMade"'));
+});
+
+test("chart selection state resets when changing instrument or timeframe", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('selectedDrawingIndex=-1;drawingEdit=false;drawingEditMode=""'));
+});
