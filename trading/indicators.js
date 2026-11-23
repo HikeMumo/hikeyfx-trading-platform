@@ -12,6 +12,7 @@ const names=[
 ];
 const mean=(a)=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
 const sma=(a,p)=>a.map((_,i)=>i+1<p?null:mean(a.slice(i-p+1,i+1)));
+const smaValid=(a,p)=>a.map((_,i)=>i+1<p||a.slice(i-p+1,i+1).some(x=>!Number.isFinite(x))?null:mean(a.slice(i-p+1,i+1)));
 const ema=(a,p)=>{const out=[];let v=null,k=2/(p+1),seed=[];a.forEach((x)=>{if(!Number.isFinite(x)){out.push(null);return}if(v===null){seed.push(x);if(seed.length===p){v=mean(seed);out.push(v)}else out.push(null)}else{v=x*k+v*(1-k);out.push(v)}});return out};
 const smma=(a,p)=>{const out=[];let v=null;a.forEach((x,i)=>{v=i===p-1?mean(a.slice(0,p)):i>=p?((v*(p-1)+x)/p):null;out.push(v)});return out};
 const smmaValid=(a,p)=>{const out=Array(a.length).fill(null),seed=[];let v=null;a.forEach((x,i)=>{if(!Number.isFinite(x))return;if(v===null){seed.push(x);if(seed.length===p){v=mean(seed);out[i]=v}}else{v=(v*(p-1)+x)/p;out[i]=v}});return out};
@@ -21,7 +22,7 @@ function calculate(rows){
  if(!Array.isArray(rows)||rows.length<2)return {};
  const c=rows.map(x=>Number(x.close)),h=rows.map(x=>Number(x.high)),l=rows.map(x=>Number(x.low)),o=rows.map(x=>Number(x.open)),v=rows.map(x=>Number(x.volume||0)),n=c.length,hasVolume=rows.some(x=>Number.isFinite(Number(x.volume))&&Number(x.volume)>0);
  if(rows.some((x,i)=>![c[i],h[i],l[i],o[i]].every(Number.isFinite)))return {};
- const sma20=sma(c,20),ema12=ema(c,12),ema26=ema(c,26),ema20=ema(c,20),sma5=sma(c,5),sma34=sma(c,34);
+ const sma20=sma(c,20),ema12=ema(c,12),ema13=ema(c,13),ema26=ema(c,26),ema20=ema(c,20),sma5=sma(c,5),sma34=sma(c,34);
  const tr=rows.map((x,i)=>i===0?h[i]-l[i]:Math.max(h[i]-l[i],Math.abs(h[i]-c[i-1]),Math.abs(l[i]-c[i-1])));
  const atr14=smma(tr,14);
  const gain=[],loss=[];for(let i=0;i<n;i++){if(i===0){gain.push(null);loss.push(null);continue}const d=c[i]-c[i-1];gain.push(Math.max(0,d));loss.push(Math.max(0,-d))}
@@ -33,7 +34,7 @@ function calculate(rows){
  const cci=typical.map((x,i)=>{if(i<19)return null;const a=typical.slice(i-19,i+1),m=mean(a),dev=mean(a.map(z=>Math.abs(z-m)));return dev? (x-m)/(.015*dev):0});
  const demUp=[],demDown=[];for(let i=0;i<n;i++){demUp.push(i?Math.max(h[i]-h[i-1],0):0);demDown.push(i?Math.max(l[i-1]-l[i],0):0)}
  const dem=demUp.map((_,i)=>{if(i<13)return null;const u=mean(demUp.slice(i-13,i+1)),d=mean(demDown.slice(i-13,i+1));return u+d?u/(u+d):0});
- const force=c.map((x,i)=>hasVolume&&i? (x-c[i-1])*v[i]:null);
+ const forceRaw=c.map((x,i)=>hasVolume&&i? (x-c[i-1])*v[i]:null),force=hasVolume?smaValid(forceRaw,13):Array(n).fill(null);
  const moneyFlow=typical.map((x,i)=>x*v[i]);
  const positiveFlow=moneyFlow.map((x,i)=>i&&typical[i]>typical[i-1]?x:0),negativeFlow=moneyFlow.map((x,i)=>i&&typical[i]<typical[i-1]?x:0);
  const mfi=moneyFlow.map((_,i)=>{if(!hasVolume||i<13)return null;const p=positiveFlow.slice(i-13,i+1).reduce((a,b)=>a+b,0),q=negativeFlow.slice(i-13,i+1).reduce((a,b)=>a+b,0);return q===0?100:100-100/(1+p/q)});
@@ -69,7 +70,7 @@ function calculate(rows){
  "Bollinger Bands":upper.at(-1)===null?null:{upper:upper.at(-1),middle:middle.at(-1),lower:lower.at(-1)},
  "Envelopes":envelopes.at(-1),"Ichimoku Kinko Hyo":ichi.at(-1),"Parabolic SAR":sar.at(-1),"Standard Deviation":std20.at(-1),
  "Average Directional Movement Index":adx.at(-1),"Average True Range":atr14.at(-1),
- "Bears Power":ema20.at(-1)===null?null:l.at(-1)-ema20.at(-1),"Bulls Power":ema20.at(-1)===null?null:h.at(-1)-ema20.at(-1),
+ "Bears Power":ema13.at(-1)===null?null:l.at(-1)-ema13.at(-1),"Bulls Power":ema13.at(-1)===null?null:h.at(-1)-ema13.at(-1),
  "Commodity Channel Index":cci.at(-1),"DeMarker":dem.at(-1),"Force Index":force.at(-1),
  "MACD":macd.at(-1)===null?null:{main:macd.at(-1),signal:signal.at(-1)},
  "Momentum":mom.at(-1),"Moving Average of Oscillator":maOsc.at(-1),
@@ -83,7 +84,7 @@ function calculate(rows){
  "Bollinger Bands":{upper:upper,middle:middle,lower:lower},"Envelopes":{upper:envelopes.map(x=>x&&x.upper),middle:ema20,lower:envelopes.map(x=>x&&x.lower)},
  "Ichimoku Kinko Hyo":{tenkan:ichi.map(x=>x.tenkan),kijun:ichi.map(x=>x.kijun),senkouA:ichi.map(x=>x.senkouA),senkouB:ichi.map(x=>x.senkouB),chikou:ichi.map(x=>x.chikou)},
  "Parabolic SAR":sar,"Standard Deviation":std20,"Average Directional Movement Index":adx,"Average True Range":atr14,
- "Bears Power":c.map((x,i)=>ema20[i]===null?null:l[i]-ema20[i]),"Bulls Power":c.map((x,i)=>ema20[i]===null?null:h[i]-ema20[i]),
+ "Bears Power":c.map((x,i)=>ema13[i]===null?null:l[i]-ema13[i]),"Bulls Power":c.map((x,i)=>ema13[i]===null?null:h[i]-ema13[i]),
  "Commodity Channel Index":cci,"DeMarker":dem,"Force Index":force,"MACD":{main:macd,signal:signal},
  "Momentum":mom,"Moving Average of Oscillator":maOsc,"Relative Strength Index":rsi,"Relative Vigor Index":{main:rvi,signal:rviSignal},
  "Stochastic Oscillator":{main:stoch,signal:stochD},"Williams Percent Range":high14.map((x,i)=>x===null?null:x===low14[i]?0:-100*(x-c[i])/(x-low14[i])),
