@@ -128,6 +128,16 @@ test("workspace settings save quote sorting, chart defaults and browser notifica
   assert.ok(html.includes('function saveWorkspaceSettings'));
 });
 
+test("order ticket uses MT5-style lots and calculates notional using each instrument contract size", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('id="volume" type="number" min="0.01" max="1" step="0.01" value="0.01"'));
+  assert.ok(html.includes('VOLUME (LOTS)'));
+  assert.ok(html.includes('contractSize=selected.s==="Gold"?100:100000'));
+  assert.ok(html.includes('volume:lots'));
+  assert.ok(html.includes('lots<0.01||lots>1'));
+  assert.ok(!html.includes('volume:units/100000'));
+});
+
 test("open positions expose a validated partial-close workflow", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   for (const id of ["partialCloseDialog","partialCloseVolume","confirmPartialClose","cancelPartialClose"]) {
