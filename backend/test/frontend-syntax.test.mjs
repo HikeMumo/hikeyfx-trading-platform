@@ -289,3 +289,18 @@ test("chart selection state resets when changing instrument or timeframe", async
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('selectedDrawingIndex=-1;drawingEdit=false;drawingEditMode=""'));
 });
+
+test("chart templates save, apply, refresh and delete full chart configurations", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const id of ["chartTemplateName","saveChartTemplate","chartTemplateSelect","applyChartTemplate","deleteChartTemplate","chartTemplateStatus"]) {
+    assert.ok(html.includes('id="' + id + '"'), id + " should exist");
+  }
+  assert.ok(html.includes('localStorage.getItem("hikeyfx-chart-templates"'));
+  assert.ok(html.includes('localStorage.setItem("hikeyfx-chart-templates"'));
+  assert.ok(html.includes('function saveChartTemplate'));
+  assert.ok(html.includes('function applyChartTemplate'));
+  assert.ok(html.includes('function deleteChartTemplate'));
+  assert.ok(html.includes('indicators:Array.from(activeIndicators)'));
+  assert.ok(html.includes('drawings:JSON.parse(JSON.stringify(drawings))'));
+  assert.ok(html.includes('syncIndicatorButtons();loadHistoricalCandles();drawChart()'));
+});
