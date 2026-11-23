@@ -28,6 +28,9 @@ test("indicator library calculates values from historical OHLCV candles", async 
   }
   assert.ok(Number.isFinite(values["Relative Strength Index"]));
   assert.ok(values["Bollinger Bands"].upper > values["Bollinger Bands"].lower);
+  assert.equal(values.series["Moving Average"].length, candles.length);
+  assert.equal(values.series.MACD.main.length, candles.length);
+  assert.equal(values.series.Alligator.jaw.length, candles.length);
 });
 
 test("indicator library refuses insufficient and malformed candle series", async () => {
