@@ -55,3 +55,42 @@ test("market quote route reports unavailable when provider is not configured", a
   assert.equal(body.status, "unavailable");
   assert.equal(body.ok, false);
 });
+
+
+test("TraderMade historical adapter requests real OHLC time-series data", async () => {
+  let requestedUrl;
+  const now=Date.parse("2026-11-22T12:00:00.000Z");
+  const result=await (await import("../src/market-data.mjs")).fetchTraderMadeCandles({
+    apiKey:"history-test-secret",symbol:"EURUSD",timeframe:"15m",now,
+    fetchImpl:async url=>{
+      requestedUrl=new URL(url);
+      return new Response(JSON.stringify({quotes:[
+        {date:"2026-11-22 11:30:00",open:1.08,high:1.081,low:1.079,close:1.0805},
+        {date:"2026-11-22 11:45:00",open:1.0805,high:1.082,low:1.08,close:1.0815}
+      ]}),{status:200,headers:{"content-type":"application/json"}});
+    }
+  });
+  assert.equal(requestedUrl.pathname,"/api/v1/timeseries");
+  assert.equal(requestedUrl.searchParams.get("currency"),"EURUSD");
+  assert.equal(requestedUrl.searchParams.get("interval"),"minute");
+  assert.equal(requestedUrl.searchParams.get("period"),"15");
+  assert.equal(requestedUrl.searchParams.has("api_key"),true);
+  assert.equal(result.candles.length,2);
+  assert.equal(result.candles[1].close,1.0815);
+});
+
+test("TraderMade historical adapter aggregates unsupported minute periods without fabricating bars", async () => {
+  const {fetchTraderMadeCandles}=await import("../src/market-data.mjs");
+  const result=await fetchTraderMadeCandles({
+    apiKey:"history-test-secret",symbol:"EURUSD",timeframe:"2m",now:Date.parse("2026-11-22T12:00:00Z"),
+    fetchImpl:async()=>new Response(JSON.stringify({quotes:[
+      {date:"2026-11-22 11:58:00",open:1.1,high:1.11,low:1.09,close:1.105},
+      {date:"2026-11-22 11:59:00",open:1.105,high:1.12,low:1.1,close:1.115}
+    ]}),{status:200})
+  });
+  assert.equal(result.candles.length,1);
+  assert.equal(result.candles[0].open,1.1);
+  assert.equal(result.candles[0].high,1.12);
+  assert.equal(result.candles[0].low,1.09);
+  assert.equal(result.candles[0].close,1.115);
+});
