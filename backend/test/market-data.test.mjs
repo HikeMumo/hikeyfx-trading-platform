@@ -151,6 +151,15 @@ test("monthly charts retrieve seven years in one-year provider-safe chunks", asy
   assert.equal(result.timeframe, "1M");
 });
 
+test("historical adapter identifies provider plan restrictions returned with HTTP 200", async () => {
+  await assert.rejects(fetchTraderMadeCandles({
+    apiKey: "restricted-plan-test", symbol: "EURUSD", timeframe: "1D",
+    fetchImpl: async () => new Response(JSON.stringify({
+      message: "Your plan does not allow access to this dataset"
+    }), { status: 200, headers: { "content-type": "application/json" } })
+  }), error => error.code === "MARKET_DATA_HISTORY_FORBIDDEN");
+});
+
 test("historical adapter rejects unknown symbols and timeframes before network access", async () => {
   const noNetwork=async()=>{throw new Error("network must not be called")};
   await assert.rejects(fetchTraderMadeCandles({apiKey:"test",symbol:"UNKNOWN",timeframe:"15m",fetchImpl:noNetwork}),/enabled historical data/);
