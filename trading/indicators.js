@@ -29,7 +29,7 @@ function calculate(rows){
  const rsi=c.map((_,i)=>avgGain[i]===null?null:avgLoss[i]===0?(avgGain[i]===0?50:100):100-100/(1+avgGain[i]/avgLoss[i]));
  const upper=[],lower=[],middle=[];for(let i=0;i<n;i++){if(i<19){upper.push(null);lower.push(null);middle.push(null)}else{const a=c.slice(i-19,i+1),m=mean(a),s=std(a);middle.push(m);upper.push(m+2*s);lower.push(m-2*s)}}
  const high14=[],low14=[];for(let i=0;i<n;i++){high14.push(i<13?null:Math.max(...h.slice(i-13,i+1)));low14.push(i<13?null:Math.min(...l.slice(i-13,i+1)))}
- const typical=rows.map((_,i)=>(h[i]+l[i]+c[i])/3);
+ const typical=rows.map((_,i)=>(h[i]+l[i]+c[i])/3),median=rows.map((_,i)=>(h[i]+l[i])/2);
  const cci=typical.map((x,i)=>{if(i<19)return null;const a=typical.slice(i-19,i+1),m=mean(a),dev=mean(a.map(z=>Math.abs(z-m)));return dev? (x-m)/(.015*dev):0});
  const demUp=[],demDown=[];for(let i=0;i<n;i++){demUp.push(i?Math.max(h[i]-h[i-1],0):0);demDown.push(i?Math.max(l[i-1]-l[i],0):0)}
  const dem=demUp.map((_,i)=>{if(i<13)return null;const u=mean(demUp.slice(i-13,i+1)),d=mean(demDown.slice(i-13,i+1));return u+d?u/(u+d):0});
@@ -39,7 +39,7 @@ function calculate(rows){
  const mfi=moneyFlow.map((_,i)=>{if(!hasVolume||i<13)return null;const p=positiveFlow.slice(i-13,i+1).reduce((a,b)=>a+b,0),q=negativeFlow.slice(i-13,i+1).reduce((a,b)=>a+b,0);return q===0?100:100-100/(1+p/q)});
  const obv=[];for(let i=0;i<n;i++)obv.push(!hasVolume?null:i?obv[i-1]+(c[i]>c[i-1]?v[i]:c[i]<c[i-1]?-v[i]:0):v[i]);
  const ad=[];for(let i=0;i<n;i++){if(!hasVolume){ad.push(null);continue}const m=h[i]===l[i]?0:((c[i]-l[i])-(h[i]-c[i]))/(h[i]-l[i]);ad.push((i?ad[i-1]:0)+m*v[i])}
- const ao=c.map((_,i)=>i<33?null:mean(typical.slice(i-4,i+1))-mean(typical.slice(i-33,i+1)));
+ const ao=c.map((_,i)=>i<33?null:mean(median.slice(i-4,i+1))-mean(median.slice(i-33,i+1)));
  const ac=ao.map((x,i)=>x===null||i<4?null:x-mean(ao.slice(i-4,i+1)));
  const macd=ema12.map((x,i)=>x===null||ema26[i]===null?null:x-ema26[i]);
  const signal=ema(macd,9);
@@ -58,7 +58,7 @@ function calculate(rows){
  const ichi=rows.map((_,i)=>({tenkan:tenkan[i],kijun:kijun[i],senkouA:projectedA[i],senkouB:projectedB[i],chikou:chikou[i]}));
  const envelopes=ema20.map(x=>x===null?null:{upper:x*1.01,lower:x*.99});
  function shiftSeries(values,shift){const out=Array(values.length).fill(null);values.forEach(function(value,i){if(i+shift<out.length)out[i+shift]=value});return out}
- const jaw=shiftSeries(smma(typical,13),8),teeth=shiftSeries(smma(typical,8),5),lips=shiftSeries(smma(typical,5),3);
+ const jaw=shiftSeries(smma(median,13),8),teeth=shiftSeries(smma(median,8),5),lips=shiftSeries(smma(median,5),3);
  const alligator=rows.map((_,i)=>({jaw:jaw[i],teeth:teeth[i],lips:lips[i]}));
  const mom=c.map((x,i)=>i<14?null:(c[i-14]===0?null:x/c[i-14]*100)),roc=c.map((x,i)=>i<14?null:(x/c[i-14]-1)*100);
  const dema=ema20.map((x,i)=>x===null?null:2*x-(ema(ema20.map(z=>z||0),20)[i]||0));
