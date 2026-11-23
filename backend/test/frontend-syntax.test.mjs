@@ -68,3 +68,13 @@ test("trading page contains no duplicate element IDs", async () => {
   const ids = [...html.matchAll(/\\bid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(new Set(ids).size, ids.length, "element IDs must be unique");
 });
+
+test("open positions expose a functional stop-loss and take-profit editor", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const id of ["modifyPositionDialog","modifyStopLoss","modifyTakeProfit","savePositionChanges","cancelPositionChanges"]) {
+    assert.ok(html.includes('id="' + id + '"'), id + " should exist");
+  }
+  assert.ok(html.includes('data-modify='));
+  assert.ok(html.includes('"/modify"'));
+  assert.ok(html.includes('function savePositionChanges'));
+});
