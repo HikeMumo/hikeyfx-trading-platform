@@ -73,6 +73,13 @@ test("RSI toggle stays synchronized with the full indicator library and all mult
   assert.ok(html.includes('drawIndicatorLine(series.Envelopes.middle'));
 });
 
+test("chart x-axis shows clock time for intraday timeframes and dates for higher timeframes", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('(tf.endsWith("m")||tf.endsWith("h"))?td.toLocaleString'));
+  assert.ok(html.includes('hour:"2-digit",minute:"2-digit"'));
+  assert.ok(html.includes(':td.toLocaleDateString(undefined,{month:"short",day:"numeric"})'));
+});
+
 test("Heikin Ashi candles are calculated from full loaded history before viewport slicing", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   assert.ok(html.includes("plotCandles=candles.map(function(c)"));
