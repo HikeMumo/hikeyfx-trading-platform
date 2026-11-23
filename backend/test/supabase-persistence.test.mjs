@@ -112,3 +112,43 @@ test("admin migration restricts operational overview to active admin memberships
   assert.ok(sql.includes("grant execute on function public.hikeyfx_admin_overview() to authenticated"));
   assert.ok(sql.includes("revoke all on function public.hikeyfx_admin_overview() from public, anon"));
 });
+
+test("position modification migration is account-scoped and validates against protected quotes", async () => {
+  const sql = await readFile(new URL("../../supabase/migrations/0011_demo_position_modification.sql", import.meta.url), "utf8");
+  assert.match(sql, /create or replace function public\.hikeyfx_demo_modify_position/);
+  assert.match(sql, /security definer/);
+  assert.match(sql, /v_account_id := public\.bootstrap_member\(\)/);
+  assert.match(sql, /account_id=v_account_id and status='open'/);
+  assert.match(sql, /join public\.demo_execution_quotes q on q\.symbol=i\.symbol/);
+  assert.match(sql, /Stop loss is on the wrong side of current price/);
+  assert.match(sql, /Take profit is on the wrong side of current price/);
+  assert.match(sql, /event_type,event_data\)\s*values\(v_account_id,v_position\.id,'adjustment'/);
+  assert.match(sql, /revoke all on function public\.hikeyfx_demo_modify_position/);
+  assert.match(sql, /grant execute on function public\.hikeyfx_demo_modify_position/);
+  assert.match(sql, /set search_path = ''/);
+});
+
+test("Supabase repository forwards position protection changes to the scoped RPC", async () => {
+  const oldUrl = process.env.SUPABASE_URL;
+  const oldKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  process.env.SUPABASE_URL = "https://example.supabase.co";
+  process.env.SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
+  const requests = [];
+  try {
+    const { createSupabaseDemoRepository } = await import("../src/supabase.mjs?modify-position-test");
+    const repository = createSupabaseDemoRepository({ fetchImpl: async (url, options) => {
+      requests.push({ url: String(url), options });
+      return new Response(JSON.stringify({ id: "position-1", status: "open" }), { status: 200 });
+    }});
+    const result = await repository.modifyPosition("member-jwt", "position-1", { stopLoss: 1.08, takeProfit: null });
+    assert.equal(result.id, "position-1");
+    assert.match(requests[0].url, /rpc\/hikeyfx_demo_modify_position$/);
+    assert.equal(requests[0].options.headers.authorization, "Bearer member-jwt");
+    assert.deepEqual(JSON.parse(requests[0].options.body), {
+      p_position_id: "position-1", p_stop_loss: 1.08, p_take_profit: null
+    });
+  } finally {
+    if (oldUrl === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldUrl;
+    if (oldKey === undefined) delete process.env.SUPABASE_PUBLISHABLE_KEY; else process.env.SUPABASE_PUBLISHABLE_KEY = oldKey;
+  }
+});
