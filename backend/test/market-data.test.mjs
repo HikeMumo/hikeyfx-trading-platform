@@ -98,7 +98,7 @@ test("TraderMade historical adapter aggregates unsupported minute periods withou
 
 test("historical adapter rejects unknown symbols and timeframes before network access", async () => {
   const noNetwork=async()=>{throw new Error("network must not be called")};
-  await assert.rejects(fetchTraderMadeCandles({apiKey:"test",symbol:"UNKNOWN",timeframe:"15m",fetchImpl:noNetwork}),/not enabled/);
+  await assert.rejects(fetchTraderMadeCandles({apiKey:"test",symbol:"UNKNOWN",timeframe:"15m",fetchImpl:noNetwork}),/enabled historical data/);
   await assert.rejects(fetchTraderMadeCandles({apiKey:"test",symbol:"EURUSD",timeframe:"7m",fetchImpl:noNetwork}),/Unsupported chart timeframe/);
 });
 
