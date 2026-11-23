@@ -31,7 +31,7 @@ function calculate(rows){
  const upper=[],lower=[],middle=[];for(let i=0;i<n;i++){if(i<19){upper.push(null);lower.push(null);middle.push(null)}else{const a=c.slice(i-19,i+1),m=mean(a),s=std(a);middle.push(m);upper.push(m+2*s);lower.push(m-2*s)}}
  const high14=[],low14=[];for(let i=0;i<n;i++){high14.push(i<13?null:Math.max(...h.slice(i-13,i+1)));low14.push(i<13?null:Math.min(...l.slice(i-13,i+1)))}
  const typical=rows.map((_,i)=>(h[i]+l[i]+c[i])/3),median=rows.map((_,i)=>(h[i]+l[i])/2);
- const cci=typical.map((x,i)=>{if(i<19)return null;const a=typical.slice(i-19,i+1),m=mean(a),dev=mean(a.map(z=>Math.abs(z-m)));return dev? (x-m)/(.015*dev):0});
+ const cci=typical.map((x,i)=>{if(i<13)return null;const a=typical.slice(i-13,i+1),m=mean(a),dev=mean(a.map(z=>Math.abs(z-m)));return dev? (x-m)/(.015*dev):0});
  const demUp=[],demDown=[];for(let i=0;i<n;i++){demUp.push(i?Math.max(h[i]-h[i-1],0):0);demDown.push(i?Math.max(l[i-1]-l[i],0):0)}
  const dem=demUp.map((_,i)=>{if(i<13)return null;const u=mean(demUp.slice(i-13,i+1)),d=mean(demDown.slice(i-13,i+1));return u+d?u/(u+d):0});
  const forceRaw=c.map((x,i)=>hasVolume&&i? (x-c[i-1])*v[i]:null),force=hasVolume?smaValid(forceRaw,13):Array(n).fill(null);
