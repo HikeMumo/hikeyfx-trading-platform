@@ -15,17 +15,17 @@ Set these environment variables on the backend host:
 
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY`
-- `TRADERMADE_API_KEY` (optional until a valid, permitted data subscription is available)
+- `TRADERMADE_API_KEY` (optional; existing live quote and historical fallback provider)\n- `TWELVE_DATA_API_KEY` (preferred historical candle provider; when set, chart history requests use Twelve Data instead of TraderMade)
 
 Never put a Supabase secret/service-role key or TraderMade key in browser code or Git.
 
-## Routes
+## Historical chart data\n\nWhen `TWELVE_DATA_API_KEY` is configured, the authenticated candle route uses Twelve Data for mapped FX and precious-metal symbols. Native provider intervals are used where available; other supported chart periods are aggregated from genuine lower-timeframe OHLC records. Unsupported instruments and provider-plan restrictions are reported instead of generating placeholder candles. The current adapter maps EURUSD, GBPUSD, AUDUSD, USDJPY, USDCHF, USDCAD, NZDUSD, XAUUSD and XAGUSD. Index CFDs are not mapped yet and need a verified data symbol/provider entitlement before they can show history.\n\nTwelve Data's plan and display licensing must match the intended HikeyFX audience and use; a working API key alone does not establish permission to redistribute market data.\n\n## Routes
 
 - `GET /health` (returns process status and safe booleans indicating Supabase persistence and market-data configuration; it does not probe the database or validate provider credentials)
 - `GET /api/v1/demo/account`
 - `GET /api/v1/demo/positions`
 - `GET /api/v1/demo/history`
-- `GET /api/v1/market/quotes`
+- `GET /api/v1/market/quotes`\n- `GET /api/v1/market/candles`
 - `POST /api/v1/demo/orders`
 - `POST /api/v1/demo/positions/{id}/close`
 
