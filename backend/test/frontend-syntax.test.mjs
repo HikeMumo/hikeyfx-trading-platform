@@ -122,7 +122,7 @@ test("chart drawings can be selected, resized by endpoint dragging and deleted",
   assert.ok(html.includes('selectedDrawingIndex=-1,drawingEdit=false,drawingEditMode'));
   assert.ok(html.includes('Math.hypot(p.x-endPoint.x,p.y-endPoint.y)<=14'));
   assert.ok(html.includes('edit.x2=edit.x1+dx*Math.cos(angle)-dy*Math.sin(angle)'));
-  assert.ok(html.includes('function(e){if(drawingEdit){drawingEdit=false'));
+  assert.ok(html.includes('if(drawingEdit){drawingEdit=false;drawingEditMode=""'));
 });
 
 test("chart drawings expose a rotation handle and persist rotated geometry", async () => {
