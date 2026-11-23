@@ -138,11 +138,17 @@ test("workspace settings save quote sorting, chart defaults and browser notifica
   assert.ok(html.includes('function saveWorkspaceSettings'));
 });
 
+test("USDJPY and USDCHF are enabled in the order ticket", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('["EUR/USD","GBP/USD","AUD/USD","USD/JPY","USD/CHF","Gold"].indexOf(selected.s)<0'));
+  assert.ok(html.includes('"USD/JPY","USD/CHF"].indexOf(selected.s)>=0?100000:null'));
+});
+
 test("order ticket uses MT5-style lots and calculates notional using each instrument contract size", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('id="volume" type="number" min="0.01" max="1" step="0.01" value="0.01"'));
   assert.ok(html.includes('VOLUME (LOTS)'));
-  assert.ok(html.includes('contractSize=selected.s==="Gold"?100:["EUR/USD","GBP/USD","AUD/USD"].indexOf(selected.s)>=0?100000:null'));
+  assert.ok(html.includes('contractSize=selected.s==="Gold"?100:["EUR/USD","GBP/USD","AUD/USD","USD/JPY","USD/CHF"].indexOf(selected.s)>=0?100000:null'));
   assert.ok(html.includes('contractSize===null?"Not available for this instrument"'));
   assert.ok(html.includes('volume:lots'));
   assert.ok(html.includes('lots<0.01||lots>1'));
