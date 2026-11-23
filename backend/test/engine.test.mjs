@@ -160,3 +160,14 @@ test("rejects partial close volumes that over-close or leave less than minimum l
   const minimumRemainder = engine.partialClosePosition(position.id, 0.09);
   assert.equal(minimumRemainder.remainingVolume, 0.01);
 });
+
+test("journal records open, modify, partial close and final close events", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.10 });
+  engine.modifyPosition(position.id, { stopLoss: 1.08400, takeProfit: 1.08700 });
+  engine.partialClosePosition(position.id, 0.04);
+  engine.closePosition(position.id);
+  const events = engine.snapshot().journal;
+  assert.deepEqual(events.map(event => event.eventType), ["closed","partial_close","adjustment","opened"]);
+  assert.equal(events[0].eventData.positionId, position.id);
+});
