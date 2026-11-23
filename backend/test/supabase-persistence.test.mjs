@@ -152,3 +152,40 @@ test("Supabase repository forwards position protection changes to the scoped RPC
     if (oldKey === undefined) delete process.env.SUPABASE_PUBLISHABLE_KEY; else process.env.SUPABASE_PUBLISHABLE_KEY = oldKey;
   }
 });
+
+test("partial close migration uses protected quotes and preserves the remaining position", async () => {
+  const sql = await readFile(new URL("../../supabase/migrations/0012_demo_partial_close.sql", import.meta.url), "utf8");
+  assert.match(sql, /create or replace function public\.hikeyfx_demo_partial_close_position/);
+  assert.match(sql, /security definer/);
+  assert.match(sql, /account_id=v_account_id and status='open'/);
+  assert.match(sql, /join public\.demo_execution_quotes q on q\.symbol=i\.symbol/);
+  assert.match(sql, /v_remaining := v_position\.volume-p_volume/);
+  assert.match(sql, /set volume=v_remaining/);
+  assert.match(sql, /'closedVolume',p_volume/);
+  assert.match(sql, /'remainingVolume',v_remaining/);
+  assert.match(sql, /revoke all on function public\.hikeyfx_demo_partial_close_position/);
+  assert.match(sql, /grant execute on function public\.hikeyfx_demo_partial_close_position/);
+});
+
+test("Supabase repository forwards partial close requests to the authenticated RPC", async () => {
+  const oldUrl = process.env.SUPABASE_URL;
+  const oldKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  process.env.SUPABASE_URL = "https://example.supabase.co";
+  process.env.SUPABASE_PUBLISHABLE_KEY = "sb_publishable_test";
+  const requests = [];
+  try {
+    const { createSupabaseDemoRepository } = await import("../src/supabase.mjs?partial-close-test");
+    const repository = createSupabaseDemoRepository({ fetchImpl: async (url, options) => {
+      requests.push({ url: String(url), options });
+      return new Response(JSON.stringify({ positionId: "position-1", status: "partial_closed" }), { status: 200 });
+    }});
+    const result = await repository.partialClosePosition("member-jwt", "position-1", 0.04);
+    assert.equal(result.status, "partial_closed");
+    assert.match(requests[0].url, /rpc\/hikeyfx_demo_partial_close_position$/);
+    assert.equal(requests[0].options.headers.authorization, "Bearer member-jwt");
+    assert.deepEqual(JSON.parse(requests[0].options.body), { p_position_id: "position-1", p_volume: 0.04 });
+  } finally {
+    if (oldUrl === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = oldUrl;
+    if (oldKey === undefined) delete process.env.SUPABASE_PUBLISHABLE_KEY; else process.env.SUPABASE_PUBLISHABLE_KEY = oldKey;
+  }
+});
