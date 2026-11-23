@@ -32,6 +32,19 @@ test("TraderMade adapter maps genuine timestamped quote fields", async () => {
   assert.equal(result.quotes[0].status, "fresh");
 });
 
+test("TraderMade adapter accepts the complete HikeyFX forex, metal and index quote set", async () => {
+  const symbols = ["EURUSD","GBPUSD","AUDUSD","USDJPY","USDCHF","SPX500","NAS100","UK100","XAUUSD"];
+  const now = Date.parse("2026-11-23T12:00:00.000Z");
+  const result = await fetchTraderMadeQuotes({
+    apiKey: "coverage-test-secret", symbols, now,
+    fetchImpl: async () => new Response(JSON.stringify({ quotes: symbols.map((instrument, index) => ({
+      instrument, bid: 100 + index, ask: 100.2 + index, timestamp: now / 1000
+    })) }), { status: 200, headers: { "content-type": "application/json" } })
+  });
+  assert.deepEqual(result.quotes.map(quote => quote.symbol), symbols);
+  assert.equal(result.status, "fresh");
+});
+
 test("TraderMade adapter rejects missing credentials", async () => {
   await assert.rejects(
     fetchTraderMadeQuotes({ apiKey: "", symbols: ["EURUSD"] }),
