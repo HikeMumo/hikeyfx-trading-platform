@@ -159,3 +159,11 @@ test("history workspace includes a separate account journal view", async () => {
   assert.ok(html.includes('function renderJournal'));
   assert.ok(html.includes('textContent=String(event.eventType'));
 });
+
+test("account journal can be filtered by event name and event details", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('id="journalSearch"'));
+  assert.ok(html.includes('id="journalTools"'));
+  assert.ok(html.includes('filtered=journal.filter'));
+  assert.ok(html.includes('el("journalSearch").addEventListener("input",renderJournal)'));
+});
