@@ -83,7 +83,7 @@ const TIMEFRAME_CONFIG = {
 "15m":["minute",15,2],"20m":["minute",1,2],"30m":["minute",30,2],
 "1h":["hourly",1,30],"2h":["hourly",2,30],"3h":["hourly",1,30],
 "4h":["hourly",4,30],"6h":["hourly",6,30],"8h":["hourly",8,30],"12h":["hourly",1,30],
-"1D":["daily",1,365],"1W":["daily",1,365],"1M":["daily",1,365]
+"1D":["daily",1,365],"1W":["daily",1,1825],"1M":["daily",1,1825]
 };
 const isoDate = date => date.toISOString().slice(0,16).replace("T","-");
 export function parseHistoricalTimestamp(value) {
@@ -109,17 +109,23 @@ export async function fetchTraderMadeCandles({symbol,timeframe="15m",apiKey=proc
  const code=String(symbol||"").trim().toUpperCase(),tf=String(timeframe||""),config=TIMEFRAME_CONFIG[tf];
  if(!HISTORY_SYMBOLS.has(code))throw new Error("This instrument does not have enabled historical data.");
  if(!config)throw new Error("Unsupported chart timeframe.");
- const [interval,period,days]=config,end=new Date(now),start=new Date(now-days*86400000),url=new URL(HISTORY_API_BASE);
- url.searchParams.set("currency",code);
- url.searchParams.set("start_date",interval==="daily"?start.toISOString().slice(0,10):isoDate(start));
- url.searchParams.set("end_date",interval==="daily"?end.toISOString().slice(0,10):isoDate(end));
- url.searchParams.set("interval",interval);url.searchParams.set("period",String(period));url.searchParams.set("format","records");url.searchParams.set("api_key",apiKey);
- let response;
- try{response=await fetchImpl(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)})}catch{const error=new Error("Historical market data provider could not be reached.");error.code="MARKET_DATA_UPSTREAM_UNAVAILABLE";throw error}
- if(!response.ok){const error=new Error("Historical candles are unavailable for this account or request.");error.code=response.status===401||response.status===403?"MARKET_DATA_HISTORY_FORBIDDEN":"MARKET_DATA_UPSTREAM_ERROR";throw error}
- let payload;try{payload=await response.json()}catch{const error=new Error("Historical provider returned invalid data.");error.code="MARKET_DATA_INVALID_RESPONSE";throw error}
- if(!Array.isArray(payload.quotes)){const error=new Error("Historical provider returned no candle collection.");error.code="MARKET_DATA_EMPTY";throw error}
- const rows=payload.quotes.flatMap(item=>{const open=Number(item.open),high=Number(item.high),low=Number(item.low),close=Number(item.close),time=parseHistoricalTimestamp(item.date||item.datetime||"");if(![open,high,low,close,time].every(Number.isFinite)||Math.min(open,high,low,close)<=0||high<Math.max(open,close,low)||low>Math.min(open,close,high))return[];return[{time:new Date(time).toISOString(),open,high,low,close}]}).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time));
+ const [interval,period,days]=config,end=new Date(now),start=new Date(now-days*86400000),ranges=[];
+ if(interval==="daily"&&days>365){let cursor=new Date(start);while(cursor<=end){const chunkEnd=new Date(Math.min(end.getTime(),cursor.getTime()+364*86400000));ranges.push([cursor,chunkEnd]);cursor=new Date(chunkEnd.getTime()+86400000)}}else ranges.push([start,end]);
+ const providerRows=[];
+ for(const [rangeStart,rangeEnd] of ranges){
+  const url=new URL(HISTORY_API_BASE);
+  url.searchParams.set("currency",code);
+  url.searchParams.set("start_date",interval==="daily"?rangeStart.toISOString().slice(0,10):isoDate(rangeStart));
+  url.searchParams.set("end_date",interval==="daily"?rangeEnd.toISOString().slice(0,10):isoDate(rangeEnd));
+  url.searchParams.set("interval",interval);url.searchParams.set("period",String(period));url.searchParams.set("format","records");url.searchParams.set("api_key",apiKey);
+  let response;
+  try{response=await fetchImpl(url,{headers:{accept:"application/json"},signal:AbortSignal.timeout(12000)})}catch{const error=new Error("Historical market data provider could not be reached.");error.code="MARKET_DATA_UPSTREAM_UNAVAILABLE";throw error}
+  if(!response.ok){const error=new Error("Historical candles are unavailable for this account or request.");error.code=response.status===401||response.status===403?"MARKET_DATA_HISTORY_FORBIDDEN":"MARKET_DATA_UPSTREAM_ERROR";throw error}
+  let payload;try{payload=await response.json()}catch{const error=new Error("Historical provider returned invalid data.");error.code="MARKET_DATA_INVALID_RESPONSE";throw error}
+  if(Array.isArray(payload.quotes))providerRows.push(...payload.quotes);
+ }
+ if(!providerRows.length){const error=new Error("Historical provider returned no candle collection.");error.code="MARKET_DATA_EMPTY";throw error}
+ const rows=providerRows.flatMap(item=>{const open=Number(item.open),high=Number(item.high),low=Number(item.low),close=Number(item.close),time=parseHistoricalTimestamp(item.date||item.datetime||"");if(![open,high,low,close,time].every(Number.isFinite)||Math.min(open,high,low,close)<=0||high<Math.max(open,close,low)||low>Math.min(open,close,high))return[];return[{time:new Date(time).toISOString(),open,high,low,close}]}).sort((a,b)=>Date.parse(a.time)-Date.parse(b.time));
  const candles=aggregateCandles(rows,tf).slice(-240);
  if(!candles.length){const error=new Error("No historical candles were returned for this instrument and timeframe.");error.code="MARKET_DATA_EMPTY";throw error}
  return{source:"TraderMade historical",symbol:code,timeframe:tf,receivedAt:new Date(now).toISOString(),candles};
