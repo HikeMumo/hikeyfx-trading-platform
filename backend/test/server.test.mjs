@@ -304,3 +304,19 @@ test("persistent position modification uses the authenticated member repository"
   assert.equal((await response.json()).data.stopLoss, 1.08300);
   assert.equal(calls.some(call => call[0] === "modify" && call[1] === "member-modify-token" && call[2] === positionId), true);
 });
+
+test("HTTP API partially closes an open demo position", async t => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.10 });
+  engine.updateQuote("EURUSD", 1.08600, 1.08612);
+  const server = createApp(engine, undefined, async () => ({ id: "partial-member" }), null);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/demo/positions/${position.id}/partial-close`, {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ volume: 0.04 })
+  });
+  assert.equal(response.status, 200);
+  const data = (await response.json()).data;
+  assert.equal(data.closedVolume, 0.04);
+  assert.equal(data.remainingVolume, 0.06);
+});
