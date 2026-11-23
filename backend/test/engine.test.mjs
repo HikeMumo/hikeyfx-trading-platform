@@ -157,5 +157,6 @@ test("rejects partial close volumes that over-close or leave less than minimum l
   const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.10 });
   assert.throws(() => engine.partialClosePosition(position.id, 0.10), /leave at least/);
   assert.throws(() => engine.partialClosePosition(position.id, 0.095), /0.01 lot steps/);
-  assert.throws(() => engine.partialClosePosition(position.id, 0.09), /leave at least/);
+  const minimumRemainder = engine.partialClosePosition(position.id, 0.09);
+  assert.equal(minimumRemainder.remainingVolume, 0.01);
 });
