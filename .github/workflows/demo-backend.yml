@@ -44,6 +44,7 @@ jobs:
         run: |
           node --check auth/config.js
           node --check auth/auth.js
+          node --check trading/indicators.js
           node --check portal/member.js
           node --check backend/src/server.mjs
           node --check backend/src/supabase.mjs
