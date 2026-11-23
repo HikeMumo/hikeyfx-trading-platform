@@ -171,3 +171,15 @@ test("journal records open, modify, partial close and final close events", () =>
   assert.deepEqual(events.map(event => event.eventType), ["closed","partial_close","adjustment","opened"]);
   assert.equal(events[0].eventData.positionId, position.id);
 });
+
+test("journal records automatic stop-loss and take-profit closures from trusted quote updates", () => {
+  const engine = new DemoTradingEngine();
+  const stop = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.1, stopLoss: 1.08400 });
+  engine.updateQuote("EURUSD", 1.08390, 1.08402);
+  assert.equal(engine.snapshot().journal[0].eventType, "stop_loss");
+  assert.equal(engine.snapshot().positions.some(position => position.id === stop.id), false);
+  const target = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.1, takeProfit: 1.08700 });
+  engine.updateQuote("EURUSD", 1.08710, 1.08722);
+  assert.equal(engine.snapshot().journal[0].eventType, "take_profit");
+  assert.equal(engine.snapshot().positions.some(position => position.id === target.id), false);
+});
