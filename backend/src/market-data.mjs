@@ -85,7 +85,7 @@ const TIMEFRAME_CONFIG = {
 "4h":["hourly",4,30],"6h":["hourly",6,30],"8h":["hourly",8,30],"12h":["hourly",1,30],
 "1D":["daily",1,365],"1W":["daily",1,365],"1M":["daily",1,365]
 };
-const isoDate = date => date.toISOString().slice(0,19).replace("T","-");
+const isoDate = date => date.toISOString().slice(0,16).replace("T","-");
 function bucketStart(date,timeframe) {
  const d=new Date(date);
  if(timeframe==="1W"){const day=(d.getUTCDay()+6)%7;d.setUTCDate(d.getUTCDate()-day);d.setUTCHours(0,0,0,0);return d.toISOString()}
