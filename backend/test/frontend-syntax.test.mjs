@@ -107,3 +107,11 @@ test("open positions expose a validated partial-close workflow", async () => {
   assert.ok(html.includes('function confirmPartialClose'));
   assert.ok(html.includes('"/partial-close"'));
 });
+
+test("trade workspace exposes a confirmed close-all positions action", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('id="closeAllPositions"'));
+  assert.ok(html.includes('function closeAllPositions'));
+  assert.ok(html.includes('window.confirm("Close all "'));
+  assert.ok(html.includes('"/close"'));
+});
