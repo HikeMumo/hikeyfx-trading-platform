@@ -216,7 +216,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
         return send(res, error.statusCode || 400, { ok: false, error: error.message });
       }
     }
-    const modifyMatch = url.pathname.match(/^\\/api\\/v1\\/demo\\/positions\\/([0-9a-f-]+)\\/modify$/i);
+    const modifyMatch = url.pathname.match(/^\/api\/v1\/demo\/positions\/([0-9a-f-]+)\/modify$/i);
     if (req.method === "POST" && modifyMatch) {
       try {
         const body = await readJson(req);
