@@ -97,3 +97,13 @@ test("workspace settings save quote sorting, chart defaults and browser notifica
   assert.ok(html.includes('function loadWorkspaceSettings'));
   assert.ok(html.includes('function saveWorkspaceSettings'));
 });
+
+test("open positions expose a validated partial-close workflow", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const id of ["partialCloseDialog","partialCloseVolume","confirmPartialClose","cancelPartialClose"]) {
+    assert.ok(html.includes('id="' + id + '"'), id + " should exist");
+  }
+  assert.ok(html.includes('data-partial='));
+  assert.ok(html.includes('function confirmPartialClose'));
+  assert.ok(html.includes('"/partial-close"'));
+});
