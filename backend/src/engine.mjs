@@ -102,6 +102,31 @@ export class DemoTradingEngine {
     return { ...position, unrealisedPnl: this.getUnrealisedPnl(position) };
   }
 
+  partialClosePosition(id, volume) {
+    const index = this.positions.findIndex(position => position.id === id);
+    if (index < 0) throw new Error("Open demo position not found.");
+    const position = this.positions[index];
+    if (!finite(volume) || volume < 0.01 || Math.abs(volume * 100 - Math.round(volume * 100)) > 1e-8 ||
+        volume >= position.volume || position.volume - volume < 0.01) {
+      throw new Error("Partial close volume must use 0.01 lot steps and leave at least 0.01 lots open.");
+    }
+    const quote = this.getQuote(position.symbol);
+    const exitPrice = position.side === "buy" ? quote.bid : quote.ask;
+    const direction = position.side === "buy" ? 1 : -1;
+    const pnl = roundMoney((exitPrice - position.entryPrice) * direction * position.contractSize * volume);
+    const releasedMargin = roundMoney(position.margin * volume / position.volume);
+    this.balance = roundMoney(this.balance + pnl);
+    position.volume = Math.round((position.volume - volume) * 100) / 100;
+    position.margin = roundMoney(Math.max(0, position.margin - releasedMargin));
+    const partial = {
+      ...position, id: randomUUID(), positionId: position.id, volume, exitPrice,
+      realisedPnl: pnl, closeReason: "partial", closedAt: new Date().toISOString(),
+      status: "partial_closed", margin: 0
+    };
+    this.history.unshift(partial);
+    return { positionId: position.id, closedVolume: volume, remainingVolume: position.volume, exitPrice, realisedPnl: pnl, balance: this.balance };
+  }
+
   closePosition(id, reason = "manual") {
     const index = this.positions.findIndex(position => position.id === id);
     if (index < 0) throw new Error("Open demo position not found.");
