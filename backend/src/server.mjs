@@ -84,6 +84,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
   const memberEngines = new Map();
   const rateBuckets = new Map();
   const ratePolicy = (method, path) => {
+    if (method === "GET" && path === "/api/v1/demo/journal") return { name: "journal", limit: 60 };
     if (method === "GET" && path === "/api/v1/market/quotes") return { name: "quotes", limit: 30 };
     if (method === "GET" && path === "/api/v1/market/candles") return { name: "candles", limit: 30 };
     if (method === "POST" && path === "/api/v1/demo/orders") return { name: "orders", limit: 20 };
@@ -170,6 +171,13 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
         catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
       }
       return send(res, 200, { ok: true, data: memberEngine.snapshot().history });
+    }
+    if (req.method === "GET" && url.pathname === "/api/v1/demo/journal") {
+      if (persistent) {
+        try { return send(res, 200, { ok: true, data: (await repository.snapshot(token)).journal || [] }); }
+        catch (error) { return send(res, error.statusCode || 503, { ok: false, error: error.message }); }
+      }
+      return send(res, 200, { ok: true, data: memberEngine.snapshot().journal || [] });
     }
     if (req.method === "GET" && url.pathname === "/api/v1/market/quotes") {
       try {
