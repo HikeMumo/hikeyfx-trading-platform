@@ -78,3 +78,12 @@ test("open positions expose a functional stop-loss and take-profit editor", asyn
   assert.ok(html.includes('"/modify"'));
   assert.ok(html.includes('function savePositionChanges'));
 });
+
+test("account panel displays equity, margin, free margin and leverage metrics", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const id of ["balance","equity","usedMargin","freeMargin","marginLevel","leverage"]) {
+    assert.ok(html.includes('id="' + id + '"'), id + " should be visible in account metrics");
+  }
+  assert.ok(html.includes('accountState=data[0]'));
+  assert.ok(html.includes('function updateBalance'));
+});
