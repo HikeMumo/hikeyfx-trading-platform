@@ -115,3 +115,12 @@ test("trade workspace exposes a confirmed close-all positions action", async () 
   assert.ok(html.includes('window.confirm("Close all "'));
   assert.ok(html.includes('"/close"'));
 });
+
+test("chart drawings can be selected, resized by endpoint dragging and deleted", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('id="deleteSelectedDrawing"'));
+  assert.ok(html.includes('var selectedDrawingIndex=-1,drawingEdit=false'));
+  assert.ok(html.includes('Math.hypot(p.x-drawings[di].x2,p.y-drawings[di].y2)<=14'));
+  assert.ok(html.includes('drawings[selectedDrawingIndex].x2=e.clientX-r.left'));
+  assert.ok(html.includes('function(e){if(drawingEdit){drawingEdit=false'));
+});
