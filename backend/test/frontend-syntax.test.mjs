@@ -50,7 +50,8 @@ test("chart indicator toggles share one calculated series with the 30-indicator 
   assert.ok(html.includes('activeIndicators.add("Exponential Moving Average")'));
   assert.ok(html.includes('activeIndicators.add("Bollinger Bands")'));
   assert.ok(html.includes('syncIndicatorButtons();updateIndicatorValues();drawChart()'));
-  assert.ok(html.includes('series["Moving Average"]'));
+  assert.ok(html.includes('var values=series[spec[0]]'));
+  assert.ok(html.includes('["Moving Average","#9b7540"]'));
   assert.ok(!html.includes('avg/=7'), "legacy seven-period moving average must not conflict with the 20-period library calculation");
 });
 
