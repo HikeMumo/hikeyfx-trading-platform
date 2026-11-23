@@ -112,6 +112,21 @@ body[data-view="charts"] .below>.subpanel:first-child>p{display:none}
 .menu-item small{margin-left:auto}
 #newOrderButton{border-radius:12px;padding:11px 15px}
 @media(max-width:720px){body[data-view="markets"] .layout{height:calc(100dvh - 150px);overflow-y:auto}.category{margin:7px 0}.settings-panel{padding:10px!important}.settings-group{padding:9px!important}.mt5-nav button svg{width:23px;height:23px}}
+
+/* Chart tab recovery and refined settings navigation icon */
+body[data-view="charts"] .layout{display:block!important;height:auto!important;min-height:0!important;overflow:visible!important;padding-bottom:88px!important}
+body[data-view="charts"] .maincol{display:flex!important;visibility:visible!important;opacity:1!important;flex-direction:column!important;gap:10px!important;width:100%!important;min-height:0!important}
+body[data-view="charts"] .maincol>.markethead{display:flex!important}
+body[data-view="charts"] .maincol>.chartpanel{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;flex:0 0 auto!important;width:100%!important;min-height:0!important;overflow:visible!important}
+body[data-view="charts"] .chartpanel .chartwrap,#chartWrap{position:relative;min-height:280px}
+body[data-view="charts"] #chartWrap{display:block!important;visibility:visible!important;opacity:1!important;height:clamp(280px,52vh,520px)!important;min-height:280px!important;width:100%!important}
+body[data-view="charts"] #chart{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;height:100%!important;min-height:280px!important}
+body[data-view="charts"] .maincol>.below{display:block!important;visibility:visible!important;width:100%!important}
+body[data-view="charts"] .maincol>.below>.subpanel:first-child{display:block!important}
+.mt5-nav #navSettings svg{width:23px!important;height:23px!important;stroke-width:1.65!important;stroke-linejoin:round!important;stroke-linecap:round!important}
+.mt5-nav #navSettings{gap:3px!important}
+.mt5-nav #navSettings.active{background:#edf4ee!important;color:#176b48!important}
+@media(max-width:720px){body[data-view="charts"] .layout{padding:8px 8px 92px!important}body[data-view="charts"] #chartWrap{height:clamp(280px,48vh,430px)!important}}
 </style></head><body data-view="markets">
 <header class="top"><button id="menuButton" type="button" aria-label="Open side menu">☰</button><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><span id="workspaceTitle">Quotes</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">MEMBER AREA</span></div></header>
 <main class="layout">
@@ -159,7 +174,7 @@ body[data-view="charts"] .below>.subpanel:first-child>p{display:none}
 <button id="navCharts" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19V5M3 19h18M6 15l4-5 3 2 5-7 3 2"/></svg><span>Chart</span></button>
 <button id="navTrade" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4l-4 3 4 3M16 14l4 3-4 3"/></svg><span>Trade</span></button>
 <button id="navHistory" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>History</span></button>
-<button id="navSettings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.1.9-1.2 2.1-1.4-.5a7.8 7.8 0 0 1-1.5.9l-.2 1.5h-2.5l-.3-1.5a7.8 7.8 0 0 1-1.5-.9l-1.4.5-1.2-2.1 1.1-.9a7.5 7.5 0 0 1 0-1.8l-1.1-.9 1.2-2.1 1.4.5a7.8 7.8 0 0 1 1.5-.9l.3-1.5h2.5l.2 1.5a7.8 7.8 0 0 1 1.5.9l1.4-.5 1.2 2.1-1.1.9a7.5 7.5 0 0 1 0 1.8Z"/></svg><span>Settings</span></button>
+<button id="navSettings" type="button" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.7 3.8h4.6l.55 2.05c.48.18.93.44 1.34.77l2.02-.55 2.3 3.98-1.47 1.5c.06.49.06.99 0 1.48l1.47 1.5-2.3 3.98-2.02-.55c-.41.33-.86.59-1.34.77l-.55 2.05H9.7l-.55-2.05a6.7 6.7 0 0 1-1.34-.77l-2.02.55-2.3-3.98 1.47-1.5a6.2 6.2 0 0 1 0-1.48l-1.47-1.5 2.3-3.98 2.02.55c.41-.33.86-.59 1.34-.77L9.7 3.8Z"/><circle cx="12" cy="12.3" r="3.05"/></svg><span>Settings</span></button>
 
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -246,7 +261,7 @@ el("tabHistory").addEventListener("click",function(){el("tabHistory").classList.
 el("journalSearch").addEventListener("input",renderJournal);el("tabJournal").addEventListener("click",function(){el("tabJournal").classList.add("active");el("tabPositions").classList.remove("active");el("tabHistory").classList.remove("active");el("positionsTable").hidden=true;el("historyTable").hidden=true;el("journalTable").hidden=false;el("historyTools").style.display="none";el("journalTools").style.display="flex";renderJournal()});
 function activateNav(id,view){var labels={navMarkets:"Quotes",navCharts:"Chart",navTrade:"Trade",navHistory:"History",navSettings:"Settings"};["navMarkets","navCharts","navTrade","navHistory","navSettings"].forEach(function(key){var active=key===id;el(key).classList.toggle("active",active);if(active)el(key).setAttribute("aria-current","page");else el(key).removeAttribute("aria-current")});el("workspaceTitle").textContent=labels[id]||"Settings";document.body.setAttribute("data-view",view);var layout=el("positionsTable").closest(".layout");if(layout)layout.scrollTop=0}
 el("navMarkets").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navMarkets","markets")});
-el("navCharts").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navCharts","charts");drawChart()});
+el("navCharts").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navCharts","charts");var chartPanel=el("chartWrap");if(chartPanel){chartPanel.style.display="block";chartPanel.style.visibility="visible";}window.requestAnimationFrame(function(){window.requestAnimationFrame(function(){drawChart();if(!candles.length&&accessToken)loadHistoricalCandles()})})});
 el("navTrade").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navTrade","trade");el("tabPositions").click()});
 el("navHistory").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navHistory","history");el("tabHistory").click()});
 el("navSettings").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navSettings","settings")});
