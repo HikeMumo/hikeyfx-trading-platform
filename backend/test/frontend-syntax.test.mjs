@@ -120,7 +120,7 @@ test("chart drawings can be selected, resized by endpoint dragging and deleted",
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('id="deleteSelectedDrawing"'));
   assert.ok(html.includes('selectedDrawingIndex=-1,drawingEdit=false,drawingEditMode'));
-  assert.ok(html.includes('Math.hypot(p.x-drawings[di].x2,p.y-drawings[di].y2)<=14'));
+  assert.ok(html.includes('Math.hypot(p.x-endPoint.x,p.y-endPoint.y)<=14'));
   assert.ok(html.includes('edit.x2=edit.x1+dx*Math.cos(angle)-dy*Math.sin(angle)'));
   assert.ok(html.includes('function(e){if(drawingEdit){drawingEdit=false'));
 });
