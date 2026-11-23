@@ -29,6 +29,7 @@ test("indicator library calculates values from historical OHLCV candles", async 
   assert.ok(Number.isFinite(values["Relative Strength Index"]));
   assert.equal(values.series["Relative Strength Index"].findIndex(Number.isFinite), 14);
   assert.ok(Number.isFinite(values["Average Directional Movement Index"]));
+  assert.equal(values.series["Average Directional Movement Index"].findIndex(Number.isFinite), 26, "Wilder ADX should seed after 14 valid DX values");
   assert.ok(Number.isFinite(values["Average True Range"]));
   assert.ok(Number.isFinite(values["Relative Vigor Index"].main));
   assert.ok(Number.isFinite(values["Stochastic Oscillator"].signal));
