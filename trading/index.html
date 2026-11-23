@@ -8,6 +8,18 @@
 /* HikeyFX workspace refinement */
 :root{--bg:#f8f7f2;--panel:#fffefa;--line:rgba(24,39,31,.12);--muted:#657168;--text:#17221c;--green:#176b48;--red:#b34a4a;--gold:#9a8352;font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif}
 body{background:#f5f5ef;color:#17221c;letter-spacing:.005em}.top{height:66px;padding:0 clamp(12px,2vw,28px);background:rgba(255,254,250,.96);border-bottom:1px solid var(--line);box-shadow:0 2px 12px rgba(26,43,33,.035)}.brand{font-size:19px;letter-spacing:-.035em}.mark{background:#176b48;color:#fffefa;border:0;border-radius:10px;box-shadow:0 4px 12px rgba(23,107,72,.15)}.topright{color:#657168}.pill{background:#edf4ee;border:1px solid #d8e7da;color:#176b48;font-weight:700;letter-spacing:.04em}.api-status.online{color:#176b48}.layout{gap:14px;padding:18px}.panel{background:#fffefa;border-color:var(--line);border-radius:15px;box-shadow:0 5px 20px rgba(26,43,33,.025)}.side,.ticket,.subpanel{padding:16px}.eyebrow{color:#718077;letter-spacing:.13em}.search,.field input,.field select{background:#fff;border-color:#dfe5dc;border-radius:9px}.search:focus,.field input:focus,.field select:focus{outline:2px solid rgba(23,107,72,.18);border-color:#176b48}.category button,.timeframes button,.tabs button{border-radius:8px;color:#657168}.category button.active,.timeframes button.active,.tabs button.active{background:#edf4ee;color:#176b48;border-color:#d5e5d8}.instrument{border-top-color:#edf0e9}.instrument.active{background:#f0f4ed;color:#176b48}.markethead{padding:16px 18px}.coin{background:#edf4ee;color:#176b48}.assethead h1{letter-spacing:-.035em}.quote strong{font-size:22px;letter-spacing:-.04em}.chartpanel{padding:15px}.chartwrap{background:#f4f5ef;border-color:#e5e9e1;border-radius:11px}.charttop h2,.subpanel h3,.ticket h2{color:#17221c;letter-spacing:-.02em}.sumrow{color:#657168}.sumrow b{color:#26352c}.balance{background:#f0f4ed;border-color:#e0e8dd;border-radius:11px}.balance strong{letter-spacing:-.035em;color:#17221c}.balance span{color:#176b48}.switch button{border-radius:9px}.switch .buy.active{background:#eaf3ec;color:#176b48;border-color:#cfe1d2}.switch .sell.active{background:#f8eeee;color:#a13d3d;border-color:#e8cccc}.summary{background:#f6f7f2;border-color:#e7ebe3;border-radius:10px}.submit{background:#176b48;color:#fffefa;border-radius:9px;box-shadow:0 5px 13px rgba(23,107,72,.13)}.submit:hover{background:#12563a}.submit.sellbtn{background:#b34a4a;color:#fffefa}.notice{background:#f0f3ec;border-color:#dfe6dc;color:#536158;border-radius:11px}.foot{color:#778179}.mt5-nav{background:rgba(255,254,250,.98);border-color:var(--line);box-shadow:0 -6px 24px rgba(26,43,33,.07);backdrop-filter:blur(12px)}.mt5-nav button.active{color:#176b48;background:#edf4ee}.mt5-nav button[aria-current="page"]{color:#176b48}.toast{border:1px solid #d8e7da;box-shadow:0 8px 24px rgba(26,43,33,.12)}
+#menuButton{border:0;background:#edf4ee;color:#176b48;border-radius:9px;width:36px;height:36px;font-size:19px;margin-right:12px}
+#sideMenu{position:fixed;z-index:31;inset:0 auto 0 0;width:min(310px,84vw);background:#fffefa;border-right:1px solid var(--line);box-shadow:15px 0 40px rgba(18,32,23,.16);padding:18px;transform:translateX(-110%);transition:transform .22s ease}
+#sideMenu.open{transform:translateX(0)}
+#menuBackdrop{position:fixed;z-index:30;inset:0;background:rgba(18,32,23,.34);opacity:0;pointer-events:none;transition:opacity .2s}
+#menuBackdrop.open{opacity:1;pointer-events:auto}
+.menu-head{display:flex;align-items:center;justify-content:space-between;padding:7px 2px 24px;color:#176b48;letter-spacing:.08em}
+.menu-head button{border:0;background:#f0f3ec;color:#526258;border-radius:50%;width:30px;height:30px;font-size:22px}
+.menu-section{font-size:10px;letter-spacing:.13em;color:#879188;font-weight:800;padding:18px 8px 8px}
+.menu-item{width:100%;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:#26352c;text-align:left;padding:13px 9px;border-radius:9px;font-weight:650}
+.menu-item:hover{background:#edf4ee}.menu-item span{width:22px;color:#176b48;font-size:18px}.menu-item small{margin-left:auto;color:#879188;font-size:10px;font-weight:500}
+.menu-note{padding:8px;color:#879188;font-size:11px;line-height:1.6}
+.settings-panel{display:none;padding:18px}.settings-panel h2{font-size:17px;margin:0 0 16px}.settings-group{border-top:1px solid var(--line);padding:14px 2px}.settings-group b{display:block;font-size:12px}.settings-group small{display:block;color:var(--muted);font-size:10px;margin-top:4px;line-height:1.5}.settings-action{margin-top:10px;border:1px solid #dce6da;background:#edf4ee;color:#176b48;border-radius:8px;padding:9px 12px;font-weight:700}
 .ticket-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}.ticket-heading h2{margin:0}.ticket-heading button{border:0;background:#f0f3ec;color:#526258;border-radius:50%;width:30px;height:30px;font-size:22px;line-height:1}
 #newOrderButton{display:none;position:fixed;right:18px;bottom:94px;z-index:12;border:0;border-radius:30px;padding:13px 18px;background:#176b48;color:#fffefa;font-weight:750;box-shadow:0 8px 22px rgba(23,107,72,.24);align-items:center;gap:7px}
 body[data-view="trade"] #newOrderButton{display:flex}
@@ -25,11 +37,11 @@ body[data-view="history"] .trade-balance{display:none}
 /* Compact MT5-style workspace navigation */
 body{padding-bottom:82px;overflow-x:hidden}
 .layout{max-width:1500px;min-height:calc(100dvh - 154px);align-content:start}
-.mt5-nav{width:min(560px,100%);grid-template-columns:repeat(5,minmax(0,1fr));height:72px;padding:6px 7px calc(6px + env(safe-area-inset-bottom))}
+.mt5-nav{width:min(500px,100%);grid-template-columns:repeat(4,minmax(0,1fr));height:72px;padding:6px 7px calc(6px + env(safe-area-inset-bottom))}
 .mt5-nav button{font-size:10px;min-width:0}
 .mt5-nav button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 body[data-view="markets"] .maincol,body[data-view="markets"] .rightcol{display:none}
-body[data-view="markets"] .side{display:block;grid-column:1/-1;max-width:760px;width:100%;margin:0 auto}
+body[data-view="markets"] .side{display:block;grid-column:1/-1;max-width:760px;width:100%;margin:0 auto}body[data-view="markets"] .category{display:none}
 body[data-view="charts"] .side,body[data-view="charts"] .rightcol{display:none}
 body[data-view="charts"] .maincol>.subpanel:last-child{display:none}
 body[data-view="trade"] .side{display:none}
@@ -40,7 +52,7 @@ body[data-view="trade"] .maincol>.subpanel:last-child{display:block;order:2;grid
 body[data-view="history"] .side,body[data-view="history"] .rightcol{display:none}
 body[data-view="history"] .maincol{display:contents}
 body[data-view="history"] .maincol>:not(:last-child){display:none}
-body[data-view="history"] .maincol>.subpanel:last-child{display:block;grid-column:1}
+body[data-view="history"] .maincol>.subpanel:last-child{display:block;grid-column:1}body[data-view="settings"] .side,body[data-view="settings"] .maincol,body[data-view="settings"] .rightcol{display:none}body[data-view="settings"] .settings-panel{display:block;grid-column:1/-1;max-width:720px;width:100%;margin:0 auto}
 body[data-view="history"] #positionsTable{display:none}
 body[data-view="history"] #historyTable{display:table}
 body[data-view="history"] #tabPositions{display:none}
@@ -62,9 +74,9 @@ body[data-view="markets"] .instrument b{font-size:13px}
 }
 
 </style></head><body data-view="markets">
-<header class="top"><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><span id="workspaceTitle">Quotes</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">MEMBER AREA</span></div></header>
+<header class="top"><button id="menuButton" type="button" aria-label="Open side menu">☰</button><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><span id="workspaceTitle">Quotes</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">MEMBER AREA</span></div></header>
 <main class="layout">
-<aside class="panel side"><div class="eyebrow">Markets</div><input id="search" class="search" placeholder="Search instruments…"><div class="category"><button class="active" data-cat="All">All</button><button data-cat="Forex">Forex</button><button data-cat="Indices">Indices</button><button data-cat="Commodities">Commodities</button></div><div id="instrumentList"></div></aside>
+<aside class="panel side"><div class="eyebrow">Quotes</div><input id="search" class="search" placeholder="Search symbols…"><div id="instrumentList"></div></aside>
 <section class="maincol">
 <div class="panel markethead"><div class="assethead"><div class="coin" id="assetIcon">€$</div><div><h1 id="assetName">EUR/USD</h1><p id="assetDesc">Euro / US Dollar · Forex</p></div></div><div class="quote"><strong id="price">1.08420</strong><small id="change" class="up">+0.18% · Sample quote</small></div></div>
 <div class="panel chartpanel"><div class="charttop"><h2>Price chart <span style="color:var(--muted);font-weight:400">· sample data</span></h2><div class="timeframes"><button data-tf="1m">1m</button><button data-tf="5m">5m</button><button class="active" data-tf="15m">15m</button><button data-tf="1h">1H</button><button data-tf="4h">4H</button><button data-tf="1D">1D</button><button data-tf="1W">1W</button></div></div><div class="chartwrap"><canvas id="chart" aria-label="Illustrative candlestick chart"></canvas></div><div class="legend"><span><i class="dot" style="background:#36c879"></i>Up candle</span><span><i class="dot" style="background:#f06b72"></i>Down candle</span><span><i class="dot" style="background:#c9a96e"></i>Moving average</span></div><div class="underchart"><span>Locally generated test data · not live quotes</span><span id="chartMeta">15m · 64 sample candles</span></div></div>
@@ -72,7 +84,25 @@ body[data-view="markets"] .instrument b{font-size:13px}
 <div class="panel subpanel" id="activityPanel"><h3 id="activityTitle">Open positions</h3><div class="sumrow trade-balance"><span>Balance</span><b id="tradeBalance">$10,000.00</b></div><div class="tabs"><button class="active" id="tabPositions">Open trades</button><button id="tabHistory">Order history</button></div><table class="table" id="positionsTable"><thead><tr><th>Instrument / side</th><th>Volume</th><th>Entry price</th><th>Action</th></tr></thead><tbody id="positionsBody"><tr><td colspan="4" class="empty">No open trades.</td></tr></tbody></table><table class="table" id="historyTable" hidden><thead><tr><th>Instrument</th><th>Side</th><th>Simulated P/L</th><th>Time</th></tr></thead><tbody id="historyBody"><tr><td colspan="4" class="empty">No completed orders.</td></tr></tbody></table></div>
 </section>
 <aside class="rightcol"><div class="panel ticket" id="orderTicket"><div class="ticket-heading"><h2>New order</h2><button type="button" id="closeOrderTicket" aria-label="Close order ticket">×</button></div><div class="hint">Order entry preview · execution unavailable</div><div class="balance"><small>Account balance</small><strong id="balance">$10,000.00</strong><span>Illustrative account funds</span></div><div class="switch"><button class="buy active" id="buySide">BUY</button><button class="sell" id="sellSide">SELL</button></div><div class="field"><label for="orderType">ORDER TYPE</label><select id="orderType"><option>Market (simulated)</option><option>Limit (preview only)</option><option>Stop (preview only)</option></select></div><div class="field"><label for="volume">VOLUME (UNITS)</label><input id="volume" type="number" min="1" max="100000" step="1" value="1000"></div><div class="grid2"><div class="field"><label for="sl">STOP LOSS (OPTIONAL)</label><input id="sl" type="number" step="0.00001" placeholder="Price"></div><div class="field"><label for="tp">TAKE PROFIT (OPTIONAL)</label><input id="tp" type="number" step="0.00001" placeholder="Price"></div></div><div class="summary"><div class="sumrow"><span>Instrument</span><b id="ticketSymbol">EUR/USD</b></div><div class="sumrow"><span>Sample price</span><b id="ticketPrice">1.08420</b></div><div class="sumrow"><span>Estimated notional</span><b id="notional">$1,084.20</b></div><div class="sumrow"><span>Commission / spread</span><b>Not modelled</b></div></div><button class="submit" id="placeOrder">Place demo buy</button><div class="warning">Demo execution only. Prices are fictional seed quotes, not a live feed. Stop-loss and take-profit levels are stored but do not auto-trigger yet. No funds are taken and no real trade is placed.</div></div></aside>
+<section class="panel settings-panel" id="settingsPanel">
+  <h2>Settings</h2>
+  <div class="settings-group"><b>Quotes</b><small>Instrument list and quote display preferences.</small><small>Current view: Bid / Ask style · Market data is sample-only.</small></div>
+  <div class="settings-group"><b>Charts</b><small>Default timeframe: 15 minutes · Chart style: Candlesticks.</small><small>Indicators and chart tools are available from the Chart tab.</small></div>
+  <div class="settings-group"><b>Trading</b><small>Order entry is restricted to the development environment. No live execution is enabled.</small></div>
+  <div class="settings-group"><b>Account</b><small>Manage your member profile and account details.</small><button class="settings-action" id="openAccountSettings" type="button">Open account management</button></div>
+  <div class="settings-group"><b>Appearance</b><small>HikeyFX light theme · Cream white and deep green.</small></div>
+</section>
 </main>
+<div id="menuBackdrop" aria-hidden="true"></div>
+<aside id="sideMenu" aria-label="Main menu" aria-hidden="true">
+  <div class="menu-head"><b>HIKEYFX</b><button id="closeMenu" type="button" aria-label="Close menu">×</button></div>
+  <div class="menu-section">ACCOUNT</div>
+  <button class="menu-item" id="menuAccounts" type="button"><span>▣</span> Accounts <small>Manage account</small></button>
+  <div class="menu-section">APPLICATION</div>
+  <button class="menu-item" id="menuSettings" type="button"><span>⚙</span> Settings</button>
+  <div class="menu-section">INFORMATION</div>
+  <div class="menu-note">HikeyFX trading workspace · Development preview</div>
+</aside>
 <button id="newOrderButton" type="button" aria-label="Create new order">＋ <span>New order</span></button>
 <div class="notice"><b>Prototype notice:</b> This is a development preview, not a regulated brokerage service. Quotes and candles are fictional test data. Deposits, withdrawals, live accounts and live order routing are unavailable.</div><footer class="foot">HikeyFX · Development preview · Market data and execution integrations not connected.</footer><div class="toast" id="toast" role="status"></div>
 <nav class="mt5-nav" aria-label="Trading workspace">
@@ -80,7 +110,7 @@ body[data-view="markets"] .instrument b{font-size:13px}
 <button id="navCharts" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19V5M3 19h18M6 15l4-5 3 2 5-7 3 2"/></svg><span>Chart</span></button>
 <button id="navTrade" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16M8 4l-4 3 4 3M16 14l4 3-4 3"/></svg><span>Trade</span></button>
 <button id="navHistory" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg><span>History</span></button>
-<button id="navAccount" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg><span>Settings</span></button>
+
 </nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../auth/config.js"></script>
@@ -125,12 +155,16 @@ el("maToggle").addEventListener("click",function(){ma=!ma;el("maToggle").textCon
 el("rsiToggle").addEventListener("click",function(){rsi=!rsi;el("rsiToggle").textContent="RSI · "+(rsi?"ON":"OFF");el("rsiToggle").classList.toggle("active",rsi);drawChart()});
 el("tabPositions").addEventListener("click",function(){el("tabPositions").classList.add("active");el("tabHistory").classList.remove("active");el("positionsTable").hidden=false;el("historyTable").hidden=true});
 el("tabHistory").addEventListener("click",function(){el("tabHistory").classList.add("active");el("tabPositions").classList.remove("active");el("positionsTable").hidden=true;el("historyTable").hidden=false});
-function activateNav(id,view){var labels={navMarkets:"Quotes",navCharts:"Chart",navTrade:"Trade",navHistory:"History",navAccount:"Settings"};["navMarkets","navCharts","navTrade","navHistory","navAccount"].forEach(function(key){var active=key===id;el(key).classList.toggle("active",active);if(active)el(key).setAttribute("aria-current","page");else el(key).removeAttribute("aria-current")});el("workspaceTitle").textContent=labels[id];document.body.setAttribute("data-view",view);var layout=el("positionsTable").closest(".layout");if(layout)layout.scrollTop=0}
+function activateNav(id,view){var labels={navMarkets:"Quotes",navCharts:"Chart",navTrade:"Trade",navHistory:"History"};["navMarkets","navCharts","navTrade","navHistory"].forEach(function(key){var active=key===id;el(key).classList.toggle("active",active);if(active)el(key).setAttribute("aria-current","page");else el(key).removeAttribute("aria-current")});el("workspaceTitle").textContent=labels[id]||"Settings";document.body.setAttribute("data-view",view);var layout=el("positionsTable").closest(".layout");if(layout)layout.scrollTop=0}
 el("navMarkets").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navMarkets","markets")});
 el("navCharts").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navCharts","charts");drawChart()});
 el("navTrade").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navTrade","trade");el("tabPositions").click()});
 el("navHistory").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navHistory","history");el("tabHistory").click()});
-el("navAccount").addEventListener("click",function(){document.body.classList.remove("order-open");window.location.assign("../portal/")});
+el("menuButton").addEventListener("click",function(){el("sideMenu").classList.add("open");el("menuBackdrop").classList.add("open");el("sideMenu").setAttribute("aria-hidden","false")});
+function closeSideMenu(){el("sideMenu").classList.remove("open");el("menuBackdrop").classList.remove("open");el("sideMenu").setAttribute("aria-hidden","true")}
+el("closeMenu").addEventListener("click",closeSideMenu);el("menuBackdrop").addEventListener("click",closeSideMenu);
+el("menuSettings").addEventListener("click",function(){document.body.classList.remove("order-open");activateNav("navMarkets","settings");closeSideMenu()});
+el("menuAccounts").addEventListener("click",function(){closeSideMenu();window.location.assign("../portal/")});el("openAccountSettings").addEventListener("click",function(){window.location.assign("../portal/")});
 el("newOrderButton").addEventListener("click",function(){document.body.classList.add("order-open")});
 el("closeOrderTicket").addEventListener("click",function(){document.body.classList.remove("order-open")});
 window.addEventListener("resize",drawChart);renderList();selectAsset();updateBalance();checkApi();
