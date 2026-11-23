@@ -43,6 +43,17 @@ test("chart exposes working controls for its analytical drawing objects", async 
   assert.ok(!html.includes("function makeCandles"), "synthetic chart candle generator must not remain");
 });
 
+test("chart indicator toggles share one calculated series with the 30-indicator library", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('var activeIndicators=new Set(["Moving Average"])'));
+  assert.ok(html.includes('function syncIndicatorButtons()'));
+  assert.ok(html.includes('activeIndicators.add("Exponential Moving Average")'));
+  assert.ok(html.includes('activeIndicators.add("Bollinger Bands")'));
+  assert.ok(html.includes('syncIndicatorButtons();updateIndicatorValues();drawChart()'));
+  assert.ok(html.includes('series["Moving Average"]'));
+  assert.ok(!html.includes('avg/=7'), "legacy seven-period moving average must not conflict with the 20-period library calculation");
+});
+
 test("quotes view provides searchable categories and persistent favourites", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   for (const category of ["All","Favorites","Forex","Indices","Commodities"]) {
