@@ -83,6 +83,17 @@ test("chart price scale includes selected overlays and reuses the calculated ind
   assert.ok(!html.includes('var calc=window.HikeyFXIndicators.calculate(candles)'));
 });
 
+test("mobile workspace has MT5-style five-item navigation including Settings", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const id of ["navMarkets","navCharts","navTrade","navHistory","navSettings"]) {
+    assert.ok(html.includes('id="' + id + '"'), id + " should exist in bottom navigation");
+    assert.ok(html.includes('el("' + id + '").addEventListener("click"'), id + " should have a working navigation action");
+  }
+  assert.ok(html.includes("grid-template-columns:repeat(5,1fr)"));
+  assert.ok(html.includes('navSettings:"Settings"'));
+  assert.ok(html.includes('activateNav("navSettings","settings")'));
+});
+
 test("quotes view provides searchable categories and persistent favourites", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   for (const category of ["All","Favorites","Forex","Indices","Commodities"]) {
