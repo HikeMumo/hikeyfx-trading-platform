@@ -116,3 +116,25 @@ test("rejects invalid leverage and initial balances", () => {
   assert.throws(() => new DemoTradingEngine({ initialBalance: 100, leverage: 0 }), /Leverage/);
   assert.throws(() => new DemoTradingEngine({ initialBalance: 100, leverage: 501 }), /Leverage/);
 });
+
+test("modifies stop-loss and take-profit on an open position", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.1 });
+  const modified = engine.modifyPosition(position.id, { stopLoss: 1.08400, takeProfit: 1.08700 });
+  assert.equal(modified.stopLoss, 1.08400);
+  assert.equal(modified.takeProfit, 1.08700);
+  assert.equal(engine.snapshot().positions[0].stopLoss, 1.08400);
+});
+
+test("rejects modified protection levels on the wrong side of the current quote", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.1 });
+  engine.updateQuote("EURUSD", 1.08600, 1.08612);
+  assert.throws(() => engine.modifyPosition(position.id, { stopLoss: 1.08600 }), /Stop-loss/);
+  assert.throws(() => engine.modifyPosition(position.id, { takeProfit: 1.08500 }), /Take-profit/);
+});
+
+test("rejects modification of a position that is not open", () => {
+  const engine = new DemoTradingEngine();
+  assert.throws(() => engine.modifyPosition("missing", {}), /not found/);
+});
