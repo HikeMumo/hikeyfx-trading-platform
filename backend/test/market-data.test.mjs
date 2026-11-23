@@ -115,6 +115,22 @@ test("TraderMade historical adapter aggregates unsupported minute periods withou
 });
 
 
+test("historical adapter supports all 21 MT5 chart timeframes", async () => {
+  const timeframes = ["1m","2m","3m","4m","5m","6m","10m","12m","15m","20m","30m","1h","2h","3h","4h","6h","8h","12h","1D","1W","1M"];
+  for (const timeframe of timeframes) {
+    const result = await fetchTraderMadeCandles({
+      apiKey: "timeframe-test-secret", symbol: "EURUSD", timeframe,
+      now: Date.parse("2026-11-22T12:00:00Z"),
+      fetchImpl: async () => new Response(JSON.stringify({ quotes: [
+        { date: "2026-11-22 11:30:00", open: 1.08, high: 1.081, low: 1.079, close: 1.0805 },
+        { date: "2026-11-22 11:45:00", open: 1.0805, high: 1.082, low: 1.08, close: 1.0815 }
+      ] }), { status: 200, headers: { "content-type": "application/json" } })
+    });
+    assert.equal(result.timeframe, timeframe);
+    assert.ok(result.candles.length > 0, timeframe + " should return aggregated or native OHLC candles");
+  }
+});
+
 test("historical adapter rejects unknown symbols and timeframes before network access", async () => {
   const noNetwork=async()=>{throw new Error("network must not be called")};
   await assert.rejects(fetchTraderMadeCandles({apiKey:"test",symbol:"UNKNOWN",timeframe:"15m",fetchImpl:noNetwork}),/enabled historical data/);
