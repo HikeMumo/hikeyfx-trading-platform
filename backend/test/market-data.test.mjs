@@ -2,6 +2,59 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { fetchTraderMadeQuotes, fetchTraderMadeCandles, parseHistoricalTimestamp } from "../src/market-data.mjs";
 import { createApp } from "../src/server.mjs";
+import { fetchTwelveDataCandles } from "../src/twelve-data.mjs";
+
+test("Twelve Data adapter requests genuine EUR/USD 5-minute OHLC history", async () => {
+  let requested;
+  const now = Date.parse("2026-11-24T12:00:00Z");
+  const result = await fetchTwelveDataCandles({
+    apiKey: "twelve-test-secret", symbol: "EURUSD", timeframe: "5m", now,
+    fetchImpl: async url => {
+      requested = new URL(url);
+      return new Response(JSON.stringify({ values: [
+        { datetime: "2026-11-24 11:50:00", open: "1.0800", high: "1.0810", low: "1.0790", close: "1.0805" },
+        { datetime: "2026-11-24 11:55:00", open: "1.0805", high: "1.0820", low: "1.0800", close: "1.0815" }
+      ] }), { status: 200, headers: { "content-type": "application/json" } });
+    }
+  });
+  assert.equal(requested.pathname, "/time_series");
+  assert.equal(requested.searchParams.get("symbol"), "EUR/USD");
+  assert.equal(requested.searchParams.get("interval"), "5min");
+  assert.equal(requested.searchParams.get("apikey"), "twelve-test-secret");
+  assert.equal(result.source, "Twelve Data historical");
+  assert.equal(result.candles.length, 2);
+  assert.equal(result.candles[1].close, 1.0815);
+  assert.equal(result.candles[0].time, "2026-11-24T11:50:00.000Z");
+});
+
+test("Twelve Data adapter aggregates real one-minute candles into custom MT5 timeframes", async () => {
+  const result = await fetchTwelveDataCandles({
+    apiKey: "twelve-test-secret", symbol: "EURUSD", timeframe: "2m",
+    now: Date.parse("2026-11-24T12:00:00Z"),
+    fetchImpl: async () => new Response(JSON.stringify({ values: [
+      { datetime: "2026-11-24 11:58:00", open: "1.10", high: "1.11", low: "1.09", close: "1.105" },
+      { datetime: "2026-11-24 11:59:00", open: "1.105", high: "1.12", low: "1.10", close: "1.115" }
+    ] }), { status: 200 })
+  });
+  assert.equal(result.candles.length, 1);
+  assert.equal(result.candles[0].open, 1.1);
+  assert.equal(result.candles[0].high, 1.12);
+  assert.equal(result.candles[0].low, 1.09);
+  assert.equal(result.candles[0].close, 1.115);
+});
+
+test("Twelve Data adapter identifies provider plan restrictions without inventing candles", async () => {
+  await assert.rejects(fetchTwelveDataCandles({
+    apiKey: "twelve-test-secret", symbol: "EURUSD", timeframe: "5m",
+    fetchImpl: async () => new Response(JSON.stringify({ status: "error", message: "Your plan does not support this interval" }), { status: 200 })
+  }), error => error.code === "MARKET_DATA_HISTORY_FORBIDDEN");
+});
+
+test("Twelve Data adapter rejects missing key and unmapped instruments", async () => {
+  await assert.rejects(fetchTwelveDataCandles({ apiKey: "", symbol: "EURUSD" }), error => error.code === "MARKET_DATA_NOT_CONFIGURED");
+  await assert.rejects(fetchTwelveDataCandles({ apiKey: "test", symbol: "NAS100", fetchImpl: async () => { throw new Error("must not call"); } }), error => error.code === "MARKET_DATA_SYMBOL_UNAVAILABLE");
+});
+
 
 test("timezone-free historical timestamps are explicitly normalized to UTC", () => {
   assert.equal(parseHistoricalTimestamp("2026-11-22 11:30:00"), Date.parse("2026-11-22T11:30:00.000Z"));
