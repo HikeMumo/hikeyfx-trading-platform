@@ -172,4 +172,35 @@ document.querySelectorAll("[data-chart-type]").forEach(function(b){b.addEventLis
 if(!authClient){notify("Secure member sign-in is unavailable.");el("placeOrder").disabled=true}else{authClient.auth.getSession().then(function(result){if(result.error||!result.data.session){window.location.replace("../auth/");return}accessToken=result.data.session.access_token;return authClient.rpc("bootstrap_member").then(function(rpcResult){if(rpcResult.error)throw rpcResult.error;return syncTradingState()}).then(function(){el("placeOrder").disabled=false;return refreshMarketQuotes()}).then(function(){window.setInterval(refreshMarketQuotes,30000)})}).catch(function(error){notify("Account connection failed: "+error.message);el("placeOrder").disabled=true})}
 authClient&&authClient.auth.onAuthStateChange(function(event,session){if(event==="SIGNED_OUT"||!session){window.location.replace("../auth/")}else{accessToken=session.access_token}});
 })();
-</script></body></html>
+</script><script>
+/* HikeyFX mobile quote long-press actions */
+(function(){
+  var list=document.getElementById("instrumentList");
+  if(!list)return;
+  var holdTimer=null,holdTarget=null,holdPoint=null,suppressNextClick=false;
+  function clearHold(){if(holdTimer!==null){clearTimeout(holdTimer);holdTimer=null}}
+  list.addEventListener("pointerdown",function(event){
+    var button=event.target.closest(".instrument");
+    if(!button||event.pointerType==="mouse")return;
+    clearHold();holdTarget=button;holdPoint={x:event.clientX,y:event.clientY};
+    holdTimer=setTimeout(function(){
+      if(!holdTarget||!holdPoint)return;
+      suppressNextClick=true;
+      holdTarget.dispatchEvent(new MouseEvent("contextmenu",{bubbles:true,cancelable:true,clientX:holdPoint.x,clientY:holdPoint.y,view:window}));
+      if(navigator.vibrate)navigator.vibrate(18);
+      holdTimer=null;
+    },520);
+  },{passive:true});
+  ["pointerup","pointercancel","pointerleave"].forEach(function(name){
+    list.addEventListener(name,function(){clearHold();holdTarget=null;holdPoint=null},{passive:true});
+  });
+  list.addEventListener("pointermove",function(event){
+    if(holdPoint&&Math.hypot(event.clientX-holdPoint.x,event.clientY-holdPoint.y)>12){clearHold();holdTarget=null;holdPoint=null}
+  },{passive:true});
+  list.addEventListener("click",function(event){
+    if(!suppressNextClick)return;
+    suppressNextClick=false;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+  },true);
+})();
+</script>
+</body></html>
