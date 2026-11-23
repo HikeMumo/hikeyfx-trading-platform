@@ -44,6 +44,13 @@ test("indicator library calculates values from historical OHLCV candles", async 
   assert.equal(values.series.MACD.main.length, candles.length);
   assert.equal(values.series.Alligator.jaw.length, candles.length);
   assert.equal(values.series["Ichimoku Kinko Hyo"].senkouB.length, candles.length);
+  for (const [name, series] of Object.entries(values.series)) {
+    const components = Array.isArray(series) ? [series] : Object.values(series);
+    for (const points of components) {
+      assert.equal(points.length, candles.length, name + " series should align with candle timestamps");
+      assert.ok(points.every(point => point === null || Number.isFinite(point)), name + " series must not contain NaN or infinite values");
+    }
+  }
 });
 
 test("RSI returns a neutral 50 in a flat market", async () => {
