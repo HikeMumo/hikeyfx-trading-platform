@@ -32,6 +32,8 @@ test("indicator library calculates values from historical OHLCV candles", async 
   assert.equal(values.series["Average Directional Movement Index"].findIndex(Number.isFinite), 26, "Wilder ADX should seed after 14 valid DX values");
   assert.ok(Number.isFinite(values["Average True Range"]));
   assert.ok(Number.isFinite(values["Relative Vigor Index"].main));
+  assert.equal(values.series["Relative Vigor Index"].main.findIndex(Number.isFinite), 12, "10-period RVI should seed after its first 10 smoothed range values");
+  assert.equal(values.series["Relative Vigor Index"].signal.findIndex(Number.isFinite), 15, "RVI signal should use four symmetrically weighted values");
   assert.ok(Number.isFinite(values["Stochastic Oscillator"].signal));
   assert.equal(values.series["Stochastic Oscillator"].signal.findIndex(Number.isFinite), 8, "default 5-3-3 Stochastic should seed its signal at bar 9");
   assert.ok(Number.isFinite(values["Ichimoku Kinko Hyo"].senkouB));
