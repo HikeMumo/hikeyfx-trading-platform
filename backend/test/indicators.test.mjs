@@ -53,6 +53,25 @@ test("indicator library calculates values from historical OHLCV candles", async 
   }
 });
 
+test("Awesome Oscillator and Alligator use median price (high plus low divided by two)", async () => {
+  const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
+  const context = { window: {} };
+  vm.runInNewContext(source, context, { filename: "trading/indicators.js" });
+  const candles = Array.from({ length: 90 }, (_, i) => {
+    const close = 1.1 + i * 0.0003 + Math.sin(i / 5) * 0.001;
+    return { open: close - 0.0002, high: close + 0.0002 + (i % 4) * 0.0003, low: close - 0.0005 - (i % 3) * 0.0002, close };
+  });
+  const values = context.window.HikeyFXIndicators.calculate(candles);
+  const median = candles.map(candle => (candle.high + candle.low) / 2);
+  const mean = points => points.reduce((sum, value) => sum + value, 0) / points.length;
+  const expectedAo = mean(median.slice(-5)) - mean(median.slice(-34));
+  assert.ok(Math.abs(values["Awesome Oscillator"] - expectedAo) < 1e-12);
+  const smoothed = Array(median.length).fill(null);
+  smoothed[12] = mean(median.slice(0, 13));
+  for (let i = 13; i < median.length; i++) smoothed[i] = (smoothed[i - 1] * 12 + median[i]) / 13;
+  assert.ok(Math.abs(values.series.Alligator.jaw.at(-1) - smoothed[median.length - 1 - 8]) < 1e-12);
+});
+
 test("RSI returns a neutral 50 in a flat market", async () => {
   const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
   const context = { window: {} };
