@@ -27,6 +27,7 @@ test("indicator library calculates values from historical OHLCV candles", async 
     assert.notEqual(values[name], null, name + " should have a calculated value");
   }
   assert.ok(Number.isFinite(values["Relative Strength Index"]));
+  assert.equal(values.series["Commodity Channel Index"].findIndex(Number.isFinite), 13, "default CCI should use 14 bars");
   assert.equal(values.series["Relative Strength Index"].findIndex(Number.isFinite), 14);
   assert.ok(Number.isFinite(values["Average Directional Movement Index"]));
   assert.equal(values.series["Average Directional Movement Index"].findIndex(Number.isFinite), 26, "Wilder ADX should seed after 14 valid DX values");
