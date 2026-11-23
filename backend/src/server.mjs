@@ -134,7 +134,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
       return res.end();
     }
     if (req.method === "GET" && url.pathname === "/health") {
-      return send(res, 200, { ok: true, status: "alive", service: "hikeyfx-demo-api", mode: "demo-only", checks: { supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY), persistentDemoConfigured: Boolean(demoRepository), marketDataConfigured: Boolean(process.env.TRADERMADE_API_KEY), historicalDataProvider: process.env.TWELVE_DATA_API_KEY ? "twelve-data" : process.env.TRADERMADE_API_KEY ? "tradermade" : "not-configured" } });
+      return send(res, 200, { ok: true, status: "alive", service: "hikeyfx-demo-api", mode: "demo-only", checks: { supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY), persistentDemoConfigured: Boolean(demoRepository), marketDataConfigured: Boolean(process.env.TRADERMADE_API_KEY || process.env.TWELVE_DATA_API_KEY), historicalDataProvider: process.env.TWELVE_DATA_API_KEY ? "twelve-data" : process.env.TRADERMADE_API_KEY ? "tradermade" : "not-configured" } });
     }
 
     const user = await authenticateUser(req);
