@@ -87,3 +87,13 @@ test("account panel displays equity, margin, free margin and leverage metrics", 
   assert.ok(html.includes('accountState=data[0]'));
   assert.ok(html.includes('function updateBalance'));
 });
+
+test("workspace settings save quote sorting, chart defaults and browser notifications", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const id of ["quoteSort","defaultTimeframe","defaultChartType","browserNotifications","saveWorkspaceSettings","settingsSaveStatus"]) {
+    assert.ok(html.includes('id="' + id + '"'), id + " should exist");
+  }
+  assert.ok(html.includes('localStorage.setItem("hikeyfx-workspace-settings"'));
+  assert.ok(html.includes('function loadWorkspaceSettings'));
+  assert.ok(html.includes('function saveWorkspaceSettings'));
+});
