@@ -49,14 +49,19 @@ function calculate(rows){
  const stoch=rows.map((_,i)=>{if(i<13)return null;const hh=Math.max(...h.slice(i-13,i+1)),ll=Math.min(...l.slice(i-13,i+1));return hh===ll?50:100*(c[i]-ll)/(hh-ll)});const stochD=stoch.map((_,i)=>i<15||stoch.slice(i-2,i+1).some(x=>!Number.isFinite(x))?null:mean(stoch.slice(i-2,i+1)));
  const rvi=rows.map((_,i)=>{if(i<3)return null;const weights=[1,2,2,1];let num=0,den=0;for(let j=0;j<4;j++){const k=i-3+j;num+=(c[k]-o[k])*weights[j];den+=(h[k]-l[k])*weights[j]}return den?num/den:0});const rviSignal=rvi.map((_,i)=>i<6||rvi.slice(i-3,i+1).some(x=>!Number.isFinite(x))?null:(rvi[i]+2*rvi[i-1]+2*rvi[i-2]+rvi[i-3])/6);
  const sar=[];let rising=true,ep=h[0],s=l[0],af=.02;for(let i=0;i<n;i++){if(i>0){s=s+af*(ep-s);if(rising){s=Math.min(s,l[i-1],i>1?l[i-2]:l[i-1]);if(l[i]<s){rising=false;s=ep;ep=l[i];af=.02}else if(h[i]>ep){ep=h[i];af=Math.min(.2,af+.02)}}else{s=Math.max(s,h[i-1],i>1?h[i-2]:h[i-1]);if(h[i]>s){rising=true;s=ep;ep=h[i];af=.02}else if(l[i]<ep){ep=l[i];af=Math.min(.2,af+.02)}}}sar.push(s)}
- const ichi=rows.map((_,i)=>{if(i<51)return null;const hh9=Math.max(...h.slice(i-8,i+1)),ll9=Math.min(...l.slice(i-8,i+1)),hh26=Math.max(...h.slice(i-25,i+1)),ll26=Math.min(...l.slice(i-25,i+1));return {tenkan:(hh9+ll9)/2,kijun:(hh26+ll26)/2,senkouA:((hh9+ll9)/2+(hh26+ll26)/2)/2}});
+ const tenkan=rows.map((_,i)=>i<8?null:(Math.max(...h.slice(i-8,i+1))+Math.min(...l.slice(i-8,i+1)))/2);
+ const kijun=rows.map((_,i)=>i<25?null:(Math.max(...h.slice(i-25,i+1))+Math.min(...l.slice(i-25,i+1)))/2);
+ const spanA=tenkan.map((x,i)=>x===null||kijun[i]===null?null:(x+kijun[i])/2);
+ const spanB=rows.map((_,i)=>i<51?null:(Math.max(...h.slice(i-51,i+1))+Math.min(...l.slice(i-51,i+1)))/2);
+ const projectedA=shiftSeries(spanA,26),projectedB=shiftSeries(spanB,26),chikou=Array(n).fill(null);for(let i=26;i<n;i++)chikou[i-26]=c[i];
+ const ichi=rows.map((_,i)=>({tenkan:tenkan[i],kijun:kijun[i],senkouA:projectedA[i],senkouB:projectedB[i],chikou:chikou[i]}));
  const envelopes=ema20.map(x=>x===null?null:{upper:x*1.01,lower:x*.99});
  function shiftSeries(values,shift){const out=Array(values.length).fill(null);values.forEach(function(value,i){if(i+shift<out.length)out[i+shift]=value});return out}
  const jaw=shiftSeries(smma(typical,13),8),teeth=shiftSeries(smma(typical,8),5),lips=shiftSeries(smma(typical,5),3);
  const alligator=rows.map((_,i)=>({jaw:jaw[i],teeth:teeth[i],lips:lips[i]}));
  const mom=c.map((x,i)=>i<14?null:(c[i-14]===0?null:x/c[i-14]*100)),roc=c.map((x,i)=>i<14?null:(x/c[i-14]-1)*100);
  const dema=ema20.map((x,i)=>x===null?null:2*x-(ema(ema20.map(z=>z||0),20)[i]||0));
- const smma20=smma(c,20),wma20=wma(c,20),maOsc=sma5.map((x,i)=>x===null||sma34[i]===null?null:x-sma34[i]);
+ const smma20=smma(c,20),wma20=wma(c,20),maOsc=macd.map((x,i)=>x===null||signal[i]===null?null:x-signal[i]);
  const std20=upper.map((x,i)=>x===null?null:(x-middle[i])/2);
  const output={
  "Moving Average":sma20.at(-1),"Exponential Moving Average":ema20.at(-1),"Smoothed Moving Average":smma20.at(-1),"Linear Weighted Moving Average":wma20.at(-1),
@@ -75,7 +80,7 @@ function calculate(rows){
  const series={
  "Moving Average":sma20,"Exponential Moving Average":ema20,"Smoothed Moving Average":smma20,"Linear Weighted Moving Average":wma20,
  "Bollinger Bands":{upper:upper,middle:middle,lower:lower},"Envelopes":{upper:envelopes.map(x=>x&&x.upper),middle:ema20,lower:envelopes.map(x=>x&&x.lower)},
- "Ichimoku Kinko Hyo":{tenkan:ichi.map(x=>x&&x.tenkan),kijun:ichi.map(x=>x&&x.kijun),senkouA:ichi.map(x=>x&&x.senkouA)},
+ "Ichimoku Kinko Hyo":{tenkan:ichi.map(x=>x.tenkan),kijun:ichi.map(x=>x.kijun),senkouA:ichi.map(x=>x.senkouA),senkouB:ichi.map(x=>x.senkouB),chikou:ichi.map(x=>x.chikou)},
  "Parabolic SAR":sar,"Standard Deviation":std20,"Average Directional Movement Index":adx,"Average True Range":atr14,
  "Bears Power":c.map((x,i)=>ema20[i]===null?null:l[i]-ema20[i]),"Bulls Power":c.map((x,i)=>ema20[i]===null?null:h[i]-ema20[i]),
  "Commodity Channel Index":cci,"DeMarker":dem,"Force Index":force,"MACD":{main:macd,signal:signal},
