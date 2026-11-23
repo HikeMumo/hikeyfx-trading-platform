@@ -29,6 +29,16 @@ test("closes a position and moves realised PnL into balance", () => {
   assert.equal(engine.snapshot().positions.length, 0);
 });
 
+test("USDJPY and USDCHF support standard 100000-unit demo contracts", () => {
+  const engine = new DemoTradingEngine();
+  const yen = engine.placeOrder({ symbol: "USDJPY", side: "buy", volume: 0.01 });
+  const franc = engine.placeOrder({ symbol: "USDCHF", side: "sell", volume: 0.01 });
+  assert.equal(yen.contractSize, 100000);
+  assert.equal(franc.contractSize, 100000);
+  assert.equal(yen.entryPrice, 149.63);
+  assert.equal(franc.entryPrice, 0.88404);
+});
+
 test("gold demo orders use a 100-ounce contract and lot-based margin", () => {
   const engine = new DemoTradingEngine();
   const position = engine.placeOrder({ symbol: "XAUUSD", side: "buy", volume: 0.01 });
