@@ -72,6 +72,21 @@ test("Awesome Oscillator and Alligator use median price (high plus low divided b
   assert.ok(Math.abs(values.series.Alligator.jaw.at(-1) - smoothed[median.length - 1 - 8]) < 1e-12);
 });
 
+test("Envelopes use a 14-period simple average with 0.1 percent bands", async () => {
+  const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
+  const context = { window: {} };
+  vm.runInNewContext(source, context, { filename: "trading/indicators.js" });
+  const candles = Array.from({ length: 40 }, (_, i) => {
+    const close = 1.05 + i * 0.0007 + Math.sin(i / 4) * 0.0008;
+    return { open: close - 0.0001, high: close + 0.0003, low: close - 0.0003, close };
+  });
+  const values = context.window.HikeyFXIndicators.calculate(candles);
+  const expectedMiddle = candles.slice(-14).reduce((sum, candle) => sum + candle.close, 0) / 14;
+  assert.ok(Math.abs(values.series.Envelopes.middle.at(-1) - expectedMiddle) < 1e-12);
+  assert.ok(Math.abs(values.series.Envelopes.upper.at(-1) - expectedMiddle * 1.001) < 1e-12);
+  assert.ok(Math.abs(values.series.Envelopes.lower.at(-1) - expectedMiddle * 0.999) < 1e-12);
+});
+
 test("RSI returns a neutral 50 in a flat market", async () => {
   const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
   const context = { window: {} };
