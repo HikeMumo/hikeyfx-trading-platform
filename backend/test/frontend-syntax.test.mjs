@@ -149,3 +149,13 @@ test("chart analytical object library includes 23 drawing tools", async () => {
   for (const id of toolIds) assert.ok(html.includes('id="' + id + '"'), id + " should exist");
   assert.ok(html.includes('window.prompt("Chart text","Text")'));
 });
+
+test("history workspace includes a separate account journal view", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('id="tabJournal"'));
+  assert.ok(html.includes('id="journalTable"'));
+  assert.ok(html.includes('id="journalBody"'));
+  assert.ok(html.includes('apiRequest("/api/v1/demo/journal")'));
+  assert.ok(html.includes('function renderJournal'));
+  assert.ok(html.includes('textContent=String(event.eventType'));
+});
