@@ -11,7 +11,47 @@ body{background:#f5f5ef;color:#17221c;letter-spacing:.005em}.top{height:66px;pad
 @media(min-width:1101px){.layout{padding-top:22px}.side,.ticket{align-self:start;position:sticky;top:82px}.chartwrap{height:390px}}
 @media(max-width:720px){.top{height:58px}.layout{padding:10px}.markethead{padding:13px}.chartwrap{height:285px}.side,.ticket,.subpanel{padding:14px}}
 
-</style></head><body>
+
+/* Compact MT5-style workspace navigation */
+body{padding-bottom:82px;overflow-x:hidden}
+.layout{max-width:1500px;min-height:calc(100dvh - 154px);align-content:start}
+.mt5-nav{width:min(560px,100%);grid-template-columns:repeat(5,minmax(0,1fr));height:72px;padding:6px 7px calc(6px + env(safe-area-inset-bottom))}
+.mt5-nav button{font-size:10px;min-width:0}
+.mt5-nav button .navicon{font-size:18px;line-height:20px;font-weight:600}
+body[data-view="markets"] .maincol,body[data-view="markets"] .rightcol{display:none}
+body[data-view="markets"] .side{display:block;grid-column:1/-1;max-width:760px;width:100%;margin:0 auto}
+body[data-view="charts"] .side,body[data-view="charts"] .rightcol{display:none}
+body[data-view="charts"] .maincol>.subpanel:last-child{display:none}
+body[data-view="trade"] .side{display:none}
+body[data-view="trade"] .maincol{display:contents}
+body[data-view="trade"] .maincol>:not(:last-child){display:none}
+body[data-view="trade"] .rightcol{display:block;order:1;grid-column:1}
+body[data-view="trade"] .maincol>.subpanel:last-child{display:block;order:2;grid-column:1}
+body[data-view="history"] .side,body[data-view="history"] .rightcol{display:none}
+body[data-view="history"] .maincol{display:contents}
+body[data-view="history"] .maincol>:not(:last-child){display:none}
+body[data-view="history"] .maincol>.subpanel:last-child{display:block;grid-column:1}
+body[data-view="history"] #positionsTable{display:none}
+body[data-view="history"] #historyTable{display:table}
+body[data-view="history"] #tabPositions{display:none}
+body[data-view="history"] #tabHistory{display:none}
+body[data-view="markets"] .instrument{padding:13px 8px}
+body[data-view="markets"] .instrument b{font-size:13px}
+@media(max-width:720px){
+  body{padding-bottom:88px}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;padding:10px;height:calc(100dvh - 150px);min-height:420px;overflow-y:auto;overscroll-behavior:contain}
+  .mt5-nav{height:76px;border-radius:15px 15px 0 0}
+  .mt5-nav button{gap:3px;font-size:9px}
+  body[data-view="markets"] .side{max-width:none}
+  body[data-view="charts"] .maincol{display:flex;min-height:0}
+  body[data-view="charts"] .chartwrap{height:min(42vh,310px);min-height:210px}
+  body[data-view="trade"] .rightcol{grid-column:1}
+  body[data-view="trade"] .maincol>.subpanel:last-child{grid-column:1}
+  body[data-view="history"] .maincol>.subpanel:last-child{grid-column:1}
+  .notice,.foot{display:none}
+}
+
+</style></head><body data-view="markets">
 <header class="top"><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><span>Trading workspace</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">MEMBER AREA</span></div></header>
 <main class="layout">
 <aside class="panel side"><div class="eyebrow">Markets</div><input id="search" class="search" placeholder="Search instruments…"><div class="category"><button class="active" data-cat="All">All</button><button data-cat="Forex">Forex</button><button data-cat="Indices">Indices</button><button data-cat="Commodities">Commodities</button></div><div id="instrumentList"></div></aside>
@@ -24,6 +64,13 @@ body{background:#f5f5ef;color:#17221c;letter-spacing:.005em}.top{height:66px;pad
 <aside class="rightcol"><div class="panel ticket"><h2>Order ticket</h2><div class="hint">Order entry preview · execution unavailable</div><div class="balance"><small>Account balance</small><strong id="balance">$10,000.00</strong><span>Illustrative account funds</span></div><div class="switch"><button class="buy active" id="buySide">BUY</button><button class="sell" id="sellSide">SELL</button></div><div class="field"><label for="orderType">ORDER TYPE</label><select id="orderType"><option>Market (simulated)</option><option>Limit (preview only)</option><option>Stop (preview only)</option></select></div><div class="field"><label for="volume">VOLUME (UNITS)</label><input id="volume" type="number" min="1" max="100000" step="1" value="1000"></div><div class="grid2"><div class="field"><label for="sl">STOP LOSS (OPTIONAL)</label><input id="sl" type="number" step="0.00001" placeholder="Price"></div><div class="field"><label for="tp">TAKE PROFIT (OPTIONAL)</label><input id="tp" type="number" step="0.00001" placeholder="Price"></div></div><div class="summary"><div class="sumrow"><span>Instrument</span><b id="ticketSymbol">EUR/USD</b></div><div class="sumrow"><span>Sample price</span><b id="ticketPrice">1.08420</b></div><div class="sumrow"><span>Estimated notional</span><b id="notional">$1,084.20</b></div><div class="sumrow"><span>Commission / spread</span><b>Not modelled</b></div></div><button class="submit" id="placeOrder">Place demo buy</button><div class="warning">Demo execution only. Prices are fictional seed quotes, not a live feed. Stop-loss and take-profit levels are stored but do not auto-trigger yet. No funds are taken and no real trade is placed.</div></div></aside>
 </main>
 <div class="notice"><b>Prototype notice:</b> This is a development preview, not a regulated brokerage service. Quotes and candles are fictional test data. Deposits, withdrawals, live accounts and live order routing are unavailable.</div><footer class="foot">HikeyFX · Development preview · Market data and execution integrations not connected.</footer><div class="toast" id="toast" role="status"></div>
+<nav class="mt5-nav" aria-label="Trading workspace">
+<button id="navMarkets" class="active" type="button"><span class="navicon">⌕</span><span>Markets</span></button>
+<button id="navCharts" type="button"><span class="navicon">⌁</span><span>Charts</span></button>
+<button id="navTrade" type="button"><span class="navicon">⇄</span><span>Trade</span></button>
+<button id="navHistory" type="button"><span class="navicon">◷</span><span>History</span></button>
+<button id="navAccount" type="button"><span class="navicon">◉</span><span>Account</span></button>
+</nav>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../auth/config.js"></script>
 <script src="./api-config.js"></script>
@@ -67,10 +114,11 @@ el("maToggle").addEventListener("click",function(){ma=!ma;el("maToggle").textCon
 el("rsiToggle").addEventListener("click",function(){rsi=!rsi;el("rsiToggle").textContent="RSI · "+(rsi?"ON":"OFF");el("rsiToggle").classList.toggle("active",rsi);drawChart()});
 el("tabPositions").addEventListener("click",function(){el("tabPositions").classList.add("active");el("tabHistory").classList.remove("active");el("positionsTable").hidden=false;el("historyTable").hidden=true});
 el("tabHistory").addEventListener("click",function(){el("tabHistory").classList.add("active");el("tabPositions").classList.remove("active");el("positionsTable").hidden=true;el("historyTable").hidden=false});
-function activateNav(id){["navCharts","navTrade","navHistory","navAccount"].forEach(function(key){el(key).classList.toggle("active",key===id)})}
-el("navCharts").addEventListener("click",function(){activateNav("navCharts");el("chart").scrollIntoView({behavior:"smooth",block:"center"})});
-el("navTrade").addEventListener("click",function(){activateNav("navTrade");el("placeOrder").scrollIntoView({behavior:"smooth",block:"center"})});
-el("navHistory").addEventListener("click",function(){activateNav("navHistory");el("tabHistory").click();el("historyTable").scrollIntoView({behavior:"smooth",block:"center"})});
+function activateNav(id,view){["navMarkets","navCharts","navTrade","navHistory","navAccount"].forEach(function(key){el(key).classList.toggle("active",key===id)});document.body.setAttribute("data-view",view);var layout=el("positionsTable").closest(".layout");if(layout)layout.scrollTop=0}
+el("navMarkets").addEventListener("click",function(){activateNav("navMarkets","markets")});
+el("navCharts").addEventListener("click",function(){activateNav("navCharts","charts");drawChart()});
+el("navTrade").addEventListener("click",function(){activateNav("navTrade","trade");el("tabPositions").click()});
+el("navHistory").addEventListener("click",function(){activateNav("navHistory","history");el("tabHistory").click()});
 el("navAccount").addEventListener("click",function(){window.location.assign("../portal/")});
 window.addEventListener("resize",drawChart);renderList();selectAsset();updateBalance();checkApi();
 if(!authClient){notify("Secure member sign-in is unavailable.");el("placeOrder").disabled=true}else{authClient.auth.getSession().then(function(result){if(result.error||!result.data.session){window.location.replace("../auth/");return}accessToken=result.data.session.access_token;return authClient.rpc("bootstrap_member").then(function(rpcResult){if(rpcResult.error)throw rpcResult.error;return syncTradingState()}).then(function(){el("placeOrder").disabled=false})}).catch(function(error){notify("Account connection failed: "+error.message);el("placeOrder").disabled=true})}
