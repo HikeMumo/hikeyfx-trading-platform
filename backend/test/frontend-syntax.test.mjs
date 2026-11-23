@@ -95,6 +95,18 @@ test("chart price scale includes selected overlays and reuses the calculated ind
   assert.ok(!html.includes('var calc=window.HikeyFXIndicators.calculate(candles)'));
 });
 
+test("main menu exposes working Journal and About destinations", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const id of ["menuJournal","menuAbout","aboutDialog","aboutTitle","closeAbout"]) {
+    assert.ok(html.includes('id="' + id + '"'), id + " should exist");
+  }
+  assert.ok(html.includes('el("menuJournal").addEventListener("click"'));
+  assert.ok(html.includes('el("tabJournal").click()'));
+  assert.ok(html.includes('el("menuAbout").addEventListener("click"'));
+  assert.ok(html.includes('el("closeAbout").addEventListener("click"'));
+  assert.ok(html.includes("Live broker routing, deposits and withdrawals are not connected."));
+});
+
 test("mobile workspace has MT5-style five-item navigation including Settings", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   for (const id of ["navMarkets","navCharts","navTrade","navHistory","navSettings"]) {
