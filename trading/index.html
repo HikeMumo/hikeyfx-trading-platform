@@ -87,6 +87,31 @@ body[data-view="charts"] .maincol>.chartpanel{display:block!important;visibility
 body[data-view="charts"] #chartWrap{display:block!important;visibility:visible!important;min-height:260px!important;height:clamp(260px,48vh,460px)!important;width:100%!important}
 body[data-view="charts"] #chart{display:block!important;visibility:visible!important;width:100%!important;height:100%!important;min-height:260px!important}
 @media(max-width:720px){.mt5-nav{height:68px!important;padding:5px 5px calc(5px + env(safe-area-inset-bottom))!important}.mt5-nav button span{display:block!important;font-size:10px!important;line-height:1.1!important}.chart-tools{min-width:0}.chartpanel{min-width:0}}
+
+/* Compact navigation, settings and quote filters */
+body[data-view="markets"] .category{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;gap:5px;scrollbar-width:none;padding-bottom:3px}
+body[data-view="markets"] .category::-webkit-scrollbar{display:none}
+body[data-view="markets"] .category button{flex:0 0 auto;padding:7px 10px;border:1px solid var(--line);border-radius:18px;font-size:10px}
+body[data-view="charts"] .below{grid-template-columns:minmax(0,1fr)}
+body[data-view="charts"] .below>.subpanel:last-child{display:none!important}
+body[data-view="charts"] .below>.subpanel:first-child{padding:9px}
+body[data-view="charts"] .below>.subpanel:first-child>p{display:none}
+.settings-panel{padding:13px!important}
+.settings-panel>h2{font-size:15px;margin:2px 0 10px}
+.settings-group{padding:10px 11px!important;margin:0 0 7px!important;border:1px solid var(--line);border-radius:10px;background:#fffefa}
+.settings-group>b{display:flex;align-items:center;gap:8px;font-size:12px}
+.settings-group>b:before{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:8px;background:#edf4ee;color:#176b48;font-size:14px}
+.settings-group:nth-of-type(1)>b:before{content:"≋"}.settings-group:nth-of-type(2)>b:before{content:"⌁"}.settings-group:nth-of-type(3)>b:before{content:"♧"}.settings-group:nth-of-type(4)>b:before{content:"◎"}.settings-group:nth-of-type(5)>b:before{content:"◐"}
+.settings-group>small{display:none!important}
+.settings-group .field{margin:8px 0 0}
+.settings-group .field label{font-size:9px}
+.settings-group .field input,.settings-group .field select{padding:8px;font-size:11px}
+.settings-panel>.submit{margin-top:5px}
+.menu-item{display:flex;align-items:center;gap:10px;min-height:44px}
+.menu-item>span{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:8px;background:#edf4ee;color:#176b48;font-size:15px}
+.menu-item small{margin-left:auto}
+#newOrderButton{border-radius:12px;padding:11px 15px}
+@media(max-width:720px){body[data-view="markets"] .layout{height:calc(100dvh - 150px);overflow-y:auto}.category{margin:7px 0}.settings-panel{padding:10px!important}.settings-group{padding:9px!important}.mt5-nav button svg{width:23px;height:23px}}
 </style></head><body data-view="markets">
 <header class="top"><button id="menuButton" type="button" aria-label="Open side menu">☰</button><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><span id="workspaceTitle">Quotes</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">MEMBER AREA</span></div></header>
 <main class="layout">
