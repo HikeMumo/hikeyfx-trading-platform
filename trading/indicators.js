@@ -12,7 +12,7 @@ const names=[
 ];
 const mean=(a)=>a.length?a.reduce((s,v)=>s+v,0)/a.length:null;
 const sma=(a,p)=>a.map((_,i)=>i+1<p?null:mean(a.slice(i-p+1,i+1)));
-const ema=(a,p)=>{const out=[];let v=null,k=2/(p+1);a.forEach((x,i)=>{v=v===null?x:x*k+v*(1-k);out.push(i+1<p?null:v)});return out};
+const ema=(a,p)=>{const out=[];let v=null,k=2/(p+1),seed=[];a.forEach((x)=>{if(!Number.isFinite(x)){out.push(null);return}if(v===null){seed.push(x);if(seed.length===p){v=mean(seed);out.push(v)}else out.push(null)}else{v=x*k+v*(1-k);out.push(v)}});return out};
 const smma=(a,p)=>{const out=[];let v=null;a.forEach((x,i)=>{v=i===p-1?mean(a.slice(0,p)):i>=p?((v*(p-1)+x)/p):null;out.push(v)});return out};
 const wma=(a,p)=>a.map((_,i)=>{if(i+1<p)return null;let n=0,d=0;for(let j=0;j<p;j++){n+=a[i-p+1+j]*(j+1);d+=j+1}return n/d});
 const std=(a)=>{const m=mean(a);return Math.sqrt(mean(a.map(x=>(x-m)**2)))};
@@ -41,7 +41,7 @@ function calculate(rows){
  const ao=c.map((_,i)=>i<33?null:mean(typical.slice(i-4,i+1))-mean(typical.slice(i-33,i+1)));
  const ac=ao.map((x,i)=>x===null||i<4?null:x-mean(ao.slice(i-4,i+1)));
  const macd=ema12.map((x,i)=>x===null||ema26[i]===null?null:x-ema26[i]);
- const signal=ema(macd.map(x=>x===null?0:x),9);
+ const signal=ema(macd,9);
  const plusDM=[],minusDM=[];for(let i=0;i<n;i++){const up=i?h[i]-h[i-1]:0,down=i?l[i-1]-l[i]:0;plusDM.push(up>down&&up>0?up:0);minusDM.push(down>up&&down>0?down:0)}
  const plusSmoothed=smma(plusDM,14),minusSmoothed=smma(minusDM,14);
  const dx=rows.map((_,i)=>{if(plusSmoothed[i]===null||minusSmoothed[i]===null||!atr14[i])return null;const plus=100*plusSmoothed[i]/atr14[i],minus=100*minusSmoothed[i]/atr14[i];return plus+minus?100*Math.abs(plus-minus)/(plus+minus):0});
