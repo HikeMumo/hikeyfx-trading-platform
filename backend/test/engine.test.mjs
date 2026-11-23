@@ -29,6 +29,14 @@ test("closes a position and moves realised PnL into balance", () => {
   assert.equal(engine.snapshot().positions.length, 0);
 });
 
+test("gold demo orders use a 100-ounce contract and lot-based margin", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "XAUUSD", side: "buy", volume: 0.01 });
+  assert.equal(position.contractSize, 100);
+  assert.equal(position.volume, 0.01);
+  assert.equal(position.margin, 23.4);
+});
+
 test("rejects invalid volume and unsupported instruments", () => {
   const engine = new DemoTradingEngine();
   assert.throws(() => engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.001 }), /Volume/);
