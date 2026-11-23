@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { DemoTradingEngine } from "./engine.mjs";
 import { fetchTraderMadeQuotes, fetchTraderMadeCandles } from "./market-data.mjs";
+import { fetchTwelveDataCandles } from "./twelve-data.mjs";
 import { createSupabaseDemoRepository } from "./supabase.mjs";
 
 const HOST = "0.0.0.0";
@@ -10,6 +11,9 @@ const PORT = Number(process.env.PORT || 8787);
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 const demoRepository = createSupabaseDemoRepository();
+const fetchHistoricalCandles = options => process.env.TWELVE_DATA_API_KEY
+  ? fetchTwelveDataCandles(options)
+  : fetchTraderMadeCandles(options);
 const bearerToken = req => (req.headers.authorization || "").match(/^Bearer\s+(.+)$/i)?.[1] || null;
 
 function send(res, status, payload) {
@@ -80,7 +84,7 @@ async function readJson(req) {
   return parsed;
 }
 
-export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository, marketHistory = fetchTraderMadeCandles) {
+export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository, marketHistory = fetchHistoricalCandles) {
   const memberEngines = new Map();
   const rateBuckets = new Map();
   const ratePolicy = (method, path) => {
@@ -130,7 +134,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
       return res.end();
     }
     if (req.method === "GET" && url.pathname === "/health") {
-      return send(res, 200, { ok: true, status: "alive", service: "hikeyfx-demo-api", mode: "demo-only", checks: { supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY), persistentDemoConfigured: Boolean(demoRepository), marketDataConfigured: Boolean(process.env.TRADERMADE_API_KEY) } });
+      return send(res, 200, { ok: true, status: "alive", service: "hikeyfx-demo-api", mode: "demo-only", checks: { supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY), persistentDemoConfigured: Boolean(demoRepository), marketDataConfigured: Boolean(process.env.TRADERMADE_API_KEY), historicalDataProvider: process.env.TWELVE_DATA_API_KEY ? "twelve-data" : process.env.TRADERMADE_API_KEY ? "tradermade" : "not-configured" } });
     }
 
     const user = await authenticateUser(req);
