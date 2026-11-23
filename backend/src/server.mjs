@@ -2,7 +2,7 @@ import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { DemoTradingEngine } from "./engine.mjs";
-import { fetchTraderMadeQuotes } from "./market-data.mjs";
+import { fetchTraderMadeQuotes, fetchTraderMadeCandles } from "./market-data.mjs";
 import { createSupabaseDemoRepository } from "./supabase.mjs";
 
 const HOST = "0.0.0.0";
@@ -80,11 +80,12 @@ async function readJson(req) {
   return parsed;
 }
 
-export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository) {
+export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository, marketHistory = fetchTraderMadeCandles) {
   const memberEngines = new Map();
   const rateBuckets = new Map();
   const ratePolicy = (method, path) => {
     if (method === "GET" && path === "/api/v1/market/quotes") return { name: "quotes", limit: 30 };
+    if (method === "GET" && path === "/api/v1/market/candles") return { name: "candles", limit: 30 };
     if (method === "POST" && path === "/api/v1/demo/orders") return { name: "orders", limit: 20 };
     if (method === "POST" && /^\/api\/v1\/demo\/positions\/[0-9a-f-]+\/close$/i.test(path)) return { name: "closes", limit: 30 };
     return { name: "member-api", limit: 120 };
@@ -179,6 +180,22 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
           ok: false,
           status: notConfigured ? "unavailable" : "provider-error",
           error: notConfigured ? "Market data is not configured." : "Genuine market data is temporarily unavailable."
+        });
+      }
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/v1/market/candles") {
+      try {
+        const symbol = String(url.searchParams.get("symbol") || "").toUpperCase();
+        const timeframe = String(url.searchParams.get("timeframe") || "15m");
+        const result = await marketHistory({ symbol, timeframe });
+        return send(res, 200, { ok: true, data: result.candles, source: result.source, receivedAt: result.receivedAt, symbol: result.symbol, timeframe: result.timeframe });
+      } catch (error) {
+        const notConfigured = error.code === "MARKET_DATA_NOT_CONFIGURED";
+        const forbidden = error.code === "MARKET_DATA_HISTORY_FORBIDDEN";
+        return send(res, notConfigured ? 503 : forbidden ? 403 : error.code === "MARKET_DATA_EMPTY" ? 404 : 502, {
+          ok: false, status: notConfigured ? "unavailable" : forbidden ? "plan-restricted" : "provider-error",
+          error: notConfigured ? "Historical market data is not configured." : error.message
         });
       }
     }
