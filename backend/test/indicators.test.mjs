@@ -81,6 +81,28 @@ test("RSI returns a neutral 50 in a flat market", async () => {
   assert.equal(values["Relative Strength Index"], 50);
 });
 
+test("Force Index is smoothed over 13 periods and Bulls/Bears Power use EMA13", async () => {
+  const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
+  const context = { window: {} };
+  vm.runInNewContext(source, context, { filename: "trading/indicators.js" });
+  const candles = Array.from({ length: 50 }, (_, i) => {
+    const close = 1.2 + i * 0.0004 + Math.sin(i / 3) * 0.001;
+    return { open: close - 0.0001, high: close + 0.0005, low: close - 0.0006, close, volume: 200 + i * 2 };
+  });
+  const values = context.window.HikeyFXIndicators.calculate(candles);
+  assert.equal(values.series["Force Index"].findIndex(Number.isFinite), 13);
+  const rawForce = candles.slice(-13).map((candle, index, window) => {
+    const absoluteIndex = candles.length - 13 + index;
+    return (candle.close - candles[absoluteIndex - 1].close) * candle.volume;
+  });
+  const expectedForce = rawForce.reduce((sum, value) => sum + value, 0) / rawForce.length;
+  assert.ok(Math.abs(values["Force Index"] - expectedForce) < 1e-9);
+  let ema13 = candles.slice(0, 13).reduce((sum, candle) => sum + candle.close, 0) / 13;
+  for (let i = 13; i < candles.length; i++) ema13 = candles[i].close * (2 / 14) + ema13 * (12 / 14);
+  assert.ok(Math.abs(values["Bears Power"] - (candles.at(-1).low - ema13)) < 1e-12);
+  assert.ok(Math.abs(values["Bulls Power"] - (candles.at(-1).high - ema13)) < 1e-12);
+});
+
 test("volume indicators remain unavailable when historical provider supplies no volume", async () => {
   const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
   const context = { window: {} };
