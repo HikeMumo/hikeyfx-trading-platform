@@ -33,6 +33,7 @@ test("indicator library calculates values from historical OHLCV candles", async 
   assert.ok(Number.isFinite(values["Average True Range"]));
   assert.ok(Number.isFinite(values["Relative Vigor Index"].main));
   assert.ok(Number.isFinite(values["Stochastic Oscillator"].signal));
+  assert.equal(values.series["Stochastic Oscillator"].signal.findIndex(Number.isFinite), 8, "default 5-3-3 Stochastic should seed its signal at bar 9");
   assert.ok(Number.isFinite(values["Ichimoku Kinko Hyo"].senkouB));
   assert.ok(Number.isFinite(values["Moving Average of Oscillator"]));
   assert.ok(Number.isFinite(values["Money Flow Index"]));
