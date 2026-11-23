@@ -18,7 +18,7 @@ const wma=(a,p)=>a.map((_,i)=>{if(i+1<p)return null;let n=0,d=0;for(let j=0;j<p;
 const std=(a)=>{const m=mean(a);return Math.sqrt(mean(a.map(x=>(x-m)**2)))};
 function calculate(rows){
  if(!Array.isArray(rows)||rows.length<2)return {};
- const c=rows.map(x=>Number(x.close)),h=rows.map(x=>Number(x.high)),l=rows.map(x=>Number(x.low)),o=rows.map(x=>Number(x.open)),v=rows.map(x=>Number(x.volume||0)),n=c.length;
+ const c=rows.map(x=>Number(x.close)),h=rows.map(x=>Number(x.high)),l=rows.map(x=>Number(x.low)),o=rows.map(x=>Number(x.open)),v=rows.map(x=>Number(x.volume||0)),n=c.length,hasVolume=rows.some(x=>Number.isFinite(Number(x.volume))&&Number(x.volume)>0);
  if(rows.some((x,i)=>![c[i],h[i],l[i],o[i]].every(Number.isFinite)))return {};
  const sma20=sma(c,20),ema12=ema(c,12),ema26=ema(c,26),ema20=ema(c,20),sma5=sma(c,5),sma34=sma(c,34);
  const tr=rows.map((x,i)=>i===0?h[i]-l[i]:Math.max(h[i]-l[i],Math.abs(h[i]-c[i-1]),Math.abs(l[i]-c[i-1])));
@@ -32,12 +32,12 @@ function calculate(rows){
  const cci=typical.map((x,i)=>{if(i<19)return null;const a=typical.slice(i-19,i+1),m=mean(a),dev=mean(a.map(z=>Math.abs(z-m)));return dev? (x-m)/(.015*dev):0});
  const demUp=[],demDown=[];for(let i=0;i<n;i++){demUp.push(i?Math.max(h[i]-h[i-1],0):0);demDown.push(i?Math.max(l[i-1]-l[i],0):0)}
  const dem=demUp.map((_,i)=>{if(i<13)return null;const u=mean(demUp.slice(i-13,i+1)),d=mean(demDown.slice(i-13,i+1));return u+d?u/(u+d):0});
- const force=c.map((x,i)=>i? (x-c[i-1])*v[i]:null);
+ const force=c.map((x,i)=>hasVolume&&i? (x-c[i-1])*v[i]:null);
  const moneyFlow=typical.map((x,i)=>x*v[i]);
  const positiveFlow=moneyFlow.map((x,i)=>i&&typical[i]>typical[i-1]?x:0),negativeFlow=moneyFlow.map((x,i)=>i&&typical[i]<typical[i-1]?x:0);
- const mfi=moneyFlow.map((_,i)=>{if(i<13)return null;const p=positiveFlow.slice(i-13,i+1).reduce((a,b)=>a+b,0),q=negativeFlow.slice(i-13,i+1).reduce((a,b)=>a+b,0);return q===0?100:100-100/(1+p/q)});
- const obv=[];for(let i=0;i<n;i++)obv.push(i?obv[i-1]+(c[i]>c[i-1]?v[i]:c[i]<c[i-1]?-v[i]:0):v[i]);
- const ad=[];for(let i=0;i<n;i++){const m=h[i]===l[i]?0:((c[i]-l[i])-(h[i]-c[i]))/(h[i]-l[i]);ad.push((i?ad[i-1]:0)+m*v[i])}
+ const mfi=moneyFlow.map((_,i)=>{if(!hasVolume||i<13)return null;const p=positiveFlow.slice(i-13,i+1).reduce((a,b)=>a+b,0),q=negativeFlow.slice(i-13,i+1).reduce((a,b)=>a+b,0);return q===0?100:100-100/(1+p/q)});
+ const obv=[];for(let i=0;i<n;i++)obv.push(!hasVolume?null:i?obv[i-1]+(c[i]>c[i-1]?v[i]:c[i]<c[i-1]?-v[i]:0):v[i]);
+ const ad=[];for(let i=0;i<n;i++){if(!hasVolume){ad.push(null);continue}const m=h[i]===l[i]?0:((c[i]-l[i])-(h[i]-c[i]))/(h[i]-l[i]);ad.push((i?ad[i-1]:0)+m*v[i])}
  const ao=c.map((_,i)=>i<33?null:mean(typical.slice(i-4,i+1))-mean(typical.slice(i-33,i+1)));
  const ac=ao.map((x,i)=>x===null||i<4?null:x-mean(ao.slice(i-4,i+1)));
  const macd=ema12.map((x,i)=>x===null||ema26[i]===null?null:x-ema26[i]);
@@ -69,7 +69,7 @@ function calculate(rows){
  "Momentum":mom.at(-1),"Moving Average of Oscillator":maOsc.at(-1),
  "Relative Strength Index":rsi.at(-1),"Relative Vigor Index":rvi.at(-1)===null?null:{main:rvi.at(-1),signal:rviSignal.at(-1)},
  "Stochastic Oscillator":stoch.at(-1)===null?null:{main:stoch.at(-1),signal:stochD.at(-1)},"Williams Percent Range":high14.at(-1)===null?null:high14.at(-1)===low14.at(-1)?0:-100*(high14.at(-1)-c.at(-1))/(high14.at(-1)-low14.at(-1)),
- "Accumulation/Distribution":ad.at(-1),"Money Flow Index":mfi.at(-1),"On Balance Volume":obv.at(-1),"Volumes":v.at(-1),
+ "Accumulation/Distribution":ad.at(-1),"Money Flow Index":mfi.at(-1),"On Balance Volume":obv.at(-1),"Volumes":hasVolume?v.at(-1):null,
  "Alligator":alligator.at(-1),"Awesome Oscillator":ao.at(-1),"Accelerator Oscillator":ac.at(-1)
  };
  const series={
@@ -81,7 +81,7 @@ function calculate(rows){
  "Commodity Channel Index":cci,"DeMarker":dem,"Force Index":force,"MACD":{main:macd,signal:signal},
  "Momentum":mom,"Moving Average of Oscillator":maOsc,"Relative Strength Index":rsi,"Relative Vigor Index":{main:rvi,signal:rviSignal},
  "Stochastic Oscillator":{main:stoch,signal:stochD},"Williams Percent Range":high14.map((x,i)=>x===null?null:x===low14[i]?0:-100*(x-c[i])/(x-low14[i])),
- "Accumulation/Distribution":ad,"Money Flow Index":mfi,"On Balance Volume":obv,"Volumes":v,
+ "Accumulation/Distribution":ad,"Money Flow Index":mfi,"On Balance Volume":obv,"Volumes":hasVolume?v:Array(n).fill(null),
  "Alligator":{jaw:jaw,teeth:teeth,lips:lips},
  "Awesome Oscillator":ao,"Accelerator Oscillator":ac
  };
