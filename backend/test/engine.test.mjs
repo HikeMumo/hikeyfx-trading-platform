@@ -138,3 +138,24 @@ test("rejects modification of a position that is not open", () => {
   const engine = new DemoTradingEngine();
   assert.throws(() => engine.modifyPosition("missing", {}), /not found/);
 });
+
+test("partially closes an open position and preserves the remaining volume", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.10 });
+  engine.updateQuote("EURUSD", 1.08600, 1.08612);
+  const partial = engine.partialClosePosition(position.id, 0.04);
+  assert.equal(partial.closedVolume, 0.04);
+  assert.equal(partial.remainingVolume, 0.06);
+  assert.equal(partial.realisedPnl, 3.92);
+  assert.equal(engine.snapshot().positions[0].volume, 0.06);
+  assert.equal(engine.snapshot().history[0].status, "partial_closed");
+  assert.equal(engine.getAccount().balance, 10003.92);
+});
+
+test("rejects partial close volumes that over-close or leave less than minimum lot", () => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.10 });
+  assert.throws(() => engine.partialClosePosition(position.id, 0.10), /leave at least/);
+  assert.throws(() => engine.partialClosePosition(position.id, 0.095), /0.01 lot steps/);
+  assert.throws(() => engine.partialClosePosition(position.id, 0.09), /leave at least/);
+});
