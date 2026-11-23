@@ -95,7 +95,7 @@ test("all member API routes reject unauthenticated requests", async t => {
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const base = `http://127.0.0.1:${server.address().port}`;
-  for (const path of ["/api/v1/demo/account", "/api/v1/demo/positions", "/api/v1/demo/history", "/api/v1/market/quotes"]) {
+  for (const path of ["/api/v1/demo/account", "/api/v1/demo/positions", "/api/v1/demo/history", "/api/v1/demo/journal", "/api/v1/market/quotes"]) {
     const response = await fetch(base + path);
     assert.equal(response.status, 401, path + " must require authentication");
     assert.equal((await response.json()).ok, false);
