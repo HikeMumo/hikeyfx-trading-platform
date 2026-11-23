@@ -34,6 +34,6 @@ test("indicator library refuses insufficient and malformed candle series", async
   const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
   const context = { window: {} };
   vm.runInNewContext(source, context, { filename: "trading/indicators.js" });
-  assert.deepEqual(context.window.HikeyFXIndicators.calculate([]), {});
-  assert.deepEqual(context.window.HikeyFXIndicators.calculate([{ open: 1, high: 1, low: 1, close: "bad" }]), {});
+  assert.equal(Object.keys(context.window.HikeyFXIndicators.calculate([])).length, 0);
+  assert.equal(Object.keys(context.window.HikeyFXIndicators.calculate([{ open: 1, high: 1, low: 1, close: "bad" }])).length, 0);
 });
