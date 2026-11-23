@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d18"><title>HikeyFX | Admin Preview</title>
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#101a2b;--panel2:#142139;--line:#25344c;--muted:#91a0b8;--text:#eef4ff;--gold:#d8b56d;--green:#4bc59a;--amber:#e7b765;--red:#e47c83}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,Arial,sans-serif}button{font:inherit}.shell{display:flex;min-height:100vh}.side{width:230px;padding:24px 16px;background:#0b1220;border-right:1px solid var(--line);flex-shrink:0}.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:.3px}.mark{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--gold);color:var(--gold);border-radius:10px}.eyebrow{color:var(--muted);font-size:10px;letter-spacing:1.7px;text-transform:uppercase;margin:30px 10px 10px}.nav{display:grid;gap:5px}.nav a{color:#aab7ca;text-decoration:none;padding:10px 12px;border-radius:9px}.nav a.active,.nav a:hover{background:#18263c;color:white}.nav a.active{box-shadow:inset 2px 0 var(--gold)}.side-note{margin-top:30px;padding:12px;border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:11px}.main{min-width:0;flex:1;padding:28px clamp(16px,3vw,38px)}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}.top h1{font-size:25px;margin:0}.sub{color:var(--muted);margin-top:4px}.preview{border:1px solid #725e36;background:#342b1c;color:#f2d99e;padding:7px 11px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}.notice{border:1px solid #6b5733;background:#241f17;color:#e9d4a5;border-radius:11px;padding:12px 15px;margin-bottom:20px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;min-width:0}.metric-label{color:var(--muted);font-size:12px}.metric{font-size:26px;font-weight:750;margin:7px 0 3px}.metric-foot{color:var(--muted);font-size:11px}.section{margin-top:22px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;gap:12px}.section h2{font-size:16px;margin:0}.section-head small{color:var(--muted)}.split{display:grid;grid-template-columns:1.25fr 1fr;gap:13px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);font-size:12px}th{color:var(--muted);font-weight:600}td{color:#e0e8f5}.pill{display:inline-block;border-radius:20px;padding:3px 8px;font-size:10px;background:#1b3040;color:#8fd8bc}.pill.pending{background:#382f20;color:#f0c77e}.pill.demo{background:#1e2b43;color:#a9c4f2}.activity{display:grid;gap:0}.event{padding:12px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px}.event:last-child{border:0}.event strong{font-size:12px}.event small{display:block;color:var(--muted);margin-top:3px}.muted{color:var(--muted)}.riskbar{height:7px;background:#27364d;border-radius:10px;overflow:hidden;margin:10px 0}.riskbar span{display:block;height:100%;width:18%;background:var(--green)}.footer{color:var(--muted);font-size:11px;margin-top:22px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.split{grid-template-columns:1fr}}@media(max-width:650px){.shell{display:block}.side{width:100%;padding:13px 14px;border-right:0;border-bottom:1px solid var(--line)}.eyebrow,.side-note{display:none}.nav{display:flex;overflow:auto;margin-top:12px}.nav a{white-space:nowrap;padding:8px 10px;font-size:12px}.main{padding:20px 14px}.top h1{font-size:21px}.grid{gap:9px}.card{padding:13px}.metric{font-size:22px}}
+</style></head>
+<body><div class="shell">
+<aside class="side"><div class="brand"><span class="mark">H</span> HikeyFX</div><div class="eyebrow">Administration</div><nav class="nav"><a class="active" href="#overview">Overview</a><a href="#members">Members</a><a href="#verification">Verification</a><a href="#risk">Risk monitor</a><a href="#audit">Audit log</a></nav><div class="side-note">Internal interface concept. No administrator authentication or connected customer records.</div></aside>
+<main class="main" id="overview"><div class="top"><div><h1>Operations overview</h1><div class="sub">Platform administration · Development environment</div></div><span class="preview" id="adminStatus">CHECKING ADMIN ACCESS</span></div>
+<div class="notice"><strong>Restricted area:</strong> access requires an active administrator membership. Only read-only operational summaries are displayed here; customer money movement and live trading controls are not available.</div>
+<div class="grid">
+<div class="card"><div class="metric-label">Registered members</div><div class="metric" id="memberCount">—</div><div class="metric-foot">Registered profiles</div></div>
+<div class="card"><div class="metric-label">Demo accounts</div><div class="metric" id="demoCount">—</div><div class="metric-foot">Demo accounts only</div></div>
+<div class="card"><div class="metric-label">Verification queue</div><div class="metric" id="kycCount">—</div><div class="metric-foot">Pending / in review</div></div>
+<div class="card"><div class="metric-label">Open demo positions</div><div class="metric" id="positionCount">—</div><div class="metric-foot">Demo positions only</div></div>
+</div>
+<section class="section split"><div class="card" id="members"><div class="section-head"><h2>Recent member activity</h2><small>Latest 10 profiles</small></div><div class="table-wrap"><table><thead><tr><th>Member</th><th>Account type</th><th>Status</th><th>Joined</th></tr></thead><tbody id="memberRows"><tr><td colspan="4">Loading member records…</td></tr></tbody></table></div></div>
+<div class="card" id="verification"><div class="section-head"><h2>Verification queue</h2><small>Aggregate status only</small></div><div class="activity" id="verificationSummary"><div class="event"><div><strong>Verification queue</strong><small>Loading aggregate status…</small></div><span class="pill pending">—</span></div></div><p class="muted" style="font-size:11px;margin:12px 0 0">Identity documents are not exposed in this overview.</p></div></section>
+<section class="section split"><div class="card" id="risk"><div class="section-head"><h2>Demo risk monitor</h2><span class="pill">SIMULATED</span></div><div class="metric-label">Illustrative platform load</div><div class="metric">Normal</div><div class="riskbar"><span></span></div><div class="metric-foot">Sample indicator only — not a risk engine, exposure report or trading control.</div><div class="event"><div><strong>Live execution</strong><small>Locked in development</small></div><span class="pill pending">Disabled</span></div><div class="event"><div><strong>Client deposits</strong><small>Not implemented</small></div><span class="pill pending">Disabled</span></div></div>
+<div class="card" id="audit"><div class="section-head"><h2>Audit log preview</h2><small>Fictional events</small></div><div class="activity" id="auditRows"><div class="event"><div><strong>Audit events</strong><small>Loading…</small></div><span class="muted">—</span></div></div></div></section>
+<div class="footer">HikeyFX · Restricted admin overview · Read-only development operations</div>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../auth/config.js"></script>
+<script>
+(function(){
+const status=document.getElementById("adminStatus");
+const config=window.HIKEYFX_SUPABASE_CONFIG||{};
+const safeDate=value=>{const date=new Date(value);return Number.isNaN(date.getTime())?"—":date.toLocaleString()};
+const node=(tag,text,className)=>{const item=document.createElement(tag);item.textContent=text||"—";if(className)item.className=className;return item};
+function denied(message){status.textContent="ACCESS DENIED";const notice=document.querySelector(".notice");notice.textContent=message;document.getElementById("memberRows").innerHTML="<tr><td colspan='4'>Administrator access is unavailable.</td></tr>";document.getElementById("auditRows").textContent="Restricted.";document.getElementById("verificationSummary").textContent="Restricted."}
+if(!window.supabase||!config.url||!config.publishableKey){denied("Supabase configuration is unavailable.");return}
+const client=window.supabase.createClient(config.url,config.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+client.auth.getSession().then(async result=>{
+ if(result.error||!result.data.session){window.location.replace("../auth/");return}
+ const {data,error}=await client.rpc("hikeyfx_admin_overview");
+ if(error)throw error;
+ status.textContent="ADMIN ACCESS VERIFIED";
+ const values={memberCount:data.members,demoCount:data.demoAccounts,kycCount:data.verificationPending,positionCount:data.openDemoPositions};
+ Object.keys(values).forEach(id=>document.getElementById(id).textContent=Number(values[id]||0).toLocaleString());
+ const rows=document.getElementById("memberRows");rows.replaceChildren();
+ (data.recentMembers||[]).forEach(member=>{
+  const tr=document.createElement("tr");
+  const name=node("td",member.displayName||"HikeyFX member");
+  const mode=node("td",member.accountMode||"No account","pill demo");
+  const state=node("td",member.accountStatus||"—",member.accountStatus==="active"?"pill":"pill pending");
+  const joined=node("td",safeDate(member.joinedAt));
+  [name,mode,state,joined].forEach(cell=>tr.appendChild(cell));rows.appendChild(tr);
+ });
+ if(!rows.children.length)rows.innerHTML="<tr><td colspan='4'>No member profiles found.</td></tr>";
+ const queue=document.getElementById("verificationSummary");queue.replaceChildren();
+ const q=document.createElement("div");q.className="event";const qText=document.createElement("div");qText.append(node("strong","Open verification cases"),node("small","Pending or in-review cases"));q.append(qText,node("span",String(data.verificationPending||0),"pill pending"));queue.append(q);
+ const events=document.getElementById("auditRows");events.replaceChildren();
+ (data.recentAuditEvents||[]).forEach(event=>{const row=document.createElement("div");row.className="event";const detail=document.createElement("div");detail.append(node("strong",event.action),node("small",(event.targetType||"System")+" · "+safeDate(event.createdAt)));row.append(detail,node("span","AUDIT","muted"));events.append(row)});
+ if(!events.children.length)events.textContent="No audit events recorded.";
+ const signout=node("button","Sign out");signout.style.cssText="border:1px solid #3b4b61;background:#17253b;color:#eef4ff;padding:8px 12px;border-radius:8px;cursor:pointer";signout.onclick=async()=>{await client.auth.signOut();window.location.replace("../auth/")};document.querySelector(".top").append(signout);
+}).catch(error=>denied(error.message||"Administrator access could not be verified."));
+})();
+</script></body></html>

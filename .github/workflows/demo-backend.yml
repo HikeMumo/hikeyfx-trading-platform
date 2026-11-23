@@ -1,0 +1,53 @@
+name: HikeyFX platform checks
+# Validates backend APIs, browser scripts, Supabase RPC adapters and migration contracts.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - development/phase-1-foundation
+    paths:
+      - "backend/**"
+      - "auth/**"
+      - "portal/**"
+      - "admin/**"
+      - "trading/**"
+      - "supabase/**"
+      - ".github/workflows/demo-backend.yml"
+  pull_request:
+    branches:
+      - development/phase-1-foundation
+    paths:
+      - "backend/**"
+      - "auth/**"
+      - "portal/**"
+      - "trading/**"
+      - "supabase/**"
+      - ".github/workflows/demo-backend.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node.js demo engine and API tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Check browser JavaScript syntax
+        run: |
+          node --check auth/config.js
+          node --check auth/auth.js
+          node --check trading/indicators.js
+          node --check portal/member.js
+          node --check backend/src/server.mjs
+          node --check backend/src/supabase.mjs
+      - name: Run automated tests
+        working-directory: backend
+        run: npm test
