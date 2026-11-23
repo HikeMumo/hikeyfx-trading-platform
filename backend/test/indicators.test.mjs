@@ -36,6 +36,9 @@ test("indicator library calculates values from historical OHLCV candles", async 
   assert.ok(Number.isFinite(values["Money Flow Index"]));
   assert.ok(values["Bollinger Bands"].upper > values["Bollinger Bands"].lower);
   assert.equal(values.series["Moving Average"].length, candles.length);
+  const emaSeed = candles.slice(0,20).reduce((sum,candle)=>sum+candle.close,0)/20;
+  assert.ok(Math.abs(values.series["Exponential Moving Average"][19]-emaSeed)<1e-12);
+  assert.equal(values.series.MACD.signal.findIndex(Number.isFinite), 33);
   assert.equal(values.series.MACD.main.length, candles.length);
   assert.equal(values.series.Alligator.jaw.length, candles.length);
   assert.equal(values.series["Ichimoku Kinko Hyo"].senkouB.length, candles.length);
