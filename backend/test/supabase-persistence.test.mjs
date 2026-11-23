@@ -16,6 +16,14 @@ test("persistent demo migration defines member-scoped authenticated RPCs", async
   assert.match(sql, /from public, anon/);
 });
 
+test("major FX demo quote migration adds protected USDJPY and USDCHF execution prices", async () => {
+  const sql = await readFile(new URL("../../supabase/migrations/0014_demo_major_fx_execution_quotes.sql", import.meta.url), "utf8");
+  assert.match(sql, /\('USDJPY',149\.610,149\.630,100000\)/);
+  assert.match(sql, /\('USDCHF',0\.88404,0\.88416,100000\)/);
+  assert.match(sql, /on conflict\(symbol\) do update/);
+  assert.ok(sql.includes("fixed illustrative demo execution quotes"));
+});
+
 test("Supabase repository forwards only the member JWT and publishable key to RPC", async () => {
   const oldUrl = process.env.SUPABASE_URL;
   const oldKey = process.env.SUPABASE_PUBLISHABLE_KEY;
