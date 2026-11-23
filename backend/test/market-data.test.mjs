@@ -131,6 +131,26 @@ test("historical adapter supports all 21 MT5 chart timeframes", async () => {
   }
 });
 
+test("weekly and monthly charts retrieve five years in one-year provider-safe chunks", async () => {
+  let requests = 0;
+  const now = Date.parse("2026-11-23T12:00:00Z");
+  const result = await fetchTraderMadeCandles({
+    apiKey: "long-history-test-secret", symbol: "EURUSD", timeframe: "1M", now,
+    fetchImpl: async url => {
+      requests++;
+      const start = url.searchParams.get("start_date");
+      const end = url.searchParams.get("end_date");
+      assert.ok(Date.parse(end) - Date.parse(start) <= 364 * 86400000, "each daily request must stay within one year");
+      return new Response(JSON.stringify({ quotes: [{
+        date: start, open: 1.08, high: 1.09, low: 1.07, close: 1.085
+      }] }), { status: 200, headers: { "content-type": "application/json" } });
+    }
+  });
+  assert.equal(requests, 5);
+  assert.equal(result.candles.length, 5);
+  assert.equal(result.timeframe, "1M");
+});
+
 test("historical adapter rejects unknown symbols and timeframes before network access", async () => {
   const noNetwork=async()=>{throw new Error("network must not be called")};
   await assert.rejects(fetchTraderMadeCandles({apiKey:"test",symbol:"UNKNOWN",timeframe:"15m",fetchImpl:noNetwork}),/enabled historical data/);
