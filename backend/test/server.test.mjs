@@ -334,3 +334,38 @@ test("HTTP API exposes the authenticated member trade journal", async t => {
   assert.equal(data[0].eventType, "opened");
   assert.equal(data[0].eventData.symbol, "EURUSD");
 });
+
+
+test("fresh market quotes revalue open demo positions and expose floating PnL", async t => {
+  const marketData = async () => ({
+    source: "test-feed",
+    receivedAt: new Date().toISOString(),
+    status: "fresh",
+    quotes: [{ symbol: "EURUSD", bid: 1.08600, ask: 1.08612, status: "fresh" }]
+  });
+  const server = createApp(undefined, marketData, async () => ({ id: "mark-to-market-member" }), null);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = "http://127.0.0.1:" + server.address().port;
+  const headers = { authorization: "Bearer mark-to-market-token", "content-type": "application/json" };
+
+  const opened = await fetch(base + "/api/v1/demo/orders", {
+    method: "POST", headers,
+    body: JSON.stringify({ symbol: "EURUSD", side: "buy", volume: 0.1 })
+  });
+  assert.equal(opened.status, 201);
+  const position = (await opened.json()).data;
+  assert.equal(position.unrealisedPnl, -1.2); // The bid/ask spread is a normal initial trading cost.
+
+  const quotes = await fetch(base + "/api/v1/market/quotes?symbols=EURUSD", { headers });
+  assert.equal(quotes.status, 200);
+  assert.deepEqual((await quotes.json()).executionQuotesUpdated, ["EURUSD"]);
+
+  const response = await fetch(base + "/api/v1/demo/positions", { headers });
+  const marked = (await response.json()).data[0];
+  assert.equal(marked.currentPrice, 1.086);
+  assert.equal(marked.unrealisedPnl, 9.8);
+
+  const account = await fetch(base + "/api/v1/demo/account", { headers });
+  assert.equal((await account.json()).data.unrealisedPnl, 9.8);
+});
