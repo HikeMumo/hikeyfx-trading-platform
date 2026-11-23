@@ -37,7 +37,7 @@ test("TraderMade adapter rejects missing credentials", async () => {
 test("TraderMade adapter rejects unsupported symbols before provider request", async () => {
   await assert.rejects(
     fetchTraderMadeQuotes({ apiKey: "test", symbols: ["FAKEPAIR"], fetchImpl: async () => { throw new Error("must not call"); } }),
-    /not enabled/
+    /enabled historical data/
   );
 });
 
