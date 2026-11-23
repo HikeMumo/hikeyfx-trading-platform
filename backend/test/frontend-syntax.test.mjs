@@ -42,3 +42,14 @@ test("chart exposes working controls for its analytical drawing objects", async 
   }
   assert.ok(!html.includes("function makeCandles"), "synthetic chart candle generator must not remain");
 });
+
+test("quotes view provides searchable categories and persistent favourites", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  for (const category of ["All","Favorites","Forex","Indices","Commodities"]) {
+    assert.match(html, new RegExp('data-cat="' + category + '"'));
+  }
+  assert.ok(html.includes('id="search"'));
+  assert.ok(html.includes('data-favorite='));
+  assert.ok(html.includes('localStorage.setItem("hikeyfx-favourites"'));
+  assert.ok(html.includes('function toggleFavourite'));
+});
