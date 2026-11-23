@@ -73,6 +73,12 @@ test("RSI toggle stays synchronized with the full indicator library and all mult
   assert.ok(html.includes('drawIndicatorLine(series.Envelopes.middle'));
 });
 
+test("chart distinguishes provider plan restrictions from general history failures", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('error.providerStatus=payload.status'));
+  assert.ok(html.includes('error.providerStatus==="plan-restricted"?"Provider plan restriction"'));
+});
+
 test("chart x-axis shows clock time for intraday timeframes and dates for higher timeframes", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('(tf.endsWith("m")||tf.endsWith("h"))?td.toLocaleString'));
