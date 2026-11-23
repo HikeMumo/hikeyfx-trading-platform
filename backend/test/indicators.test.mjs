@@ -45,6 +45,15 @@ test("indicator library calculates values from historical OHLCV candles", async 
   assert.equal(values.series["Ichimoku Kinko Hyo"].senkouB.length, candles.length);
 });
 
+test("RSI returns a neutral 50 in a flat market", async () => {
+  const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
+  const context = { window: {} };
+  vm.runInNewContext(source, context, { filename: "trading/indicators.js" });
+  const candles = Array.from({ length: 40 }, () => ({ open: 1, high: 1.001, low: 0.999, close: 1 }));
+  const values = context.window.HikeyFXIndicators.calculate(candles);
+  assert.equal(values["Relative Strength Index"], 50);
+});
+
 test("volume indicators remain unavailable when historical provider supplies no volume", async () => {
   const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
   const context = { window: {} };
