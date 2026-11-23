@@ -80,6 +80,28 @@ export class DemoTradingEngine {
     return { ...position, unrealisedPnl: this.getUnrealisedPnl(position) };
   }
 
+  modifyPosition(id, { stopLoss = null, takeProfit = null } = {}) {
+    const position = this.positions.find(item => item.id === id);
+    if (!position) throw new Error("Open demo position not found.");
+    for (const [name, value] of [["stopLoss", stopLoss], ["takeProfit", takeProfit]]) {
+      if (value !== null && (!finite(value) || value <= 0)) {
+        throw new Error(name + " must be a positive price or null.");
+      }
+    }
+    const quote = this.getQuote(position.symbol);
+    const currentPrice = position.side === "buy" ? quote.bid : quote.ask;
+    if (stopLoss !== null && (position.side === "buy" ? stopLoss >= currentPrice : stopLoss <= currentPrice)) {
+      throw new Error("Stop-loss must remain below the current price for a buy and above it for a sell.");
+    }
+    if (takeProfit !== null && (position.side === "buy" ? takeProfit <= currentPrice : takeProfit >= currentPrice)) {
+      throw new Error("Take-profit must remain above the current price for a buy and below it for a sell.");
+    }
+    position.stopLoss = stopLoss;
+    position.takeProfit = takeProfit;
+    position.modifiedAt = new Date().toISOString();
+    return { ...position, unrealisedPnl: this.getUnrealisedPnl(position) };
+  }
+
   closePosition(id, reason = "manual") {
     const index = this.positions.findIndex(position => position.id === id);
     if (index < 0) throw new Error("Open demo position not found.");
