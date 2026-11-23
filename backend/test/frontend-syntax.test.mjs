@@ -73,6 +73,13 @@ test("RSI toggle stays synchronized with the full indicator library and all mult
   assert.ok(html.includes('drawIndicatorLine(series.Envelopes.middle'));
 });
 
+test("Heikin Ashi candles are calculated from full loaded history before viewport slicing", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes("plotCandles=candles.map(function(c)"));
+  assert.ok(html.includes("return ha}).slice(startIndex,endIndex)"));
+  assert.ok(!html.includes("plotCandles=visibleCandles.map(function(c)"));
+});
+
 test("chart price scale includes selected overlays and reuses the calculated indicator series", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('priceOverlayNames=["Moving Average"'));
