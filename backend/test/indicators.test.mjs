@@ -122,6 +122,26 @@ test("Force Index is smoothed over 13 periods and Bulls/Bears Power use EMA13", 
   assert.ok(Math.abs(values["Bulls Power"] - (candles.at(-1).high - ema13)) < 1e-12);
 });
 
+test("RVI main line sums ten weighted numerator and denominator bars", async () => {
+  const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
+  const context = { window: {} };
+  vm.runInNewContext(source, context, { filename: "trading/indicators.js" });
+  const candles = Array.from({ length: 40 }, (_, i) => {
+    const close = 1.15 + i * 0.0002 + Math.sin(i / 3) * 0.0008;
+    const open = close - Math.cos(i / 4) * 0.0003;
+    return { open, high: close + 0.0006 + (i % 3) * 0.0001, low: open - 0.0005 - (i % 4) * 0.0001, close };
+  });
+  const values = context.window.HikeyFXIndicators.calculate(candles);
+  const numerator = [], denominator = [];
+  for (let i = 3; i < candles.length; i++) {
+    const w = [1, 2, 2, 1], window = candles.slice(i - 3, i + 1);
+    numerator.push(window.reduce((sum, candle, j) => sum + (candle.close - candle.open) * w[j], 0) / 6);
+    denominator.push(window.reduce((sum, candle, j) => sum + (candle.high - candle.low) * w[j], 0) / 6);
+  }
+  const expected = numerator.slice(-10).reduce((a, b) => a + b, 0) / denominator.slice(-10).reduce((a, b) => a + b, 0);
+  assert.ok(Math.abs(values["Relative Vigor Index"].main - expected) < 1e-12);
+});
+
 test("volume indicators remain unavailable when historical provider supplies no volume", async () => {
   const source = await readFile(new URL("../../trading/indicators.js", import.meta.url), "utf8");
   const context = { window: {} };
