@@ -73,6 +73,16 @@ test("RSI toggle stays synchronized with the full indicator library and all mult
   assert.ok(html.includes('drawIndicatorLine(series.Envelopes.middle'));
 });
 
+test("chart price scale includes selected overlays and reuses the calculated indicator series", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('priceOverlayNames=["Moving Average"'));
+  assert.ok(html.includes('activeIndicators.forEach(function(name)'));
+  assert.ok(html.includes('if(Number.isFinite(value))vals.push(value)'));
+  assert.ok(html.includes('var series=indicatorSeries'));
+  assert.ok(html.includes('var rsiSeries=indicatorSeries["Relative Strength Index"]||[]'));
+  assert.ok(!html.includes('var calc=window.HikeyFXIndicators.calculate(candles)'));
+});
+
 test("quotes view provides searchable categories and persistent favourites", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   for (const category of ["All","Favorites","Forex","Indices","Commodities"]) {
