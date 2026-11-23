@@ -133,3 +133,11 @@ test("chart drawings expose a rotation handle and persist rotated geometry", asy
   assert.ok(html.includes('edit.angle=drawingEditStartAngle'));
   assert.ok(html.includes('JSON.stringify(drawings)'));
 });
+
+test("chart drawings can be removed with a long press on a selected handle", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('drawingHoldTimer=setTimeout'));
+  assert.ok(html.includes('},1800)'));
+  assert.ok(html.includes('drawings.splice(hit,1)'));
+  assert.ok(html.includes('clearTimeout(drawingHoldTimer)'));
+});
