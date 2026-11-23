@@ -51,20 +51,36 @@ function calculate(rows){
  const alligator=rows.map((_,i)=>({jaw:i<13?null:mean(typical.slice(i-13,i+1)),teeth:i<8?null:mean(typical.slice(i-8,i+1)),lips:i<5?null:mean(typical.slice(i-5,i+1))}));
  const mom=c.map((x,i)=>i<14?null:x-c[i-14]),roc=c.map((x,i)=>i<14?null:(x/c[i-14]-1)*100);
  const dema=ema20.map((x,i)=>x===null?null:2*x-(ema(ema20.map(z=>z||0),20)[i]||0));
+ const smma20=smma(c,20),wma20=wma(c,20),maOsc=sma5.map((x,i)=>x===null||sma34[i]===null?null:x-sma34[i]);
+ const std20=upper.map((x,i)=>x===null?null:(x-middle[i])/2);
  const output={
- "Moving Average":sma20.at(-1),"Exponential Moving Average":ema20.at(-1),"Smoothed Moving Average":smma(c,20).at(-1),"Linear Weighted Moving Average":wma(c,20).at(-1),
+ "Moving Average":sma20.at(-1),"Exponential Moving Average":ema20.at(-1),"Smoothed Moving Average":smma20.at(-1),"Linear Weighted Moving Average":wma20.at(-1),
  "Bollinger Bands":upper.at(-1)===null?null:{upper:upper.at(-1),middle:middle.at(-1),lower:lower.at(-1)},
- "Envelopes":envelopes.at(-1),"Ichimoku Kinko Hyo":ichi.at(-1),"Parabolic SAR":sar.at(-1),"Standard Deviation":upper.at(-1)===null?null:(upper.at(-1)-middle.at(-1))/2,
+ "Envelopes":envelopes.at(-1),"Ichimoku Kinko Hyo":ichi.at(-1),"Parabolic SAR":sar.at(-1),"Standard Deviation":std20.at(-1),
  "Average Directional Movement Index":adx.at(-1),"Average True Range":atr14.at(-1),
  "Bears Power":ema20.at(-1)===null?null:l.at(-1)-ema20.at(-1),"Bulls Power":ema20.at(-1)===null?null:h.at(-1)-ema20.at(-1),
  "Commodity Channel Index":cci.at(-1),"DeMarker":dem.at(-1),"Force Index":force.at(-1),
  "MACD":macd.at(-1)===null?null:{main:macd.at(-1),signal:signal.at(-1)},
- "Momentum":mom.at(-1),"Moving Average of Oscillator":sma5.at(-1)===null||sma34.at(-1)===null?null:sma5.at(-1)-sma34.at(-1),
+ "Momentum":mom.at(-1),"Moving Average of Oscillator":maOsc.at(-1),
  "Relative Strength Index":rsi.at(-1),"Relative Vigor Index":rvi.at(-1),
  "Stochastic Oscillator":stoch.at(-1),"Williams Percent Range":high14.at(-1)===null?null:high14.at(-1)===low14.at(-1)?0:-100*(high14.at(-1)-c.at(-1))/(high14.at(-1)-low14.at(-1)),
  "Accumulation/Distribution":ad.at(-1),"Money Flow Index":mfi.at(-1),"On Balance Volume":obv.at(-1),"Volumes":v.at(-1),
  "Alligator":alligator.at(-1),"Awesome Oscillator":ao.at(-1),"Accelerator Oscillator":ac.at(-1)
  };
+ const series={
+ "Moving Average":sma20,"Exponential Moving Average":ema20,"Smoothed Moving Average":smma20,"Linear Weighted Moving Average":wma20,
+ "Bollinger Bands":{upper:upper,middle:middle,lower:lower},"Envelopes":{upper:envelopes.map(x=>x&&x.upper),middle:ema20,lower:envelopes.map(x=>x&&x.lower)},
+ "Ichimoku Kinko Hyo":{tenkan:ichi.map(x=>x&&x.tenkan),kijun:ichi.map(x=>x&&x.kijun),senkouA:ichi.map(x=>x&&x.senkouA)},
+ "Parabolic SAR":sar,"Standard Deviation":std20,"Average Directional Movement Index":adx,"Average True Range":atr14,
+ "Bears Power":c.map((x,i)=>ema20[i]===null?null:l[i]-ema20[i]),"Bulls Power":c.map((x,i)=>ema20[i]===null?null:h[i]-ema20[i]),
+ "Commodity Channel Index":cci,"DeMarker":dem,"Force Index":force,"MACD":{main:macd,signal:signal},
+ "Momentum":mom,"Moving Average of Oscillator":maOsc,"Relative Strength Index":rsi,"Relative Vigor Index":rvi,
+ "Stochastic Oscillator":stoch,"Williams Percent Range":high14.map((x,i)=>x===null?null:x===low14[i]?0:-100*(x-c[i])/(x-low14[i])),
+ "Accumulation/Distribution":ad,"Money Flow Index":mfi,"On Balance Volume":obv,"Volumes":v,
+ "Alligator":{jaw:alligator.map(x=>x&&x.jaw),teeth:alligator.map(x=>x&&x.teeth),lips:alligator.map(x=>x&&x.lips)},
+ "Awesome Oscillator":ao,"Accelerator Oscillator":ac
+ };
+ Object.defineProperty(output,"series",{value:series,enumerable:false});
  return output;
 }
 root.HikeyFXIndicators={names,calculate};
