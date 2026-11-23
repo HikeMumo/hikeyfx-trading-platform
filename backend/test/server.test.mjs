@@ -320,3 +320,17 @@ test("HTTP API partially closes an open demo position", async t => {
   assert.equal(data.closedVolume, 0.04);
   assert.equal(data.remainingVolume, 0.06);
 });
+
+test("HTTP API exposes the authenticated member trade journal", async t => {
+  const engine = new DemoTradingEngine();
+  engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.1 });
+  const server = createApp(engine, undefined, async () => ({ id: "journal-member" }), null);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/demo/journal`);
+  assert.equal(response.status, 200);
+  const data = (await response.json()).data;
+  assert.equal(data.length, 1);
+  assert.equal(data[0].eventType, "opened");
+  assert.equal(data[0].eventData.symbol, "EURUSD");
+});
