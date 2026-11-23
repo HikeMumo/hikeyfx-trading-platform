@@ -138,6 +138,11 @@ test("workspace settings save quote sorting, chart defaults and browser notifica
   assert.ok(html.includes('function saveWorkspaceSettings'));
 });
 
+test("USDJPY quote and chart formatting preserves three decimal places", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes('function digits(a){return a.s==="USD/JPY"?3:'));
+});
+
 test("USDJPY and USDCHF are enabled in the order ticket", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('["EUR/USD","GBP/USD","AUD/USD","USD/JPY","USD/CHF","Gold"].indexOf(selected.s)<0'));
