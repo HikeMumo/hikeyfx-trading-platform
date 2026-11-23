@@ -131,7 +131,7 @@ test("historical adapter supports all 21 MT5 chart timeframes", async () => {
   }
 });
 
-test("weekly and monthly charts retrieve multi-year history in one-year provider-safe chunks", async () => {
+test("monthly charts retrieve seven years in one-year provider-safe chunks", async () => {
   let requests = 0;
   const now = Date.parse("2026-11-23T12:00:00Z");
   const result = await fetchTraderMadeCandles({
