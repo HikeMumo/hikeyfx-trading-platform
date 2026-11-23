@@ -80,6 +80,11 @@ test("Heikin Ashi candles are calculated from full loaded history before viewpor
   assert.ok(!html.includes("plotCandles=visibleCandles.map(function(c)"));
 });
 
+test("chart price scale uses rendered candle highs and lows", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  assert.ok(html.includes("vals=[];plotCandles.forEach(function(c){vals.push(c.high,c.low)});"));
+});
+
 test("chart price scale includes selected overlays and reuses the calculated indicator series", async () => {
   const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
   assert.ok(html.includes('priceOverlayNames=["Moving Average"'));
