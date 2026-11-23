@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createApp } from "../src/server.mjs";
+import { DemoTradingEngine } from "../src/engine.mjs";
 
 test("HTTP API exposes demo account and accepts validated demo orders", async t => {
   const server = createApp(undefined, undefined, async () => ({ id: "test-user" }));
@@ -259,4 +260,47 @@ test("historical chart candle route reports plan-restricted provider access", as
   const response=await fetch("http://127.0.0.1:"+server.address().port+"/api/v1/market/candles?symbol=EURUSD&timeframe=1m");
   assert.equal(response.status,403);
   assert.equal((await response.json()).status,"plan-restricted");
+});
+
+test("HTTP API modifies stop-loss and take-profit on an open demo position", async t => {
+  const engine = new DemoTradingEngine();
+  const position = engine.placeOrder({ symbol: "EURUSD", side: "buy", volume: 0.1 });
+  const server = createApp(engine, undefined, async () => ({ id: "modify-member" }), null);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/demo/positions/${position.id}/modify`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ stopLoss: 1.08400, takeProfit: 1.08700 })
+  });
+  assert.equal(response.status, 200);
+  const payload = await response.json();
+  assert.equal(payload.data.stopLoss, 1.08400);
+  assert.equal(payload.data.takeProfit, 1.08700);
+});
+
+test("persistent position modification uses the authenticated member repository", async t => {
+  const positionId = "123e4567-e89b-12d3-a456-426614174001";
+  const calls = [];
+  const repository = {
+    snapshot: async token => {
+      calls.push(["snapshot", token]);
+      return { accountId: "account-a", balance: 10000, positions: [{ id: positionId }], history: [] };
+    },
+    modifyPosition: async (token, id, levels) => {
+      calls.push(["modify", token, id, levels]);
+      return { id, stopLoss: levels.stopLoss, takeProfit: levels.takeProfit, status: "open" };
+    }
+  };
+  const server = createApp(null, undefined, async () => ({ id: "member-modify" }), repository);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/demo/positions/${positionId}/modify`, {
+    method: "POST",
+    headers: { authorization: "Bearer member-modify-token", "content-type": "application/json" },
+    body: JSON.stringify({ stopLoss: 1.08300, takeProfit: null })
+  });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).data.stopLoss, 1.08300);
+  assert.equal(calls.some(call => call[0] === "modify" && call[1] === "member-modify-token" && call[2] === positionId), true);
 });
