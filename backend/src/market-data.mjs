@@ -86,9 +86,9 @@ const TIMEFRAME_CONFIG = {
 "1D":["daily",1,365],"1W":["daily",1,365],"1M":["daily",1,365]
 };
 const isoDate = date => date.toISOString().slice(0,16).replace("T","-");
-function parseHistoricalTimestamp(value) {
+export function parseHistoricalTimestamp(value) {
  const raw=String(value??"").trim();
- const timezoneLess=/^\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}(?::\\d{2}(?:\\.\\d+)?)?$/.test(raw);
+ const timezoneLess=/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(raw);
  return Date.parse(timezoneLess?raw.replace(" ","T")+"Z":raw);
 }
 function bucketStart(date,timeframe) {
