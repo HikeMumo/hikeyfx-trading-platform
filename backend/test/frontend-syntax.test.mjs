@@ -29,3 +29,16 @@ test("admin page inline JavaScript parses successfully", async () => {
   assert.ok(start >= 0 && end > start, "expected an inline admin script");
   assert.doesNotThrow(() => new vm.Script(html.slice(start + 8, end), { filename: "admin-inline.js" }));
 });
+
+test("chart exposes working controls for its analytical drawing objects", async () => {
+  const html = await readFile(new URL("../../trading/index.html", import.meta.url), "utf8");
+  const ids = ["trendTool","horizontalTool","verticalTool","rectangleTool","ellipseTool","rayTool","arrowTool","channelTool","fibonacciTool","triangleTool","gannFanTool","fibArcTool","fibTimeTool","crossTool","diamondTool","measureTool"];
+  for (const id of ids) {
+    assert.match(html, new RegExp('id="' + id + '"'), id + " control should exist");
+    assert.match(html, new RegExp('el\\("' + id + '"\\)\\.addEventListener\\("click"'), id + " control should have a click action");
+  }
+  for (const type of ["horizontal","vertical","rectangle","ellipse","triangle","fibonacci","channel","gannfan","fibarc","fibtime","cross","diamond","measure"]) {
+    assert.ok(html.includes('d.type==="' + type + '"'), type + " drawing should have a renderer");
+  }
+  assert.ok(!html.includes("function makeCandles"), "synthetic chart candle generator must not remain");
+});
