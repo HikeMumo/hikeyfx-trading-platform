@@ -5,6 +5,7 @@ import { DemoTradingEngine } from "./engine.mjs";
 import { fetchTraderMadeQuotes, fetchTraderMadeCandles } from "./market-data.mjs";
 import { fetchTwelveDataCandles } from "./twelve-data.mjs";
 import { createSupabaseDemoRepository } from "./supabase.mjs";
+import { ExecutionGateway } from "./execution-gateway.mjs";
 
 const HOST = "0.0.0.0";
 const PORT = Number(process.env.PORT || 8787);
@@ -84,7 +85,7 @@ async function readJson(req) {
   return parsed;
 }
 
-export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository, marketHistory = fetchHistoricalCandles) {
+export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository, marketHistory = fetchHistoricalCandles, executionGateway = new ExecutionGateway()) {
   const memberEngines = new Map();
   const rateBuckets = new Map();
   const ratePolicy = (method, path) => {
@@ -144,6 +145,9 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     const retryAfterSeconds = consumeRateLimit(user.id, ratePolicy(req.method, url.pathname));
     if (retryAfterSeconds > 0) {
       return send(res, 429, { ok: false, error: "Too many requests. Please retry shortly.", retryAfterSeconds });
+    }
+    if (req.method === "GET" && url.pathname === "/api/v1/execution/status") {
+      return send(res, 200, { ok: true, data: await executionGateway.status() });
     }
     const memberEngine = getMemberEngine(user);
     const token = bearerToken(req);
