@@ -15,7 +15,7 @@ export class GatewayError extends Error {
 /*
  * Broker-owned execution boundary. Production dependencies are mandatory:
  * adapter: health() and submitMarketOrder(order)
- * idempotencyStore: reserve(userId,key,hash), complete(userId,key,result), fail(userId,key,error)
+ * idempotencyStore: reserve(userId,key,hash), complete(userId,key,result), fail(userId,key,error), markUnknown(userId,key,error)
  * riskEngine: authorizeOrder({userId,order,quote})
  * auditLog: append(event)
  * No in-memory fallback is permitted for money-affecting state.
@@ -91,6 +91,7 @@ export class ExecutionGateway {
     if (reservation.state === "existing") return reservation.result;
     if (reservation.state !== "new") throw new GatewayError("Order reservation could not be confirmed.", 503, "IDEMPOTENCY_UNAVAILABLE");
 
+    let submissionAttempted = false;
     try {
       const health = await this.adapter.health();
       if (health?.connected !== true) throw new GatewayError("Execution counterparty is disconnected.", 503, "COUNTERPARTY_DISCONNECTED");
@@ -103,6 +104,9 @@ export class ExecutionGateway {
         symbol: order.symbol, side: order.side, volume: order.volume, at: new Date(this.now()).toISOString()
       });
 
+      // From this point onward a timeout or malformed response may mean the counterparty
+      // received the order. Never make the idempotency key reusable after this boundary.
+      submissionAttempted = true;
       const ack = await this.adapter.submitMarketOrder(order);
       if (!ack || !["accepted", "rejected"].includes(ack.status)) {
         throw new GatewayError("Counterparty returned an invalid execution acknowledgement.", 502, "INVALID_EXECUTION_ACK");
@@ -144,7 +148,16 @@ export class ExecutionGateway {
       return result;
     } catch (error) {
       const safeError = { code: error.code || "EXECUTION_FAILED", message: error.message || "Execution failed." };
-      try { await this.idempotencyStore.fail(userId, key, safeError); } catch {}
+      try {
+        if (submissionAttempted) {
+          if (typeof this.idempotencyStore.markUnknown !== "function") {
+            throw new Error("Durable unknown-outcome handling is required after submission.");
+          }
+          await this.idempotencyStore.markUnknown(userId, key, safeError);
+        } else {
+          await this.idempotencyStore.fail(userId, key, safeError);
+        }
+      } catch {}
       try {
         await this.auditLog.append({
           event: "order_execution_error", userId, accountId,
