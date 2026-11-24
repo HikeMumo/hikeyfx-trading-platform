@@ -9,7 +9,12 @@ function setup(overrides = {}) {
     async reserve(user, key, hash) {
       const id = user + ":" + key;
       const prior = records.get(id);
-      if (prior) return prior.hash === hash ? { state: "existing", result: prior.result } : { state: "conflict" };
+      if (prior) {
+        if (prior.hash !== hash) return { state: "conflict" };
+        return prior.state === "complete"
+          ? { state: "existing", result: prior.result }
+          : { state: "in_progress" };
+      }
       records.set(id, { hash, state: "reserved" });
       return { state: "new" };
     },
@@ -20,6 +25,10 @@ function setup(overrides = {}) {
     async fail(user, key, error) {
       const row = records.get(user + ":" + key);
       if (row) { row.state = "failed"; row.error = error; }
+    },
+    async markUnknown(user, key, error) {
+      const row = records.get(user + ":" + key);
+      if (row) { row.state = "unknown"; row.error = error; }
     }
   };
   const adapter = {
@@ -96,4 +105,34 @@ test("gateway fails closed when durable state is missing", async () => {
   const { gateway } = setup({ idempotencyStore: null });
   assert.equal((await gateway.status()).ready, false);
   await assert.rejects(gateway.submitMarketOrder(valid), e => e.code === "GATEWAY_NOT_READY");
+});
+
+
+test("counterparty timeout is marked unknown and cannot be blindly retried", async () => {
+  const records = new Map();
+  let submissions = 0;
+  let unknownMarks = 0;
+  const idempotencyStore = {
+    async reserve(user, key, hash) {
+      const id = user + ":" + key;
+      const prior = records.get(id);
+      if (prior) return prior.hash === hash ? { state: "in_progress" } : { state: "conflict" };
+      records.set(id, { hash, state: "reserved" });
+      return { state: "new" };
+    },
+    async complete() {},
+    async fail() {},
+    async markUnknown() { unknownMarks += 1; }
+  };
+  const { gateway } = setup({
+    idempotencyStore,
+    adapter: {
+      async health() { return { connected: true }; },
+      async submitMarketOrder() { submissions += 1; throw new Error("network timeout"); }
+    }
+  });
+  await assert.rejects(gateway.submitMarketOrder(valid), /network timeout/);
+  assert.equal(unknownMarks, 1);
+  await assert.rejects(gateway.submitMarketOrder(valid), e => e.code === "IDEMPOTENCY_UNAVAILABLE");
+  assert.equal(submissions, 1);
 });
