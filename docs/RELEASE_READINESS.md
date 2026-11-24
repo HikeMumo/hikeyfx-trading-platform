@@ -68,6 +68,6 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 
 ## Latest execution-gateway engineering verification
 
-- GitHub Actions run [45475510454](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45475510454) passed 137 automated tests and browser/backend syntax checks for the then-current main commit.
+- GitHub Actions run [45475655854](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45475655854) passed 138 automated tests and browser/backend syntax checks for commit `3f553d0a6b5a6f99d15a1f00ccd7a168d0bae6d0`.
 - Migrations 0017 and 0018 harden acknowledgement replay consistency and safe release of pre-submission idempotency reservations. They are committed source files and are not applied to hosted Supabase.
 - The live gateway remains intentionally not ready: no trusted live-account risk snapshot is wired, the trading-account schema still enforces demo mode, and no certified liquidity-provider adapter or execution-report lifecycle has been connected.
