@@ -98,7 +98,7 @@ export class ExecutionGateway {
     let submissionAttempted = false;
     try {
       const health = await this.adapter.health();
-      if (health?.connected !== true) throw new GatewayError("Execution counterparty is disconnected.", 503, "COUNTERPARTY_DISCONNECTED");
+      if (health?.connected !== true || typeof health.provider !== "string" || !health.provider) throw new GatewayError("Execution counterparty is disconnected or has no provider identity.", 503, "COUNTERPARTY_DISCONNECTED");
       const decision = await this.riskEngine.authorizeOrder({ userId, order, quote });
       if (!decision || decision.approved !== true) {
         throw new GatewayError(decision?.reason || "Order rejected by HikeyFX risk controls.", 422, "RISK_REJECTED");
@@ -116,6 +116,7 @@ export class ExecutionGateway {
         throw new GatewayError("Counterparty returned an invalid execution acknowledgement.", 502, "INVALID_EXECUTION_ACK");
       }
       if (ack.status === "rejected") {
+        if (!ack.providerOrderId) throw new GatewayError("Rejected acknowledgement is missing its provider order ID.", 502, "INVALID_EXECUTION_ACK");
         const rejected = {
           status: "rejected", clientOrderId: order.clientOrderId,
           providerOrderId: ack.providerOrderId || null,
@@ -133,7 +134,7 @@ export class ExecutionGateway {
       const executedVolume = ack.executedVolume === undefined ? amount : Number(ack.executedVolume);
       const averagePrice = Number(ack.averagePrice);
       if (!finite(executedVolume) || executedVolume <= 0 || executedVolume > amount ||
-          !finite(averagePrice) || averagePrice <= 0 || !ack.providerOrderId) {
+          !finite(averagePrice) || averagePrice <= 0 || !ack.providerOrderId || !ack.providerExecutionId) {
         throw new GatewayError("Accepted acknowledgement is missing valid fill details.", 502, "INVALID_FILL");
       }
       const result = {
