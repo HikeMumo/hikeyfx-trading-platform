@@ -39,10 +39,11 @@ function setup(overrides = {}) {
     }
   };
   const auditLog = { async append() {} };
+  const executionRepository = { async recordAcknowledgement() {} };
   const riskEngine = { async authorizeOrder() { return { approved: true }; } };
   return {
     gateway: new ExecutionGateway({
-      enabled: true, adapter, idempotencyStore, riskEngine, auditLog,
+      enabled: true, adapter, idempotencyStore, riskEngine, auditLog, executionRepository,
       now: () => 1800000000000, ...overrides
     }),
     calls
@@ -64,7 +65,8 @@ test("gateway reports ready only when all dependencies and counterparty are read
   assert.deepEqual(await gateway.status(), {
     mode: "broker-owned-execution-gateway", enabled: true, ready: true,
     adapterConnected: true, provider: "test-counterparty",
-    durableIdempotency: true, unknownOutcomeProtection: true, riskControls: true, auditTrail: true
+    durableIdempotency: true, unknownOutcomeProtection: true, riskControls: true, auditTrail: true,
+    durableExecutionRecords: true
   });
 });
 test("market order is risk-checked and acknowledged by the adapter", async () => {
