@@ -38,3 +38,7 @@ Apply `supabase/migrations/0015_broker_execution_gateway.sql` followed by `supab
 
 ## Configuration
 `SUPABASE_SERVICE_ROLE_KEY` is required by the server-side execution persistence adapter and must never be exposed to the browser. `EXECUTION_COUNTERPARTY_URL`, `EXECUTION_COUNTERPARTY_API_KEY`, `EXECUTION_COUNTERPARTY_SIGNING_SECRET`, and `EXECUTION_COUNTERPARTY_CODE` configure the signed HTTPS connector template. The counterparty must implement the exact request/response contract and replay protection before this connector is usable. `LIVE_EXECUTION_ENABLED` defaults to false. Setting it to true alone does not enable trading: all required adapters and health checks must pass. Provider secrets belong only in the host's secret manager/environment, never source control or browser code.
+
+
+## Current repository integration state
+The backend now constructs the gateway with the Supabase execution persistence adapter and the signed HTTPS connector when their environment configuration exists. The pre-trade risk repository is intentionally not injected, so the gateway reports `ready: false` and rejects all live submissions. This is deliberate: the current schema still constrains trading accounts to demo mode and does not yet provide a trusted live-account equity/margin snapshot or instrument entitlement function. Do not set `LIVE_EXECUTION_ENABLED=true` expecting this to bypass those missing dependencies. Migrations 0015 and 0016 must be reviewed and applied in a non-production Supabase project before integration testing.
