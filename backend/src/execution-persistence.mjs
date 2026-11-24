@@ -36,10 +36,12 @@ export function createSupabaseExecutionRepository({ fetchImpl = fetch } = {}) {
         p_user_id: userId, p_key: key, p_response: result
       });
     },
-    async fail() {
-      // A pre-submission failure must remain reserved until operator reconciliation.
-      // Releasing a key here could permit an unsafe duplicate if the process boundary is unclear.
-      return;
+    async fail(userId, key) {
+      // The gateway calls fail only before submitMarketOrder is attempted.
+      // The database function deletes only a still-reserved key; unknown/completed keys survive.
+      return rpc("hikeyfx_execution_idempotency_release", {
+        p_user_id: userId, p_key: key
+      });
     },
     async markUnknown(userId, key, error) {
       return rpc("hikeyfx_execution_idempotency_mark_unknown", {
