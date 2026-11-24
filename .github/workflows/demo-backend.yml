@@ -1,10 +1,11 @@
 name: HikeyFX platform checks
-# Validates backend APIs, browser scripts, Supabase RPC adapters and migration contracts.
+# Validates backend APIs, browser scripts, Supabase RPC adapters, execution gateway and migration contracts.
 
 on:
   workflow_dispatch:
   push:
     branches:
+      - main
       - development/phase-1-foundation
     paths:
       - "backend/**"
@@ -16,6 +17,7 @@ on:
       - ".github/workflows/demo-backend.yml"
   pull_request:
     branches:
+      - main
       - development/phase-1-foundation
     paths:
       - "backend/**"
@@ -47,6 +49,7 @@ jobs:
           node --check trading/indicators.js
           node --check portal/member.js
           node --check backend/src/server.mjs
+          node --check backend/src/execution-gateway.mjs
           node --check backend/src/supabase.mjs
       - name: Run automated tests
         working-directory: backend
