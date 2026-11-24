@@ -369,3 +369,39 @@ test("fresh market quotes revalue open demo positions and expose floating PnL", 
   const account = await fetch(base + "/api/v1/demo/account", { headers });
   assert.equal((await account.json()).data.unrealisedPnl, 9.8);
 });
+
+
+test("execution API reports fail-closed status and refuses live orders when gateway is disabled", async t => {
+  const { ExecutionGateway } = await import("../src/execution-gateway.mjs");
+  const gateway = new ExecutionGateway({ enabled: false });
+  const marketData = async () => ({
+    quotes: [{
+      symbol: "EURUSD", status: "fresh", bid: 1.1, ask: 1.1002,
+      providerTimestamp: new Date().toISOString()
+    }]
+  });
+  const server = createApp(undefined, marketData, async () => ({ id: "test-user" }), null, undefined, gateway);
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+
+  const statusResponse = await fetch(base + "/api/v1/execution/status");
+  assert.equal(statusResponse.status, 200);
+  const status = await statusResponse.json();
+  assert.equal(status.data.enabled, false);
+  assert.equal(status.data.ready, false);
+
+  const orderResponse = await fetch(base + "/api/v1/execution/orders", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      accountId: "00000000-0000-4000-8000-000000000001",
+      idempotencyKey: "live-order-123",
+      symbol: "EURUSD", side: "buy", volume: 0.01
+    })
+  });
+  assert.equal(orderResponse.status, 503);
+  const order = await orderResponse.json();
+  assert.equal(order.ok, false);
+  assert.match(order.error, /Live execution is disabled/);
+});
