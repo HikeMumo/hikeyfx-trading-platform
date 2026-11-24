@@ -35,7 +35,7 @@ function setup(overrides = {}) {
     async health() { return { connected: true, provider: "test-counterparty" }; },
     async submitMarketOrder(order) {
       calls.push(order);
-      return { status: "accepted", providerOrderId: "lp-001", executedVolume: order.volume, averagePrice: 1.0851 };
+      return { status: "accepted", providerOrderId: "lp-001", providerExecutionId: "lp-fill-001", executedVolume: order.volume, averagePrice: 1.0851 };
     }
   };
   const auditLog = { async append() {} };
