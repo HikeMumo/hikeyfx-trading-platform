@@ -23,7 +23,7 @@ export class GatewayError extends Error {
 export class ExecutionGateway {
   constructor({
     enabled = process.env.LIVE_EXECUTION_ENABLED === "true",
-    adapter = null, idempotencyStore = null, riskEngine = null, auditLog = null,
+    adapter = null, idempotencyStore = null, riskEngine = null, auditLog = null, executionRepository = null,
     maxQuoteAgeMs = 3000, now = () => Date.now()
   } = {}) {
     this.enabled = enabled;
@@ -31,6 +31,7 @@ export class ExecutionGateway {
     this.idempotencyStore = idempotencyStore;
     this.riskEngine = riskEngine;
     this.auditLog = auditLog;
+    this.executionRepository = executionRepository;
     this.maxQuoteAgeMs = maxQuoteAgeMs;
     this.now = now;
   }
@@ -44,7 +45,7 @@ export class ExecutionGateway {
       } catch { health = { connected: false }; }
     }
     const unknownOutcomeProtection = typeof this.idempotencyStore?.markUnknown === "function";
-    const dependenciesReady = Boolean(this.adapter && this.idempotencyStore && unknownOutcomeProtection && this.riskEngine && this.auditLog);
+    const dependenciesReady = Boolean(this.adapter && this.idempotencyStore && unknownOutcomeProtection && this.riskEngine && this.auditLog && typeof this.executionRepository?.recordAcknowledgement === "function");
     return {
       mode: "broker-owned-execution-gateway",
       enabled: this.enabled,
@@ -54,14 +55,15 @@ export class ExecutionGateway {
       durableIdempotency: Boolean(this.idempotencyStore),
       unknownOutcomeProtection,
       riskControls: Boolean(this.riskEngine),
-      auditTrail: Boolean(this.auditLog)
+      auditTrail: Boolean(this.auditLog),
+      durableExecutionRecords: typeof this.executionRepository?.recordAcknowledgement === "function"
     };
   }
 
   async submitMarketOrder({ userId, accountId, idempotencyKey, symbol, side, volume, quote }) {
     if (!this.enabled) throw new GatewayError("Live execution is disabled.", 503, "LIVE_EXECUTION_DISABLED");
     if (!userId || !accountId || !idempotencyKey) throw new GatewayError("Authenticated user, trading account and idempotency key are required.");
-    if (!this.adapter || !this.idempotencyStore || typeof this.idempotencyStore.markUnknown !== "function" || !this.riskEngine || !this.auditLog) {
+    if (!this.adapter || !this.idempotencyStore || typeof this.idempotencyStore.markUnknown !== "function" || !this.riskEngine || !this.auditLog || typeof this.executionRepository?.recordAcknowledgement !== "function") {
       throw new GatewayError("Execution gateway is not fully configured.", 503, "GATEWAY_NOT_READY");
     }
 
@@ -119,6 +121,7 @@ export class ExecutionGateway {
           providerOrderId: ack.providerOrderId || null,
           reason: String(ack.reason || "Counterparty rejected the order.")
         };
+        await this.executionRepository.recordAcknowledgement({ userId, accountId, clientOrderId: order.clientOrderId, providerCode: health.provider, providerOrderId: rejected.providerOrderId, symbol: normalizedSymbol, side: normalizedSide, requestedVolume: amount, executedVolume: 0, averagePrice: null, status: "rejected", providerExecutionId: null, executedAt: new Date(this.now()).toISOString() });
         await this.idempotencyStore.complete(userId, key, rejected);
         await this.auditLog.append({
           event: "order_rejected", userId, accountId, clientOrderId: order.clientOrderId,
@@ -140,6 +143,7 @@ export class ExecutionGateway {
         executedVolume: round(executedVolume), averagePrice: round(averagePrice),
         executedAt: ack.executedAt || new Date(this.now()).toISOString()
       };
+      await this.executionRepository.recordAcknowledgement({ userId, accountId, clientOrderId: order.clientOrderId, providerCode: health.provider, providerOrderId: result.providerOrderId, symbol: normalizedSymbol, side: normalizedSide, requestedVolume: amount, executedVolume: result.executedVolume, averagePrice: result.averagePrice, status: result.status, providerExecutionId: ack.providerExecutionId || null, executedAt: result.executedAt });
       await this.idempotencyStore.complete(userId, key, result);
       await this.auditLog.append({
         event: "order_execution_acknowledged", userId, accountId,
