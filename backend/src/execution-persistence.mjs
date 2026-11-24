@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -43,6 +45,37 @@ export function createSupabaseExecutionRepository({ fetchImpl = fetch } = {}) {
       return rpc("hikeyfx_execution_idempotency_mark_unknown", {
         p_user_id: userId, p_key: key, p_error_code: error?.code || "EXECUTION_UNCERTAIN"
       });
+    },
+    async append(event) {
+      const safe = {
+        event_type: String(event.event || "execution_event").slice(0, 80),
+        event_sha256: createHash("sha256").update(JSON.stringify(event)).digest("hex"),
+        user_id: event.userId || null,
+        account_id: event.accountId || null,
+        safe_metadata: {
+          clientOrderId: event.clientOrderId || null,
+          providerOrderId: event.providerOrderId || null,
+          symbol: event.symbol || null,
+          side: event.side || null,
+          volume: event.volume ?? null,
+          status: event.status || null,
+          code: event.code || null,
+          reason: event.reason || null,
+          at: event.at || new Date().toISOString()
+        }
+      };
+      const response = await fetchImpl(new URL("/rest/v1/execution_events", SUPABASE_URL), {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_SERVICE_ROLE_KEY,
+          authorization: "Bearer " + SUPABASE_SERVICE_ROLE_KEY,
+          "content-type": "application/json",
+          prefer: "return=minimal"
+        },
+        body: JSON.stringify(safe),
+        signal: AbortSignal.timeout(10000)
+      });
+      if (!response.ok) throw new Error("Execution audit event could not be persisted.");
     },
     async recordAcknowledgement(record) {
       return rpc("hikeyfx_execution_record_acknowledgement", {
