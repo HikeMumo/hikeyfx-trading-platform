@@ -93,6 +93,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     if (method === "GET" && path === "/api/v1/market/quotes") return { name: "quotes", limit: 30 };
     if (method === "GET" && path === "/api/v1/market/candles") return { name: "candles", limit: 30 };
     if (method === "POST" && path === "/api/v1/demo/orders") return { name: "orders", limit: 20 };
+    if (method === "POST" && path === "/api/v1/execution/orders") return { name: "live-orders", limit: 10 };
     if (method === "POST" && /^\/api\/v1\/demo\/positions\/[0-9a-f-]+\/partial-close$/i.test(path)) return { name: "partial-closes", limit: 30 };
     if (method === "POST" && /^\/api\/v1\/demo\/positions\/[0-9a-f-]+\/modify$/i.test(path)) return { name: "modifications", limit: 30 };
     if (method === "POST" && /^\/api\/v1\/demo\/positions\/[0-9a-f-]+\/close$/i.test(path)) return { name: "closes", limit: 30 };
@@ -148,6 +149,31 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
     }
     if (req.method === "GET" && url.pathname === "/api/v1/execution/status") {
       return send(res, 200, { ok: true, data: await executionGateway.status() });
+    }
+    if (req.method === "POST" && url.pathname === "/api/v1/execution/orders") {
+      try {
+        const body = await readJson(req);
+        const symbol = String(body.symbol || "").replace("/", "").toUpperCase();
+        const accountId = String(body.accountId || "");
+        const idempotencyKey = String(body.idempotencyKey || "");
+        if (!/^[0-9a-f-]{36}$/i.test(accountId) || !/^[A-Za-z0-9._:-]{8,128}$/.test(idempotencyKey)) {
+          return send(res, 400, { ok: false, error: "A valid trading account ID and idempotency key are required." });
+        }
+        const quoteResult = await marketData({ symbols: [symbol] });
+        const quote = (quoteResult.quotes || []).find(item => item.symbol === symbol && item.status === "fresh");
+        const quoteTimestamp = quote?.providerTimestamp ? Date.parse(quote.providerTimestamp) : NaN;
+        if (!quote || !Number.isFinite(quoteTimestamp)) {
+          return send(res, 503, { ok: false, error: "A fresh executable market quote is unavailable." });
+        }
+        const data = await executionGateway.submitMarketOrder({
+          userId: user.id, accountId, idempotencyKey, symbol,
+          side: body.side, volume: Number(body.volume),
+          quote: { bid: Number(quote.bid), ask: Number(quote.ask), timestamp: quoteTimestamp }
+        });
+        return send(res, 201, { ok: true, data });
+      } catch (error) {
+        return send(res, error.statusCode || 503, { ok: false, error: error.message || "Live execution is unavailable." });
+      }
     }
     const memberEngine = getMemberEngine(user);
     const token = bearerToken(req);
