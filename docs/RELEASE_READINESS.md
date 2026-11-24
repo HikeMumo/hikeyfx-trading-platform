@@ -14,6 +14,15 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 - [ ] Verify demo orders persist across backend restarts and duplicate submissions are idempotent.
 - [ ] Grant administrator membership manually to verified Auth user IDs only; verify ordinary members are denied.
 
+## Live execution gateway gates
+
+- [ ] Apply migrations 0015–0018 in a non-production Supabase project and verify service-role-only RPC permissions.
+- [ ] Replace the signed HTTPS connector template with an adapter certified against the actual liquidity-provider contract; verify provider-side timestamp/nonce replay protection.
+- [ ] Implement trusted live-account controls and an authoritative account equity, open-position, used-margin and free-margin snapshot. The current trading-account schema still enforces demo mode.
+- [ ] Implement execution-report inbox/outbox, multi-fill processing, order corrections/cancellations, position lifecycle and transactional ledger/margin posting.
+- [ ] Complete counterparty sandbox certification, duplicate/reordered/delayed event tests, reconciliation, kill-switch tests and independent risk review.
+- [ ] Keep live order entry disabled until all of the above are complete.
+
 ## Hosting and frontend gates
 
 - [ ] Deploy the frontend static site from `development/phase-1-foundation` only after staging is ready.
@@ -55,3 +64,10 @@ This is a development platform. Do not merge to `main`, publish as a public brok
 - GitHub Actions run [45077090171](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45077090171) passed 38 automated tests and browser/backend syntax checks for commit `a84a465f1622d4fb268e97e84af80d275d136105`.
 - Supabase migrations 0006 and 0007 are reported applied by the project owner; the resulting hosted database behavior has not yet been independently verified.
 - Demo execution uses fixed illustrative quotes, not live market data. Migration 0008 hardens database execution against caller-supplied prices; it must be applied before persistent demo orders are used. No live market data, real trading, deposits or withdrawals are enabled.
+
+
+## Latest execution-gateway engineering verification
+
+- GitHub Actions run [45475510454](https://github.com/HikeMumo/hikeyfx-trading-platform/actions/runs/45475510454) passed 137 automated tests and browser/backend syntax checks for the then-current main commit.
+- Migrations 0017 and 0018 harden acknowledgement replay consistency and safe release of pre-submission idempotency reservations. They are committed source files and are not applied to hosted Supabase.
+- The live gateway remains intentionally not ready: no trusted live-account risk snapshot is wired, the trading-account schema still enforces demo mode, and no certified liquidity-provider adapter or execution-report lifecycle has been connected.
