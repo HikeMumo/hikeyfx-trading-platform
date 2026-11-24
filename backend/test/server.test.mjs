@@ -13,7 +13,7 @@ test("HTTP API exposes demo account and accepts validated demo orders", async t 
   const health = await fetch(base + "/health");
   assert.equal(health.status, 200);
   const healthPayload = await health.json();
-  assert.equal(healthPayload.mode, "demo-only");
+  assert.equal(healthPayload.mode, "demo-with-live-gateway-disabled-until-ready");
   assert.equal(healthPayload.status, "alive");
   for (const key of ["supabaseConfigured", "persistentDemoConfigured", "marketDataConfigured"]) assert.equal(typeof healthPayload.checks[key], "boolean");
 
