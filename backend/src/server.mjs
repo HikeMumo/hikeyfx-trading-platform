@@ -6,12 +6,26 @@ import { fetchTraderMadeQuotes, fetchTraderMadeCandles } from "./market-data.mjs
 import { fetchTwelveDataCandles } from "./twelve-data.mjs";
 import { createSupabaseDemoRepository } from "./supabase.mjs";
 import { ExecutionGateway } from "./execution-gateway.mjs";
+import { createSupabaseExecutionRepository } from "./execution-persistence.mjs";
+import { createHttpCounterpartyAdapter } from "./http-counterparty-adapter.mjs";
 
 const HOST = "0.0.0.0";
 const PORT = Number(process.env.PORT || 8787);
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
 const demoRepository = createSupabaseDemoRepository();
+const executionPersistence = createSupabaseExecutionRepository();
+const executionAdapter = createHttpCounterpartyAdapter();
+// The risk repository is deliberately not configured until live-account, ledger,
+// instrument-permission and margin snapshots are backed by reviewed database functions.
+const liveExecutionGateway = new ExecutionGateway({
+  enabled: process.env.LIVE_EXECUTION_ENABLED === "true",
+  adapter: executionAdapter,
+  idempotencyStore: executionPersistence,
+  executionRepository: executionPersistence,
+  auditLog: executionPersistence,
+  riskEngine: null
+});
 const fetchHistoricalCandles = options => process.env.TWELVE_DATA_API_KEY
   ? fetchTwelveDataCandles(options)
   : fetchTraderMadeCandles(options);
@@ -85,7 +99,7 @@ async function readJson(req) {
   return parsed;
 }
 
-export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository, marketHistory = fetchHistoricalCandles, executionGateway = new ExecutionGateway()) {
+export function createApp(engine = null, marketData = fetchTraderMadeQuotes, authenticateUser = authenticate, repository = demoRepository, marketHistory = fetchHistoricalCandles, executionGateway = liveExecutionGateway) {
   const memberEngines = new Map();
   const rateBuckets = new Map();
   const ratePolicy = (method, path) => {
@@ -136,7 +150,7 @@ export function createApp(engine = null, marketData = fetchTraderMadeQuotes, aut
       return res.end();
     }
     if (req.method === "GET" && url.pathname === "/health") {
-      return send(res, 200, { ok: true, status: "alive", service: "hikeyfx-demo-api", mode: "demo-only", checks: { supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY), persistentDemoConfigured: Boolean(demoRepository), marketDataConfigured: Boolean(process.env.TRADERMADE_API_KEY || process.env.TWELVE_DATA_API_KEY), historicalDataProvider: process.env.TWELVE_DATA_API_KEY ? "twelve-data" : process.env.TRADERMADE_API_KEY ? "tradermade" : "not-configured" } });
+      return send(res, 200, { ok: true, status: "alive", service: "hikeyfx-api", mode: "demo-with-live-gateway-disabled-until-ready", checks: { supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY), persistentDemoConfigured: Boolean(demoRepository), marketDataConfigured: Boolean(process.env.TRADERMADE_API_KEY || process.env.TWELVE_DATA_API_KEY), historicalDataProvider: process.env.TWELVE_DATA_API_KEY ? "twelve-data" : process.env.TRADERMADE_API_KEY ? "tradermade" : "not-configured" } });
     }
 
     const user = await authenticateUser(req);
