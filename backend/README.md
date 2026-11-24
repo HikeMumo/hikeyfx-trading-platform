@@ -26,6 +26,8 @@ Never put a Supabase secret/service-role key or TraderMade key in browser code o
 - `GET /api/v1/demo/positions`
 - `GET /api/v1/demo/history`
 - `GET /api/v1/market/quotes`\n- `GET /api/v1/market/candles`
+- `GET /api/v1/execution/status` (authenticated; reports fail-closed gateway readiness)
+- `POST /api/v1/execution/orders` (authenticated; disabled unless the live gateway and every required production dependency are injected)
 - `POST /api/v1/demo/orders`
 - `POST /api/v1/demo/positions/{id}/close`
 
@@ -36,6 +38,10 @@ All non-health routes require a verified Supabase access token. When Supabase co
 Apply `../supabase/migrations/0006_persistent_demo_trading.sql` after migrations 0001–0005. Apply `../supabase/migrations/0007_admin_access_foundation.sql` for the manually controlled admin membership foundation, then apply `../supabase/migrations/0008_demo_execution_quote_hardening.sql`. Migration 0008 is critical: it revokes the older price-trusting RPCs and installs versioned `_v2` RPCs. The backend only calls those hardened functions, so updated backend deployments fail closed until migration 0008 exists. The new functions protect fixed demo execution quotes and ignore caller-supplied entry prices, contract sizes, leverage and exit prices. It also adds stricter stop-loss/take-profit validation. Migration 0006 seeds a limited set of demo instruments and adds authenticated, member-scoped snapshot, order and close RPCs. The RPCs derive the user from `auth.uid()`, enforce demo-account ownership, lock the account balance for margin checks, append trade events and use idempotency keys for order submissions.
 
 GitHub stores the migration source but does not execute it. The project owner has confirmed migrations 0006 and 0007 were applied in Supabase. Migration 0008 is newly committed and must also be applied before deploying the updated backend or using persistent demo execution. Verify the hosted RPCs with authenticated end-to-end tests before relying on persistence.
+
+## Broker-owned execution gateway
+
+The independent execution gateway core is in `src/execution-gateway.mjs`; its authenticated status and order-entry routes are `/api/v1/execution/status` and `/api/v1/execution/orders`. Live execution is disabled by default. The gateway requires a connected counterparty adapter, durable idempotency store, pre-trade risk engine and append-only audit service. It will not treat a market-data quote or a successful network write as a fill; only a validated provider acknowledgement can produce a filled/partially-filled response. Apply `../supabase/migrations/0015_broker_execution_gateway.sql` for the backend-only order, fill, event and idempotency persistence foundation. The migration does not enable live accounts or order routing. See `../docs/EXECUTION_GATEWAY.md` for required FIX/provider integration and rollout controls.
 
 ## Demo trading behavior and limitations
 
