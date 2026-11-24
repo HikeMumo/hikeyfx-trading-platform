@@ -64,7 +64,7 @@ test("gateway reports ready only when all dependencies and counterparty are read
   assert.deepEqual(await gateway.status(), {
     mode: "broker-owned-execution-gateway", enabled: true, ready: true,
     adapterConnected: true, provider: "test-counterparty",
-    durableIdempotency: true, riskControls: true, auditTrail: true
+    durableIdempotency: true, unknownOutcomeProtection: true, riskControls: true, auditTrail: true
   });
 });
 test("market order is risk-checked and acknowledged by the adapter", async () => {
