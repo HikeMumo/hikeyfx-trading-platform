@@ -43,7 +43,8 @@ export class ExecutionGateway {
         health = { connected: result?.connected === true, provider: result?.provider || null };
       } catch { health = { connected: false }; }
     }
-    const dependenciesReady = Boolean(this.adapter && this.idempotencyStore && this.riskEngine && this.auditLog);
+    const unknownOutcomeProtection = typeof this.idempotencyStore?.markUnknown === "function";
+    const dependenciesReady = Boolean(this.adapter && this.idempotencyStore && unknownOutcomeProtection && this.riskEngine && this.auditLog);
     return {
       mode: "broker-owned-execution-gateway",
       enabled: this.enabled,
@@ -51,6 +52,7 @@ export class ExecutionGateway {
       adapterConnected: health.connected,
       provider: health.provider,
       durableIdempotency: Boolean(this.idempotencyStore),
+      unknownOutcomeProtection,
       riskControls: Boolean(this.riskEngine),
       auditTrail: Boolean(this.auditLog)
     };
@@ -59,7 +61,7 @@ export class ExecutionGateway {
   async submitMarketOrder({ userId, accountId, idempotencyKey, symbol, side, volume, quote }) {
     if (!this.enabled) throw new GatewayError("Live execution is disabled.", 503, "LIVE_EXECUTION_DISABLED");
     if (!userId || !accountId || !idempotencyKey) throw new GatewayError("Authenticated user, trading account and idempotency key are required.");
-    if (!this.adapter || !this.idempotencyStore || !this.riskEngine || !this.auditLog) {
+    if (!this.adapter || !this.idempotencyStore || typeof this.idempotencyStore.markUnknown !== "function" || !this.riskEngine || !this.auditLog) {
       throw new GatewayError("Execution gateway is not fully configured.", 503, "GATEWAY_NOT_READY");
     }
 
