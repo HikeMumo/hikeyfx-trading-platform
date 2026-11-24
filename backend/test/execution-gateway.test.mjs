@@ -129,7 +129,7 @@ test("counterparty timeout is marked unknown and cannot be blindly retried", asy
   const { gateway } = setup({
     idempotencyStore,
     adapter: {
-      async health() { return { connected: true }; },
+      async health() { return { connected: true, provider: "test-counterparty" }; },
       async submitMarketOrder() { submissions += 1; throw new Error("network timeout"); }
     }
   });
