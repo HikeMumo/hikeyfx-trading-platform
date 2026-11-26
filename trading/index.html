@@ -458,6 +458,17 @@ hr,.top,.mt5-nav,.table th,.table td,.positions-table tr,
  border:0!important;border-bottom:1px solid #000!important;
  border-radius:0!important;background:#fff!important;
 }
+
+/* All interface icons remain solid black, including active navigation icons */
+svg,svg *, .icon,.icon svg,.icon svg *,.mt5-nav button svg,
+button svg, a svg, [role="button"] svg{
+ color:#000!important;
+ stroke:#000!important;
+ fill:none!important;
+}
+.mark,.mt5-nav button.active,.mt5-nav button[aria-current="page"]{
+ color:#000!important;
+}
 </style></head><body data-view="markets">
 <header class="top"><button id="menuButton" type="button" aria-label="Open side menu">☰</button><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><a class="home-link" href="../" aria-label="Back to HikeyFX home">⌂ <span>Home</span></a><span id="workspaceTitle">Quotes</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">BROKERAGE PLATFORM</span></div></header>
 <div id="brokerageStatus" style="max-width:1500px;margin:8px auto 0;padding:8px 14px;font-size:11px;color:#76521a;background:#fff3d9;border:1px solid #e8d5a8;border-radius:9px;text-align:center">HikeyFX Brokerage Platform · Demo trading only · Brokerage licensing and live execution not yet activated</div>
