@@ -232,6 +232,90 @@ body[data-view="charts"] .mt5-nav button.active{background:#20332f!important;col
  .foot{padding-bottom:100px!important}
 }
 
+
+/* HikeyFX terminal redesign — unified institutional dark theme */
+:root{
+ color-scheme:dark;
+ --bg:#0b1118;--panel:#121b25;--line:#263443;--muted:#91a0ae;
+ --text:#e7edf3;--green:#16b889;--red:#e05b65;--gold:#d4b36a;
+}
+html,body{background:#0b1118!important;color:#e7edf3!important}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important}
+.top{height:62px!important;padding:0 clamp(12px,2vw,26px)!important;background:#101923!important;border-bottom:1px solid #263443!important;box-shadow:0 3px 18px rgba(0,0,0,.18)!important}
+.brand{color:#f4f7fa!important;letter-spacing:.01em}
+.mark{background:#15372f!important;border:1px solid #216b56!important;color:#47d4a8!important;border-radius:8px!important}
+.topright,.api-status{color:#91a0ae!important}
+.home-link{color:#b7c3ce!important}
+.pill{background:#17372f!important;color:#62dcb3!important;border-color:#286c58!important}
+#brokerageStatus{background:#211d15!important;color:#d8bb7b!important;border:1px solid #51452c!important;border-radius:6px!important;margin:9px clamp(10px,2vw,24px) 0!important;max-width:none!important}
+.layout{max-width:1600px!important;grid-template-columns:minmax(210px,250px) minmax(0,1fr) minmax(260px,300px)!important;gap:12px!important;padding:14px clamp(10px,1.5vw,22px) 100px!important}
+.panel,.instrument-info-card{background:#121b25!important;border:1px solid #263443!important;border-radius:9px!important;box-shadow:0 5px 18px rgba(0,0,0,.13)!important;color:#e7edf3!important}
+.side,.ticket,.subpanel{padding:14px!important}
+.eyebrow,.field label,.sumrow,.hint,.assethead p,.quote small,.instrument small,.foot{color:#91a0ae!important}
+.search,.field input,.field select,.chart-template-tools input,.chart-template-tools select{background:#0d151e!important;color:#e7edf3!important;border:1px solid #304152!important;border-radius:6px!important}
+.search::placeholder,.field input::placeholder{color:#718293!important}
+.category button,.timeframes button,.tabs button{color:#9eacb9!important}
+.category button.active,.tabs button.active{background:#18372f!important;color:#55d6ad!important;border-color:#286c58!important}
+.instrument{color:#e7edf3!important;border-color:#253342!important}
+.instrument:hover,.instrument.active{background:#192a35!important}
+.instrument.active{border-left:2px solid #20bd91!important}
+.instrument-favorite{color:#d4b36a!important}
+.markethead,.chartpanel,.subpanel,.ticket{background:#121b25!important}
+.assethead h1,.charttop h2,.subpanel h3,.ticket h2{color:#edf3f7!important}
+.coin{background:#18372f!important;color:#58d7ae!important}
+.quote strong{color:#f2f6f9!important;font-variant-numeric:tabular-nums}
+.chartwrap{background:#0d151e!important;border:1px solid #263443!important;border-radius:7px!important}
+.chartwrap canvas,#chart{background:#0d151e!important}
+.chart-tools button,.chart-tool-menu>summary,.chart-template-details>summary,.chart-template-tools button,#addPriceAlert,#exportHistory{
+ background:#1a2733!important;color:#c5d0da!important;border:1px solid #304152!important;border-radius:6px!important;padding:7px 10px!important
+}
+.chart-tools button.active,.chart-tools button:focus-visible{background:#18372f!important;color:#5bdbb2!important;border-color:#286c58!important}
+.chart-tool-popover,.chart-template-tools{background:#121b25!important;border:1px solid #304152!important;border-radius:8px!important;box-shadow:0 12px 28px rgba(0,0,0,.35)!important}
+.chart-readout,.underchart,.legend{color:#9eacb9!important}
+.below{gap:10px!important}
+.below>.subpanel{border-radius:8px!important}
+.table{color:#dce5ec!important}
+.table th{color:#91a0ae!important;border-color:#263443!important}
+.table td{border-color:#263443!important}
+.balance,.summary{background:#0d151e!important;border:1px solid #293949!important;border-radius:7px!important}
+.balance small,.balance span{color:#91a0ae!important}
+.balance strong{color:#f1f5f8!important}
+.switch button{background:#18232e!important;border:1px solid #304152!important;color:#b8c4ce!important;border-radius:6px!important}
+.switch .buy.active{background:#12392f!important;color:#54d7ad!important;border-color:#23785e!important}
+.switch .sell.active{background:#3b2027!important;color:#f18a91!important;border-color:#8b424d!important}
+.submit{background:#16a77e!important;color:#06150f!important;border-radius:6px!important;font-weight:750!important}
+.submit.sellbtn{background:#c94e5a!important;color:#fff!important}
+.warning,.info-footnote{color:#d2b879!important}
+.notice{background:#211d15!important;border:1px solid #51452c!important;color:#d8bb7b!important}
+.sumrow b{color:#e7edf3!important}
+.settings-panel{background:#121b25!important;color:#e7edf3!important;border-color:#263443!important}
+.settings-group{background:#0f1822!important;border:1px solid #263443!important;border-radius:8px!important;padding:13px!important}
+.settings-group small{color:#91a0ae!important}
+.mt5-nav{background:rgba(15,23,32,.97)!important;border:1px solid #2b3947!important;border-bottom:0!important;box-shadow:0 -8px 28px rgba(0,0,0,.32)!important;backdrop-filter:blur(18px)!important}
+.mt5-nav button{color:#8e9dab!important}
+.mt5-nav button.active,.mt5-nav button[aria-current="page"]{background:#17372f!important;color:#52d5ac!important}
+.toast{background:#15372f!important;color:#a4f0d4!important}
+.foot{color:#728291!important}
+@media(min-width:1100px){
+ .layout{align-items:start!important}
+ .side,.rightcol{position:sticky!important;top:76px!important;max-height:calc(100dvh - 92px)!important;overflow:auto!important}
+ .chartwrap{height:clamp(420px,58vh,680px)!important}
+}
+@media(max-width:900px){
+ .layout{grid-template-columns:minmax(0,1fr)!important}
+ .side,.maincol,.rightcol{min-width:0!important}
+ .rightcol{position:static!important;max-height:none!important;overflow:visible!important}
+}
+@media(max-width:720px){
+ .top{height:56px!important}
+ #brokerageStatus{margin:7px 9px 0!important;font-size:10px!important}
+ .layout{padding:9px 9px 96px!important}
+ .panel{border-radius:8px!important}
+ .chartwrap{border-radius:5px!important}
+ .below{grid-template-columns:minmax(0,1fr)!important}
+ .mt5-nav{background:rgba(15,23,32,.98)!important;border-top:1px solid #2b3947!important}
+}
+
 </style></head><body data-view="markets">
 <header class="top"><button id="menuButton" type="button" aria-label="Open side menu">☰</button><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><a class="home-link" href="../" aria-label="Back to HikeyFX home">⌂ <span>Home</span></a><span id="workspaceTitle">Quotes</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">BROKERAGE PLATFORM</span></div></header>
 <div id="brokerageStatus" style="max-width:1500px;margin:8px auto 0;padding:8px 14px;font-size:11px;color:#76521a;background:#fff3d9;border:1px solid #e8d5a8;border-radius:9px;text-align:center">HikeyFX Brokerage Platform · Demo trading only · Brokerage licensing and live execution not yet activated</div>
