@@ -136,6 +136,49 @@ body[data-view="charts"] .maincol>.below>.subpanel:first-child{display:block!imp
 .home-link:first-letter{font-size:18px}.top{background:#fff;border-bottom:1px solid #d9dfdc;box-shadow:0 1px 4px rgba(0,0,0,.035)}
 .layout{gap:18px}.panel{border:0;border-radius:0;background:transparent;box-shadow:none}.markethead{padding:10px 2px;border-bottom:1px solid #dce2de}.maincol{gap:8px}.chartpanel{padding:10px 0 0;background:transparent}.charttop{margin-bottom:8px}.charttop h2{font-size:14px;font-weight:750;color:#24332c}.chartwrap{height:clamp(320px,55vh,560px);background:#111a22;border:1px solid #263541;border-radius:3px;overflow:hidden}.chartwrap canvas{background:#111a22}.below{gap:18px}.subpanel{padding:12px 0;border-top:1px solid #dce2de}.ticket{padding:12px 0;border-left:1px solid #dce2de;padding-left:16px}.balance,.summary{border:0;border-radius:4px;background:#f0f3ef}.category button.active,.timeframes button.active,.tabs button.active{background:#e8f2eb;border-color:#b6cdbd;color:#176b48}.mt5-nav{background:#fff;border-top:1px solid #d9dfdc;box-shadow:0 -3px 12px rgba(0,0,0,.045);border-radius:0}.mt5-nav button.active{background:#edf4ef;border-radius:5px}.notice,#brokerageStatus{border:0!important;border-radius:0!important;background:#f4f5f1!important;color:#68736c!important;box-shadow:none!important}.notice{padding:8px 4px}.settings-panel{background:transparent!important;border:0!important}.settings-group{background:transparent!important;border:0!important;border-bottom:1px solid #dce2de!important;border-radius:0!important;padding:12px 2px!important;margin:0!important}.settings-group>b:before{display:none!important}.instrument.active{background:#edf4ef;border-radius:3px}
 @media(max-width:720px){.top{padding:0 9px}.topright{gap:5px}.home-link{font-size:11px;padding:6px 7px}.topright .pill{display:none}.layout{padding:7px 10px 90px;gap:8px}.markethead{padding:8px 1px}.chartpanel{padding:8px 0 0}.chartwrap{height:clamp(320px,48vh,440px);border-radius:2px}.below{gap:10px}.subpanel{padding:10px 0}.ticket{border-left:0;border-top:1px solid #dce2de;padding:12px 0}.mt5-nav{border-radius:0}}
+
+/* MT5 mobile chart workspace — chart-first layout */
+:root{--mt5-bg:#101418;--mt5-panel:#171d23;--mt5-grid:#29333c;--mt5-text:#d7dde3;--mt5-muted:#87939e;--mt5-up:#00a884;--mt5-down:#f04452}
+body[data-view="charts"]{background:var(--mt5-bg)!important;color:var(--mt5-text)!important}
+body[data-view="charts"] .top{background:#171d23!important;color:#eef2f5!important;border-bottom:1px solid #2a343d!important;box-shadow:none!important}
+body[data-view="charts"] .top .brand,body[data-view="charts"] .topright{color:#e6ebef!important}
+body[data-view="charts"] .layout{display:block!important;max-width:none!important;padding:0!important;min-height:0!important}
+body[data-view="charts"] .maincol{display:block!important}
+body[data-view="charts"] .maincol>.markethead{background:#171d23!important;border:0!important;border-bottom:1px solid #29333c!important;border-radius:0!important;padding:11px 14px!important;box-shadow:none!important}
+body[data-view="charts"] .maincol>.markethead .coin{background:#27323b!important;color:#e6edf3!important}
+body[data-view="charts"] .maincol>.markethead h1{color:#f1f4f6!important;font-size:16px!important}
+body[data-view="charts"] .maincol>.markethead p,body[data-view="charts"] .maincol>.markethead .quote small{color:#98a5af!important}
+body[data-view="charts"] .maincol>.markethead .quote strong{color:#f3f6f8!important;font-variant-numeric:tabular-nums}
+body[data-view="charts"] .chartpanel{padding:9px 0 14px!important;background:#101418!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+body[data-view="charts"] .charttop{padding:0 12px!important;margin:0!important;display:flex!important;flex-direction:column!important;gap:4px!important}
+body[data-view="charts"] .charttop h2{color:#dce3e8!important;font-size:12px!important}
+body[data-view="charts"] .timeframes{width:100%!important;margin:2px 0 5px!important;padding:2px 10px 6px!important;border-bottom:1px solid #29333c!important}
+body[data-view="charts"] .timeframes button{color:#aab5bd!important;border:0!important;border-radius:3px!important;padding:7px 9px!important;font-size:11px!important}
+body[data-view="charts"] .timeframes button.active{background:#28343d!important;color:#fff!important;border-bottom:2px solid #00a884!important}
+body[data-view="charts"] .chart-tools{padding:2px 10px!important;margin:0!important;gap:5px!important}
+body[data-view="charts"] .chart-tools button,body[data-view="charts"] .chart-tool-menu>summary,body[data-view="charts"] .chart-template-details>summary{background:#1b242b!important;color:#c1cbd2!important;border:1px solid #303b44!important;border-radius:4px!important}
+body[data-view="charts"] .chart-tools button.active{background:#263a37!important;color:#55d5b0!important;border-color:#267b66!important}
+body[data-view="charts"] .chart-tool-popover{background:#1b242b!important;border-color:#394650!important}
+body[data-view="charts"] .chart-template-tools{background:#1b242b!important;border-color:#394650!important}
+body[data-view="charts"] .chartwrap{height:clamp(390px,63vh,690px)!important;min-height:390px!important;border:0!important;border-radius:0!important;background:#101418!important;overflow:hidden!important}
+body[data-view="charts"] #chart{background:#101418!important}
+body[data-view="charts"] .underchart,body[data-view="charts"] .legend{padding:8px 12px 0!important;color:#9aa7b1!important;background:#101418!important}
+body[data-view="charts"] .legend{gap:16px!important}
+body[data-view="charts"] .maincol>.below{display:block!important;padding:0 12px 18px!important;background:#101418!important}
+body[data-view="charts"] .maincol>.below>.subpanel{background:#171d23!important;border:0!important;border-top:1px solid #2a343d!important;border-radius:0!important;box-shadow:none!important;color:#d7dde3!important}
+body[data-view="charts"] .maincol>.below>.subpanel h3{color:#e8edf1!important}
+body[data-view="charts"] .maincol>.below .tabs button{color:#aeb9c1!important}
+body[data-view="charts"] .maincol>.below .tabs button.active{background:#203c35!important;color:#54d6ae!important;border-color:#286c5a!important}
+body[data-view="charts"] .mt5-nav{background:#171d23!important;border:0!important;border-top:1px solid #303b44!important;border-radius:0!important;box-shadow:none!important}
+body[data-view="charts"] .mt5-nav button{color:#9aa7b1!important}
+body[data-view="charts"] .mt5-nav button.active{color:#45cba3!important;background:#20332f!important}
+@media(max-width:720px){
+ body[data-view="charts"] .chartwrap{height:clamp(390px,61vh,620px)!important;min-height:390px!important}
+ body[data-view="charts"] .chart-tools{overflow-x:auto!important}
+ body[data-view="charts"] .maincol>.markethead{padding:9px 12px!important}
+ body[data-view="charts"] .timeframes button{padding:7px 8px!important}
+}
+
 </style></head><body data-view="markets">
 <header class="top"><button id="menuButton" type="button" aria-label="Open side menu">☰</button><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><a class="home-link" href="../" aria-label="Back to HikeyFX home">⌂ <span>Home</span></a><span id="workspaceTitle">Quotes</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">BROKERAGE PLATFORM</span></div></header>
 <div id="brokerageStatus" style="max-width:1500px;margin:8px auto 0;padding:8px 14px;font-size:11px;color:#76521a;background:#fff3d9;border:1px solid #e8d5a8;border-radius:9px;text-align:center">HikeyFX Brokerage Platform · Demo trading only · Brokerage licensing and live execution not yet activated</div>
