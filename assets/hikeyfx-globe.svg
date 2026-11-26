@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+<title id="title">HikeyFX globe mark</title>
+<defs><clipPath id="globe"><circle cx="62" cy="59" r="43"/></clipPath></defs>
+<circle cx="62" cy="59" r="43" fill="none" stroke="#000" stroke-width="5"/>
+<g clip-path="url(#globe)" fill="none" stroke="#000" stroke-width="2.3" opacity=".9">
+<ellipse cx="62" cy="59" rx="20" ry="43"/><ellipse cx="62" cy="59" rx="39" ry="16"/>
+<path d="M20 59h84M25 39h74M25 79h74"/>
+</g>
+<g fill="#000"><path d="M34 42l8-9 8 2 3 7-6 5-2 9-8-3-5-6zM66 26l8-5 10 4 4 8-6 6-2 9-8-3-3-9-6-3zM73 72l10-5 9 4 4 10-6 7-3 11-8-3-5-10z"/></g>
+<g stroke="#000" stroke-width="3.5" stroke-linecap="round"><path d="M47 79V61m0 0v-8m12 26V48m0 0V39m12 29V39m0 0V29m12 28V32m0 0V23"/></g>
+<g fill="#000"><rect x="43" y="68" width="8" height="13" rx="1"/><rect x="55" y="56" width="8" height="22" rx="1"/><rect x="67" y="46" width="8" height="21" rx="1"/><rect x="79" y="39" width="8" height="16" rx="1"/></g>
+<path d="M14 77c11 23 43 34 73 25 10-3 18-8 25-16" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>
+<path d="M102 82l11 4-2-12" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
