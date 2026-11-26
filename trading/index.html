@@ -425,6 +425,39 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .chartwrap{height:300px!important}
  .mt5-nav{background:#fff!important}
 }
+
+/* HikeyFX layout refinement: no cards, borders, outlines or boxed surfaces */
+html,body,#brokerageStatus,.layout,.top,.panel,.side,.maincol,.rightcol,
+.markethead,.chartpanel,.subpanel,.ticket,.instrument-info-card,#sideMenu,
+.settings-panel,.balance,.summary,.notice,.chartwrap,.mt5-nav,
+#brokerageStatus,.toast,.menu-item,.instrument,.category,.tabs,.timeframes,
+.positions-table,.table,.quote,.field,.price-alerts,.account-section,
+.account-panel,.history-panel,.trade-panel,.chart-toolbar,.chart-tools,
+.modal,.modal-content,.popover,.dropdown,.menu,.card,.card-body{
+ background:#fff!important;
+ background-image:none!important;
+ border:0!important;
+ border-color:transparent!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ outline-color:transparent;
+}
+*,*::before,*::after{box-shadow:none!important}
+hr,.top,.mt5-nav,.table th,.table td,.positions-table tr,
+.positions-table td,.positions-table th{border:0!important}
+#brokerageStatus{padding:12px 14px!important;color:#000!important;text-align:center}
+.panel,.side,.chartpanel,.subpanel,.ticket,.rightcol,.maincol{
+ padding:12px 0!important;
+}
+.layout{column-gap:24px!important;row-gap:18px!important}
+.instrument,.menu-item,.category button,.tabs button,.timeframes button,
+.mt5-nav button,.submit,.settings-action,.switch button{
+ border:0!important;border-radius:0!important;
+}
+.search,.field input,.field select,.field textarea,input,select,textarea{
+ border:0!important;border-bottom:1px solid #000!important;
+ border-radius:0!important;background:#fff!important;
+}
 </style></head><body data-view="markets">
 <header class="top"><button id="menuButton" type="button" aria-label="Open side menu">☰</button><div class="brand"><span class="mark">H</span>HikeyFX</div><div class="topright"><a class="home-link" href="../" aria-label="Back to HikeyFX home">⌂ <span>Home</span></a><span id="workspaceTitle">Quotes</span><span class="api-status" id="apiStatus" role="status">API: CHECKING</span><span class="pill">BROKERAGE PLATFORM</span></div></header>
 <div id="brokerageStatus" style="max-width:1500px;margin:8px auto 0;padding:8px 14px;font-size:11px;color:#76521a;background:#fff3d9;border:1px solid #e8d5a8;border-radius:9px;text-align:center">HikeyFX Brokerage Platform · Demo trading only · Brokerage licensing and live execution not yet activated</div>
